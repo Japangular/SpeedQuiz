@@ -1,0 +1,26 @@
+# --- Stage 1: Build with Maven ---
+FROM maven:3.9.8-eclipse-temurin-21 as builder
+
+WORKDIR /app
+COPY BackendSpeed /app
+COPY api.yaml /app
+
+# Generate the sources using OpenAPI Maven Plugin
+RUN mvn clean package -DskipTests
+
+# --- Stage 2: Tag builder stage for debugging (added for inspection) ---
+FROM builder as debug-builder
+# No extra steps; this just makes the builder stage addressable via tag
+
+# --- Stage 3: Run the Spring Boot App ---
+FROM eclipse-temurin:21-jdk-jammy
+
+WORKDIR /app
+# Copy the generated files (you can check these after build)
+COPY --from=builder /app/target/generated-sources/openapi /app/generated-sources
+
+# Copy the JAR file
+COPY --from=builder /app/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
