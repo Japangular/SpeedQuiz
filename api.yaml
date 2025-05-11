@@ -1,0 +1,55 @@
+openapi: 3.0.1
+info:
+  title: SpeedQuiz API
+  description: API for managing quiz decks and cards
+  version: 1.0.0
+
+paths:
+  /submission-deck:
+    post:
+      summary: Submit a new deck
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionDeck'
+      responses:
+        '200':
+          description: Deck submitted successfully
+
+components:
+  schemas:
+    SubmissionDeck:
+      type: object
+      properties:
+        deckName:
+          type: string
+        username:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PropertyType'
+        cards:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+      required:
+        - deckName
+        - username
+        - properties
+        - cards
+
+    PropertyType:
+      type: string
+      enum:
+        - question
+        - answer
+        - hint
+        - image
+        - svg
+        - audio
+        - unknown
