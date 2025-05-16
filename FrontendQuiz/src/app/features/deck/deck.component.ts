@@ -9,6 +9,7 @@ import {CardStoreService} from '../../services/card-store.service';
   selector: 'app-deck',
   templateUrl: './deck.component.html',
   styleUrl: './deck.component.css',
+  standalone: true,
   imports: [MatTableModule, MatPaginatorModule, MatSortModule]
 })
 export class DeckComponent implements AfterViewInit {

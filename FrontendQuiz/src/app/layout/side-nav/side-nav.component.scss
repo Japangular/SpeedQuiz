@@ -1,0 +1,66 @@
+/* Ensure the container takes the full height */
+.sidenav-container {
+  height: 100%;
+}
+
+/* Set width for both sidebars (left and right) */
+.sidenav {
+  width: 200px;
+}
+
+/* Left sidebar (target using #leftDrawer) */
+#leftDrawer {
+  background-color: #f0f0f0; /* Example color */
+}
+
+/* Right sidebar (target using #rightDrawer) */
+#rightDrawer {
+  background-color: #e0e0e0; /* Example color */
+}
+
+#rightDrawer .mat-toolbar {
+  justify-content: flex-end; /* Align toolbar content to the right */
+}
+
+#rightDrawer .mat-nav-list {
+  text-align: right; /* Align the list text to the right */
+}
+
+#rightDrawer .mat-nav-list a {
+  text-align: right; /* Ensures the links are aligned right */
+}
+
+
+/* Make the toolbar inside the sidebar inherit the background of the sidebar */
+.sidenav .mat-toolbar {
+  background: inherit;
+}
+
+/* Sticky toolbar at the top of the content */
+.mat-toolbar.mat-primary {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Media query for responsiveness */
+@media (max-width: 600px) {
+  /* Reduce width of both sidebars on smaller screens */
+  .sidenav {
+    width: 150px;
+  }
+
+  /* Make side navs overlay on smaller screens */
+  .mat-sidenav.mat-drawer-over {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+  }
+
+  /* Adjust main content when side nav is in overlay mode */
+  .mat-sidenav-content {
+    margin-left: 0;
+  }
+}
