@@ -32,13 +32,40 @@ docker network prune
 Optionally, remove all build cache:
 docker builder prune
 
+docker volume ls
+docker volume rm speedquiz_db-data
 ####################################################
-
+## db within docker-compose
 docker exec -it speedquiz_db_1 psql -U speedquiz -d speedquizdb
 \dt
 
+docker volume rm postgres-data-speedquiz
+// Docker skipped postgres-data-speedquiz because named volumes are not pruned unless they’re dangling (i.e., not referenced by any container).
 
-####################################################
+######################################################
+
+docker run --name postgres-container-speedquiz \
+  -e POSTGRES_USER=speedquiz \
+  -e POSTGRES_PASSWORD='X9@1b6Y2p3Z4w3k5P5L6m1' \
+  -e POSTGRES_DB=speedquizdb \
+  -v postgres-data-speedquiz:/var/lib/postgresql/data \
+  -p 5433:5432 \
+  -d postgres
+
+docker ps -a
+
+## manual using docker
+
+docker start postgres-container-speedquiz;
+docker exec -it postgres-container-speedquiz bash;
+psql -h localhost -U speedquiz -d speedquizdb;
+\dt;
+
+docker exec -it postgres-container-speedquiz bash
+ psql -h localhost -U speedquiz -d speedquizdb
+DROP TABLE flyway_schema_history CASCADE;
+
+# if flyway has not permission:
 
 GRANT USAGE, CREATE ON SCHEMA public TO speedquiz;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO speedquiz;
