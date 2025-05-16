@@ -3,16 +3,18 @@ import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {PropertyType, SubmissionDeck} from '../api';
 import {DeckDataSource, DeckItem} from '../features/deck/deck-datasource';
+import {UserGeneratedDeck, UserGeneratedDeckSubmissionService} from '../features/dynamic-card-creator/submission-deck.model';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CardStoreService {
+export class CardStoreService implements UserGeneratedDeckSubmissionService {
   currentDeck = {deckName: "initial Deck", username: "app initializer", properties: {}, cards: []} as SubmissionDeck;
   _currentDeck: BehaviorSubject<SubmissionDeck> = new BehaviorSubject(this.currentDeck);
   _currentDeck$: Observable<SubmissionDeck> = this._currentDeck.asObservable();
 
-  constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) { }
+  constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
+  }
 
   sendCurrentDeck(){
     this.quizApi.submissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
@@ -39,4 +41,22 @@ export class CardStoreService {
   get currentDeck$(): Observable<SubmissionDeck>{
     return this._currentDeck$;
   }
+
+  sendUserGeneratedDeck(deck: UserGeneratedDeck): void {
+    this.setCurrentDeck(mapUserGeneratedDeckToSubmissionDeck(deck, this.currentDeck.username));
+    this.sendCurrentDeck();
+  }
+}
+
+export function mapUserGeneratedDeckToSubmissionDeck(deck: UserGeneratedDeck, username: string): SubmissionDeck {
+  return {
+    deckName: deck.name,
+    username: username, // You would pass in the username here
+    properties: deck.properties,
+    cards: deck.cards.map(card => {
+      return {
+        [card.name]: card.value
+      };
+    })
+  };
 }
