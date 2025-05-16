@@ -17,6 +17,9 @@ services:
       context: .
       dockerfile: BackendSpeed/Dockerfile.backend
     command: java -version
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      OPENAPI_SPEC_PATH: /app/api.yaml
     depends_on:
       - db
     ports:

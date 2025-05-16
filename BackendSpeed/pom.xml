@@ -83,6 +83,10 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
@@ -106,12 +110,32 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>local</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>local</spring.profiles.active>
+                <openapi.spec.path>${project.basedir}/../api.yaml</openapi.spec.path>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>docker</id>
+            <properties>
+                <spring.profiles.active>docker</spring.profiles.active>
+                <openapi.spec.path>/app/api.yaml</openapi.spec.path>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
                 <version>3.14.0</version>
                 <configuration>
                     <source>21</source>
@@ -128,6 +152,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <jvmArguments>
+                        -Dspring.profiles.active=${spring.profiles.active}
+                    </jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -139,7 +166,18 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.12.0</version> <!-- or latest -->
+                <version>7.12.0</version>
+                <configuration>
+                    <inputSpec>${openapi.spec.path}</inputSpec>
+                    <generatorName>spring</generatorName>
+                    <output>${project.build.directory}/generated-sources/openapi</output>
+                    <apiPackage>com.japangular.quizzingbydoing.backendspeed.api</apiPackage>
+                    <modelPackage>com.japangular.quizzingbydoing.backendspeed.model</modelPackage>
+                    <configOptions>
+                        <interfaceOnly>true</interfaceOnly>
+                        <useSpringBoot3>true</useSpringBoot3>
+                    </configOptions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>generate-sources</id>
@@ -147,17 +185,6 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/api.yaml</inputSpec>
-                            <generatorName>spring</generatorName>
-                            <output>${project.build.directory}/generated-sources/openapi</output>
-                            <apiPackage>com.japangular.quizzingbydoing.backendspeed.api</apiPackage>
-                            <modelPackage>com.japangular.quizzingbydoing.backendspeed.model</modelPackage>
-                            <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
-                                <useSpringBoot3>true</useSpringBoot3>
-                            </configOptions>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

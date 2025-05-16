@@ -6,7 +6,7 @@ COPY BackendSpeed /app
 COPY api.yaml /app
 
 # Generate the sources using OpenAPI Maven Plugin
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Pdocker
 
 # --- Stage 2: Tag builder stage for debugging (added for inspection) ---
 FROM builder as debug-builder

@@ -1,5 +1,5 @@
 import {Inject, Injectable} from '@angular/core';
-import {INJECTED_QUIZ_API, QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
+import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {PropertyType, SubmissionDeck} from '../api';
 import {DeckDataSource, DeckItem} from '../features/deck/deck-datasource';
@@ -15,7 +15,7 @@ export class CardStoreService {
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) { }
 
   sendCurrentDeck(){
-    this.quizApi.submissionDeckPost(this.currentDeck);
+    this.quizApi.submissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
   }
 
   setCurrentDeck(deck: SubmissionDeck | DeckItem[]) {
