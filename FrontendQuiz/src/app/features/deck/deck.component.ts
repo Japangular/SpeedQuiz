@@ -4,13 +4,15 @@ import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { DeckDataSource, DeckItem } from './deck-datasource';
 import {CardStoreService} from '../../services/card-store.service';
+import {MatButton} from '@angular/material/button';
+import {DeckChooserComponent} from '../deck-chooser/deck-chooser.component';
 
 @Component({
   selector: 'app-deck',
   templateUrl: './deck.component.html',
   styleUrl: './deck.component.css',
   standalone: true,
-  imports: [MatTableModule, MatPaginatorModule, MatSortModule]
+  imports: [MatTableModule, MatPaginatorModule, MatSortModule, MatButton, DeckChooserComponent]
 })
 export class DeckComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;

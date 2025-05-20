@@ -1,0 +1,15 @@
+<mat-form-field appearance="fill">
+  <mat-label>Select Deck</mat-label>
+  <mat-select
+    (selectionChange)="onDeckSelect($event.value)"
+    [(value)]="selectedDeck"
+    [panelClass]="'custom-select-panel'"
+  >
+    <mat-option *ngFor="let deck of decks" [value]="deck">
+      <div class="option-content">
+        <div class="deckname">{{ deck.deckname }}</div>
+        <div class="properties">→ {{ formatProperties(deck.properties) }}</div>
+      </div>
+    </mat-option>
+  </mat-select>
+</mat-form-field>

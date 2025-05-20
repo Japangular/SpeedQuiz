@@ -6,6 +6,7 @@ import {DefaultService, SubmissionDeck} from '../api';
 
 export interface QuizApi {
   submissionDeckPost(deck: SubmissionDeck): Observable<any>;
+  availableDecksGet(): Observable<SubmissionDeck[]>;
 }
 
 export const QUIZ_API_TOKEN = new InjectionToken<QuizApi>('QUIZ_API');

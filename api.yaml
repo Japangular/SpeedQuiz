@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: SpeedQuiz API
   description: API for managing quiz decks and cards
-  version: 1.0.0
+  version: 1.0.1
 
 paths:
   /submission-deck:
@@ -18,30 +18,57 @@ paths:
         '200':
           description: Deck submitted successfully
 
+  /available-decks:
+    get:
+      summary: Get all deck metadata for a given user
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The username whose decks you want to fetch
+      responses:
+        '200':
+          description: A list of deck metadata
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeckMetadata'
+
 components:
   schemas:
-    SubmissionDeck:
+    DeckMetadata:
       type: object
       properties:
         deckName:
-          type: string
-        username:
           type: string
         properties:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/PropertyType'
-        cards:
-          type: array
-          items:
-            type: object
-            additionalProperties:
-              type: string
       required:
         - deckName
-        - username
         - properties
-        - cards
+
+    SubmissionDeck:
+      allOf:
+        - $ref: '#/components/schemas/DeckMetadata'
+        - type: object
+          properties:
+            username:
+              type: string
+            cards:
+              type: array
+              items:
+                type: object
+                additionalProperties:
+                  type: string
+          required:
+            - username
+            - cards
 
     PropertyType:
       type: string
