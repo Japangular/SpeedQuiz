@@ -1,6 +1,6 @@
 Docker-Compose:
 
-docker-compose down --remove-orphans
+docker-compose down -v --remove-orphans
 docker-compose build --no-cache
 docker-compose up
 
@@ -74,3 +74,11 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO speedquiz;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO speedquiz;
 ALTER SCHEMA public OWNER TO speedquiz;
 \dp public.*
+
+
+docker exec -it currentspeedquiz_db_1 psql -U speedquiz -d speedquizdb
+speedquizdb=# SELECT version();
+# intellij db: jdbc:postgresql://localhost:5432/speedquizdb
+
+
+$ openapi-generator-cli generate   -i api.yaml   -g typescript-angular   -o FrontendQuiz/src/app/api

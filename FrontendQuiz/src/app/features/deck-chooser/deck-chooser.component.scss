@@ -1,0 +1,15 @@
+.option-content {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  white-space: nowrap;
+}
+
+.deckname {
+  font-weight: bold;
+}
+
+.properties {
+  font-size: 0.85em;
+  color: gray;
+}
