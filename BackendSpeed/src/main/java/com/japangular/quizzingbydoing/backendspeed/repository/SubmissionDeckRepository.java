@@ -1,7 +1,9 @@
 package com.japangular.quizzingbydoing.backendspeed.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.japangular.quizzingbydoing.backendspeed.model.PropertyType;
 import com.japangular.quizzingbydoing.backendspeed.model.SubmissionDeck;
 import lombok.AllArgsConstructor;
 import org.postgresql.util.PSQLException;
@@ -13,15 +15,21 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Repository
 @AllArgsConstructor
 public class SubmissionDeckRepository {
 
   private final JdbcTemplate jdbcTemplate;
   private static final Logger logger = LoggerFactory.getLogger(SubmissionDeckRepository.class);
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   public int insertSubmissionDeck(SubmissionDeck submissionDeck) {
-    ObjectMapper objectMapper = new ObjectMapper();
     String propertiesJson;
     String cardsJson;
 
@@ -64,4 +72,57 @@ public class SubmissionDeckRepository {
       return 0;
     }
   }
+
+  public List<SubmissionDeck> getSubmissionDecksByUsername(String username) {
+    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE username = ?";
+
+    return jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+  }
+
+  public List<SubmissionDeck> getSubmissionDecksByDeckName(String deckName) {
+    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE deckName = ?";
+
+    return jdbcTemplate.query(sql, new Object[]{deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+  }
+
+  public List<SubmissionDeck> getSubmissionDecksByUsernameAndDeckName(String username, String deckName) {
+    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE username = ? AND deckName = ?";
+
+    return jdbcTemplate.query(sql, new Object[]{username, deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+  }
+
+  public Optional<SubmissionDeck> findByUsernameAndDeckName(String username, String deckName) {
+    List<SubmissionDeck> decks = getSubmissionDecksByUsernameAndDeckName(username, deckName);
+    if (decks.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.of(decks.getFirst());
+    }
+  }
+
+  private SubmissionDeck mapRowToSubmissionDeck(ResultSet rs) throws SQLException {
+
+
+    SubmissionDeck deck = new SubmissionDeck();
+    deck.setDeckName(rs.getString("deckName"));
+    deck.setUsername(rs.getString("username"));
+
+    try {
+      Map<String, PropertyType> properties = objectMapper.readValue(rs.getString("properties"), new TypeReference<Map<String, PropertyType>>() {
+      });
+      List<Map<String, String>> cards = objectMapper.readValue(rs.getString("cards"), new TypeReference<List<Map<String, String>>>() {
+      });
+
+      deck.setProperties(properties);
+      deck.setCards(cards);
+
+    } catch (JsonProcessingException e) {
+      logger.error("Failed to deserialize properties or cards for deckName: {}", rs.getString("deckName"), e);
+      // Optionally rethrow or handle
+    }
+
+    return deck;
+  }
+
+
 }

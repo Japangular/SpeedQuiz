@@ -1,4 +1,4 @@
-import {Component, Inject, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatStep, MatStepper} from '@angular/material/stepper';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
@@ -61,6 +61,7 @@ export class DynamicCardCreatorComponent implements OnInit {
   currentStep: number = 0;
   cards: { name: PropertyType; value: string }[] = [];
   propertyTypes: { [key: string]: PropertyType } = {};  // Track property types
+  username = "app initializer";
 
   constructor(private fb: FormBuilder, private submissionService: CardStoreService) {
   }
@@ -118,7 +119,8 @@ export class DynamicCardCreatorComponent implements OnInit {
     console.log('Cards Data:', this.cards);
 
     this.submissionService.sendUserGeneratedDeck({
-      name: this.deckForm.get('deckName')?.value,
+      deckName: this.deckForm.get('deckName')?.value,
+      username: this.username,
       properties: this.propertyTypes,
       cards: this.cards
     });

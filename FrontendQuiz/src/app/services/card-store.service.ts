@@ -1,37 +1,23 @@
 import {Inject, Injectable} from '@angular/core';
 import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {PropertyType, SubmissionDeck} from '../api';
-import {DeckDataSource, DeckItem} from '../features/deck/deck-datasource';
+import {DeckItem} from '../features/deck/deck-datasource';
 import {
-  DECK_CHOOSER_TOKEN, DeckChooser, DeckMetadata,
   UserGeneratedDeck,
   UserGeneratedDeckSubmissionService
 } from '../features/dynamic-card-creator/submission-deck.model';
+import {PropertyType, SubmissionDeck} from '../../generated/api';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CardStoreService implements UserGeneratedDeckSubmissionService, DeckChooser {
+export class CardStoreService implements UserGeneratedDeckSubmissionService {
   currentDeck = {deckName: "initial Deck", username: "app initializer", properties: {}, cards: []} as SubmissionDeck;
   _currentDeck: BehaviorSubject<SubmissionDeck> = new BehaviorSubject(this.currentDeck);
   _currentDeck$: Observable<SubmissionDeck> = this._currentDeck.asObservable();
 
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
-  }
-
-  deckMetadata(): Observable<DeckMetadata[]> {
-        throw new Error('Method not implemented.');
-    }
-
-  getDeckMetadata(): DeckMetadata[] {
-    return [
-      {name: "german deck", properties: {Frage: PropertyType.Question, Antwort: PropertyType.Answer}},
-      {name: "english Deck", properties: {Question: PropertyType.Question, Answer: PropertyType.Answer}}] as DeckMetadata[];
-  }
-
-  sendSelectedDeckMetadata(deckMetadata: DeckMetadata): void {
-    console.log("selected deck was " + JSON.stringify(deckMetadata));
   }
 
   sendCurrentDeck(){
@@ -44,8 +30,8 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService, Dec
       current.deckName = "DeckDataSource";
       current.properties = {position: PropertyType.Question, name: PropertyType.Answer};
       current.cards = deck.map(item => ({
-        position: item.id.toString(),
-        name: item.name
+        position: item['id'],
+        name: item['name']
       }));
     } else {
       this.currentDeck = deck;
@@ -56,27 +42,40 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService, Dec
     this._currentDeck.next(this.currentDeck);
   }
 
-  get currentDeck$(): Observable<SubmissionDeck>{
-    return this._currentDeck$;
-  }
-
   sendUserGeneratedDeck(deck: UserGeneratedDeck): void {
-    this.setCurrentDeck(mapUserGeneratedDeckToSubmissionDeck(deck, this.currentDeck.username));
+    this.setCurrentDeck(deck);
     this.sendCurrentDeck();
   }
+
+  switchDeck(deckName: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
+    return this.quizApi.submissionDeckGet(this.currentDeck.username, deckName).pipe(
+      map(deck => mapSubmissionDeckToDeckItem(deck))
+    );
+  }
+}
+
+export function mapSubmissionDeckToDeckItem(submissionDeck: SubmissionDeck): {
+  deckItems: DeckItem[],
+  displayedColumns: string[]
+} {
+  console.log("goal map submissionDeck: " + JSON.stringify(submissionDeck));
+  const displayedColumns = Object.keys(submissionDeck.properties);
+  const deckItems: DeckItem[] = submissionDeck.cards.map(card => {
+    const item: DeckItem = {};
+    displayedColumns.forEach(key => {
+      item[key] = card[key] ?? ''; // fallback to empty string
+    });
+    return item;
+  });
+
+  return {deckItems, displayedColumns};
 }
 
 export function mapUserGeneratedDeckToSubmissionDeck(deck: UserGeneratedDeck, username: string): SubmissionDeck {
   return {
-    deckName: deck.name,
-    username: username, // You would pass in the username here
+    deckName: deck.deckName,
+    username: deck.username ?? username,
     properties: deck.properties,
-    cards: deck.cards.map(card => {
-      return {
-        [card.name]: card.value
-      };
-    })
+    cards: deck.cards
   };
 }
-
-export const INJECTED_DECK_CHOOSER = {provide: DECK_CHOOSER_TOKEN, useClass: CardStoreService};

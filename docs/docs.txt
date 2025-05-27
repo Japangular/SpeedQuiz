@@ -1,3 +1,5 @@
+autogeneration in intellij: Project Structure -> set src and java as src [might not survive mvn clean install]
+
 Docker-Compose:
 
 docker-compose down -v --remove-orphans
@@ -81,4 +83,4 @@ speedquizdb=# SELECT version();
 # intellij db: jdbc:postgresql://localhost:5432/speedquizdb
 
 
-$ openapi-generator-cli generate   -i api.yaml   -g typescript-angular   -o FrontendQuiz/src/app/api
+$ openapi-generator-cli generate   -i api.yaml   -g typescript-angular   -o FrontendQuiz/src/generated/api
