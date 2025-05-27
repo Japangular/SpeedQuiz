@@ -6,6 +6,30 @@ info:
 
 paths:
   /submission-deck:
+    get:
+      summary: Retrieve a submission deck by username and deck name
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The username who owns the deck
+        - name: deckName
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The name of the deck to retrieve
+      responses:
+        '200':
+          description: Submission deck retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionDeck'
+        '404':
+          description: Submission deck not found
     post:
       summary: Submit a new deck
       requestBody:
@@ -23,7 +47,7 @@ paths:
       summary: Get all deck metadata for a given user
       parameters:
         - name: username
-          in: path
+          in: query
           required: true
           schema:
             type: string
@@ -45,12 +69,15 @@ components:
       properties:
         deckName:
           type: string
+        username:
+          type: string
         properties:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/PropertyType'
       required:
         - deckName
+        - username
         - properties
 
     SubmissionDeck:
@@ -58,8 +85,6 @@ components:
         - $ref: '#/components/schemas/DeckMetadata'
         - type: object
           properties:
-            username:
-              type: string
             cards:
               type: array
               items:
@@ -67,7 +92,6 @@ components:
                 additionalProperties:
                   type: string
           required:
-            - username
             - cards
 
     PropertyType:

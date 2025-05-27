@@ -1,9 +1,9 @@
-import {Component, EventEmitter, Inject, InjectionToken, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Inject, OnInit, Output} from '@angular/core';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatOption, MatSelect} from '@angular/material/select';
-import {NgForOf, NgIf} from '@angular/common';
-import {DECK_CHOOSER_TOKEN, DeckChooser, DeckMetadata} from '../dynamic-card-creator/submission-deck.model';
-import {Subscription} from 'rxjs';
+import {NgForOf} from '@angular/common';
+import {DeckApiService} from '../../services/deck-api.service';
+import {DeckMetadata, PropertyType} from '../../../generated/api';
 
 @Component({
   selector: 'app-deck-chooser',
@@ -17,26 +17,36 @@ import {Subscription} from 'rxjs';
   templateUrl: './deck-chooser.component.html',
   styleUrl: './deck-chooser.component.scss'
 })
-export class DeckChooserComponent {
-  @Output() deckSelected = new EventEmitter<any>();
+export class DeckChooserComponent implements OnInit {
+  username = "app initializer";
 
-  constructor(@Inject(DECK_CHOOSER_TOKEN) private deckChooser: DeckChooser) {
+  @Output() deckSelected: EventEmitter<string> = new EventEmitter<string>();
+
+  constructor(private deckChooser: DeckApiService) {
   }
 
-  decks = [
-    {deckname: 'First Deck', properties: {Frage: 'question', Antwort: 'answer'}},
-    {deckname: 'Second Deck', properties: {Term: 'term', Definition: 'definition'}}
+  ngOnInit(): void {
+    this.deckChooser.availableDecksGet().subscribe(decks => this.setDecks(decks));
+  }
+
+  decks: DeckMetadata[] = [
+    {deckName: 'First Deck', properties: {Frage: PropertyType.Question, Antwort: PropertyType.Answer}, username: this.username},
+    {deckName: 'Second Deck', properties: {Term: PropertyType.Question, Definition: PropertyType.Answer}, username: this.username}
   ];
 
   selectedDeck: any;
 
-  onDeckSelect(deck: any) {
+  onDeckSelect(deck: DeckMetadata) {
     this.selectedDeck = deck;
-    this.deckSelected.emit(deck);
-    this.deckChooser.sendSelectedDeckMetadata(deck);
+    this.deckSelected.emit(deck.deckName);
   }
 
   formatProperties(props: any): string {
     return Object.entries(props).map(([k, v]) => `${k}: ${v}`).join(' | ');
+  }
+
+  setDecks(decks: DeckMetadata[]){
+    this.decks = decks;
+    console.log("decks received")
   }
 }

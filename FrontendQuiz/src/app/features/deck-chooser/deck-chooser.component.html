@@ -7,7 +7,7 @@
   >
     <mat-option *ngFor="let deck of decks" [value]="deck">
       <div class="option-content">
-        <div class="deckname">{{ deck.deckname }}</div>
+        <div class="deckname">{{ deck.deckName }}</div>
         <div class="properties">→ {{ formatProperties(deck.properties) }}</div>
       </div>
     </mat-option>
