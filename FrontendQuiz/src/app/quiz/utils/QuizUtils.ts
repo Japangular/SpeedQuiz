@@ -1,6 +1,6 @@
 import {FormControl, FormGroup} from "@angular/forms";
 import {ElementRef, EventEmitter} from "@angular/core";
-import {Card} from '../quiz/quiz.model';
+import {Card} from '../dualInputCard/quiz.model';
 
 export abstract class QuizUtils {
   abstract set quizUtilCard(card: Card);

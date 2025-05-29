@@ -1,7 +1,7 @@
 import {Component, Input, Output, EventEmitter} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {NgForOf, NgIf} from "@angular/common";
-import {Card} from '../../quiz/quiz.model';
+import {NgForOf} from "@angular/common";
+import {Card} from '../../dualInputCard/quiz.model';
 
 @Component({
   selector: 'app-one-liner',

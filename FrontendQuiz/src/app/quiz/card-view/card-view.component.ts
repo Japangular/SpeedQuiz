@@ -1,6 +1,6 @@
 
-import {Card} from "../quiz/quiz.model";
-import {QuizComponent} from "../quiz/quiz.component";
+import {Card} from "../dualInputCard/quiz.model";
+import {QuizComponent} from "../dualInputCard/quiz.component";
 import {NgIf} from "@angular/common";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {StrokeOrderKanjiComponent} from '../widget/kanji-stroke-order-grid/stroke-order-kanji.component';
