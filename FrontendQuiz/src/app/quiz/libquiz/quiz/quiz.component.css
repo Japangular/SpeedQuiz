@@ -1,0 +1,15 @@
+input.active {
+  /* Define styles or animations for the active state */
+  transition: all 0.3s ease; /* Example animation */
+}
+
+input:not(.active) {
+  /* Disable or reset styles when not active */
+  transition: none;
+}
+
+.readingMeaning {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Optional: space between inputs */
+}

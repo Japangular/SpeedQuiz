@@ -1,0 +1,19 @@
+<form [formGroup]="cardForm">
+  <div class="readingMeaning">
+    <input
+      #readingInput
+      formControlName="reading"
+      placeholder="Enter reading"
+      (keydown)="toggleHint($event)"
+      autofocus
+      directiveReadingMeaning [correctAnswer]="getHiraganaAnswer()" [strategy]=createStrategy(STRATEGY.READING) (onCorrectAnswer)="readingCorrect($event)"
+    >
+
+    <input
+      #meaningInput
+      formControlName="meaning"
+      placeholder="Enter meaning"
+      (keydown)="toggleHint($event)"
+      directiveReadingMeaning [correctAnswer]="getMeaningAnswer()" [strategy]=createStrategy(STRATEGY.MEANING) (onCorrectAnswer)="meaningCorrect($event)">
+  </div>
+</form>
