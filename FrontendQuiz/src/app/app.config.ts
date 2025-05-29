@@ -7,12 +7,14 @@ import {HTTP_INTERCEPTORS, provideHttpClient} from '@angular/common/http';
 import {LoggerInterceptor} from './interceptor/LoggerInterceptor';
 import {environment} from './environments/environment';
 import {BASE_PATH} from '../generated/api';
+import {INJECTED_QUIZ_BACKEND_API} from './interfaces/QuizApi';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     INJECTED_QUIZ_API,
+    INJECTED_QUIZ_BACKEND_API,
     provideHttpClient(),
     {
       provide: BASE_PATH,
