@@ -1,7 +1,8 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {BackendService} from '../backend/backend.service';
 import {catchError, Observable, ReplaySubject} from 'rxjs';
 import {Card} from '../dualInputCard/quiz.model';
+import {INJECTED_QUIZ_BACKEND_API, QuizBackendApi} from '../../interfaces/QuizApi';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class MainService {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
   card$: Observable<Card> = this.cardSubject.asObservable();
 
-  constructor(private backend: BackendService) {
+  constructor(@Inject(INJECTED_QUIZ_BACKEND_API) private quizBackendApi: QuizBackendApi, private backend: BackendService) {
     this.getCard();
   }
 
