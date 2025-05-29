@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild, Renderer2, OnDestroy, AfterViewInit, Input, Output, EventEmitter} from '@angular/core';
+import {Component, ElementRef, ViewChild, Renderer2, OnDestroy, AfterViewInit, Input, Output, EventEmitter} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer} from '@angular/platform-browser';
 

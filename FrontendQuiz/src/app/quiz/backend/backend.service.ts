@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Card} from '../libquiz/quiz/quiz.model';
+import {Card} from '../dualInputCard/quiz.model';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,7 @@ export class BackendService {
   }
 
   toggleCardType(cardType?: string): Observable<void> {
-    const params = cardType ? {cardType} : {}; // If cardType is provided, include it in the request body
+    const params = cardType ? {cardType} : {};
     return this.http.post<void>(`${BackendService.API_BASE_URL}/toggleCardType`, params);
   }
 

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {MainService} from './main.service';
 import {AsyncPipe} from '@angular/common';
-import {CardViewComponent} from '../libquiz/card-view/card-view.component';
+import {CardViewComponent} from '../card-view/card-view.component';
 import {FormsModule} from '@angular/forms';
 
 @Component({
