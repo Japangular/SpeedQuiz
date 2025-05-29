@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Hello</h1>
+<div mat-dialog-content style="width: fit-content; top: 60vh">
+  <p *ngIf=data.displayedText> displayedText: {{data.displayedText}}</p>
+  <p>selectedChar: {{data.selectedChar}}</p>
+  <p *ngIf="data.componentMeanings">componentMeanings: {{data.componentMeanings}}</p>
+  <div *ngFor="let d of data.componentReadings">
+    {{d | json}}
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close>Close</button>
+</div>
