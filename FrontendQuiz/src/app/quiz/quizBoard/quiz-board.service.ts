@@ -7,11 +7,11 @@ import {INJECTED_QUIZ_BACKEND_API, QuizBackendApi} from '../../interfaces/QuizAp
 @Injectable({
   providedIn: 'root'
 })
-export class MainService {
+export class QuizBoardService {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
   card$: Observable<Card> = this.cardSubject.asObservable();
 
-  constructor(@Inject(INJECTED_QUIZ_BACKEND_API) private quizBackendApi: QuizBackendApi, private backend: BackendService) {
+  constructor(private backend: BackendService) {
     this.getCard();
   }
 
