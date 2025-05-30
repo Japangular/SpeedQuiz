@@ -1,0 +1,20 @@
+/* Outer container that holds everything */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
+}
+
+/* Main content that should expand */
+.content-wrap {
+  flex: 1;
+  box-sizing: border-box;
+}
+
+/* Footer styling */
+app-footer {
+  background: #f1f1f1;
+  padding: 12px;
+  text-align: center;
+  border-top: 1px solid #ccc;
+}

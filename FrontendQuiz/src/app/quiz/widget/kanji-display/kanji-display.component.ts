@@ -1,6 +1,7 @@
 import {Component, ElementRef, ViewChild, Renderer2, OnDestroy, AfterViewInit, Input, Output, EventEmitter} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer} from '@angular/platform-browser';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-kanji-display',
@@ -45,6 +46,10 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private renderer: Renderer2
   ) {
+  }
+
+  getSvgUrl(kanji: string): string {
+    return `${environment.apiBaseUrl}/kanji_svgs/${encodeURIComponent(kanji)}.svg`;
   }
 
   ngAfterViewInit() {
@@ -96,7 +101,7 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
   }
 
   loadSvg(): void {
-    const url = `assets/kanji_svgs/${this.kanji}.svg`;
+    const url = this.getSvgUrl(this.kanji);
     console.log(url);
     this.http.get(url, {responseType: 'text'})
       .subscribe(svg => {

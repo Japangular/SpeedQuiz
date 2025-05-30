@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {MainService} from './main.service';
+import {QuizBoardService} from './quiz-board.service';
 import {AsyncPipe} from '@angular/common';
 import {CardViewComponent} from '../card-view/card-view.component';
 import {FormsModule} from '@angular/forms';
@@ -12,13 +12,13 @@ import {FormsModule} from '@angular/forms';
     CardViewComponent,
     FormsModule
   ],
-  templateUrl: './main.component.html',
-  styleUrl: './main.component.css'
+  templateUrl: './quiz-board.component.html',
+  styleUrl: './quiz-board.component.css'
 })
-export class MainComponent {
+export class QuizBoardComponent {
   inputValue: string = '';
 
-  constructor(protected ms: MainService) { }
+  constructor(protected ms: QuizBoardService) { }
 
   nextCard(withoutHelp?: boolean){
     if(withoutHelp === false){

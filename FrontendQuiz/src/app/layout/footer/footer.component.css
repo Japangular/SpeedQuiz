@@ -1,0 +1,9 @@
+.app-footer {
+  justify-content: center;
+  font-size: 0.75rem;
+
+  a.footer-link {
+    color: #ffeb3b;
+  / / or any accent color to match your theme text-decoration: underline;
+  }
+}
