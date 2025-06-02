@@ -1,10 +1,8 @@
 import {FormControl, FormGroup} from "@angular/forms";
 import {ElementRef, EventEmitter, QueryList} from "@angular/core";
-import {Card} from '../dualInputCard/quiz.model';
 import {QuizAnswerSlot} from '../dualInputCard/quiz.component';
 
 export abstract class QuizUtils {
-  abstract set quizUtilCard(card: Card);
   abstract emitQuizEvent: EventEmitter<QuizEvent>;
 
   abstract inputRefs: QueryList<ElementRef>;
@@ -53,11 +51,8 @@ export abstract class QuizUtils {
     }
   }
 
-
   checkSolved() {
     if (this.isSolved()) {
-      //const readingInput = this.getInputElementByName('reading');
-      //readingInput?.nativeElement.focus(); // @TODO timing issue,
       this.isReadingCorrect = false;
       this.isMeaningCorrect = false;
       this.resetFormGroup();
@@ -81,7 +76,6 @@ export abstract class QuizUtils {
       el.nativeElement.getAttribute('data-name') === name
     );
   }
-
 }
 
 export interface CardFormStructure {
