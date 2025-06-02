@@ -3,7 +3,6 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {Card} from "./quiz.model";
 import {InputVerificationDirective} from '../utils/input-verification.directive';
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from "../utils/ValidationStrategy";
-import {LevenshteinService} from "../utils/levenshtein.service";
 import {QuizEvent, QuizUtilCard, QuizUtils} from '../utils/QuizUtils';
 import {NgForOf} from '@angular/common';
 
@@ -94,11 +93,6 @@ export class QuizComponent extends QuizUtils {
   override handleHintPressed() {
     this.emitQuizEvent.next(QuizEvent.HINT_PRESSED);
   }
-
-  protected readonly RomajiConversionStrategy = RomajiConversionStrategy;
-  protected readonly LevenshteinService = LevenshteinService;
-  protected readonly LevenshteinStrategy = LevenshteinStrategy;
-  protected readonly STRATEGY = STRATEGY;
 }
 
 export enum STRATEGY {
