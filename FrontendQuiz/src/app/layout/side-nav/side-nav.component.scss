@@ -1,6 +1,6 @@
 /* Ensure the container takes the full height */
 .sidenav-container {
-  height: 100%;
+  height: calc(100vh - 3rem);
 }
 
 /* Set width for both sidebars (left and right) */

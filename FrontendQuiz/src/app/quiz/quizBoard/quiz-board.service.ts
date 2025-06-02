@@ -1,8 +1,7 @@
-import {Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {BackendService} from '../backend/backend.service';
 import {catchError, Observable, ReplaySubject} from 'rxjs';
 import {Card} from '../dualInputCard/quiz.model';
-import {INJECTED_QUIZ_BACKEND_API, QuizBackendApi} from '../../interfaces/QuizApi';
 
 @Injectable({
   providedIn: 'root'

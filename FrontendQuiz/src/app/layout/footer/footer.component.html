@@ -1,1 +1,4 @@
-<a mat-button routerLink="/about">About / Impressum</a>
+<a mat-button
+   [routerLink]="['/quizCardApp', { outlets: { leftOutlet: ['about'] } }]">
+  About / Impressum
+</a>

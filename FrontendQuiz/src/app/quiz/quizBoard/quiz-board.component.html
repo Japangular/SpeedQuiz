@@ -1,10 +1,11 @@
-<input
-  placeholder="Insert ID, reading, or meaning"
-  (keydown)="handleKeydown($event)"
-  [(ngModel)]="inputValue"
-/>
-<button (click)="nextCard()">next Card</button>
-<button (click)="useHint()">use hint</button>
+<div>
+  <input
+    placeholder="Insert ID, reading, or meaning"
+    (keydown)="handleKeydown($event)"
+    [(ngModel)]="inputValue"
+  />
+  <button (click)="nextCard()">next Card</button>
+  <button (click)="useHint()">use hint</button>
 
-<app-card-view [currentCard]="this.ms.card$ | async" (nextCard)=nextCard($event)></app-card-view>
-b
+  <app-card-view [currentCard]="this.ms.card$ | async" (nextCard)=nextCard($event)></app-card-view>
+</div>
