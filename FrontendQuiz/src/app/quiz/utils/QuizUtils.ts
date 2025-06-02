@@ -1,49 +1,42 @@
 import {FormControl, FormGroup} from "@angular/forms";
-import {ElementRef, EventEmitter} from "@angular/core";
+import {ElementRef, EventEmitter, QueryList} from "@angular/core";
 import {Card} from '../dualInputCard/quiz.model';
+import {QuizAnswerSlot} from '../dualInputCard/quiz.component';
 
 export abstract class QuizUtils {
   abstract set quizUtilCard(card: Card);
   abstract emitQuizEvent: EventEmitter<QuizEvent>;
 
-  abstract readingInputElement: ElementRef;
-  abstract meaningInputElement: ElementRef;
+  abstract inputRefs: QueryList<ElementRef>;
 
   abstract _quizUtilCard?: QuizUtilCard;
   abstract handleSolvedCard(): void;
   abstract handleHintPressed(): void;
+
+  abstract getSlots(): QuizAnswerSlot[];
 
   hintPressed = false;
   cheated = false;
   isReadingCorrect = false;
   isMeaningCorrect = false;
 
-  cardForm: FormGroup<CardFormStructure> = new FormGroup({
-    reading: new FormControl(''),
-    meaning: new FormControl('')
-  });
+  cardForm: FormGroup<CardFormStructure> = new FormGroup({});
 
   toggleHint(event: KeyboardEvent) {
     if (event.key === 'ß') {
       event.preventDefault();
       this.hintPressed = !this.hintPressed;
       this.cheated = true;
-     this.handleHintPressed()
+      this.handleHintPressed();
     }
-  }
-
-  getHiraganaAnswer(): string {
-    return this._quizUtilCard?.correctReading ?? "";
-  }
-
-  getMeaningAnswer(): string {
-    return this._quizUtilCard?.correctMeaning ?? "";
   }
 
   readingCorrect(readingCorrect: boolean): void {
     this.isReadingCorrect = readingCorrect;
-    if(readingCorrect && !this.isMeaningCorrect){
-      this.meaningInputElement.nativeElement.focus();
+
+    if (readingCorrect && !this.isMeaningCorrect) {
+      const meaningInput = this.getInputElementByName('meaning');
+      meaningInput?.nativeElement.focus(); // Safe access
     } else {
       this.checkSolved();
     }
@@ -51,16 +44,20 @@ export abstract class QuizUtils {
 
   meaningCorrect(meaningCorrect: boolean): void {
     this.isMeaningCorrect = meaningCorrect;
-    if (!this.isReadingCorrect && this.isMeaningCorrect) {
-      this.readingInputElement.nativeElement.focus();
+
+    const readingInput = this.getInputElementByName('reading');
+    if (!this.isReadingCorrect && meaningCorrect) {
+      readingInput?.nativeElement.focus(); // Safe access
     } else {
       this.checkSolved();
     }
   }
 
-  checkSolved(){
-    if(this.isSolved()){
-      this.readingInputElement.nativeElement.focus();
+
+  checkSolved() {
+    if (this.isSolved()) {
+      //const readingInput = this.getInputElementByName('reading');
+      //readingInput?.nativeElement.focus(); // @TODO timing issue,
       this.isReadingCorrect = false;
       this.isMeaningCorrect = false;
       this.resetFormGroup();
@@ -72,17 +69,23 @@ export abstract class QuizUtils {
     return this.isMeaningCorrect && this.isReadingCorrect;
   }
 
-  resetFormGroup(){
-    this.cardForm = new FormGroup({
-      reading: new FormControl(''),
-      meaning: new FormControl('')
-    });
+  resetFormGroup() {
+    const newControls = Object.fromEntries(
+      this.getSlots().map(slot => [slot.name, new FormControl('')])
+    );
+    this.cardForm = new FormGroup(newControls);
   }
+
+  getInputElementByName(name: string): ElementRef | undefined {
+    return this.inputRefs.find(el =>
+      el.nativeElement.getAttribute('data-name') === name
+    );
+  }
+
 }
 
 export interface CardFormStructure {
-  reading: FormControl<string | null>;
-  meaning: FormControl<string | null>;
+  [key: string]: FormControl<string | null>;
 }
 
 export enum QuizEvent {

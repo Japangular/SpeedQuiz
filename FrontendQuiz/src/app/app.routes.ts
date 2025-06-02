@@ -16,6 +16,12 @@ export const routes: Routes = [
       {path: 'table', component: DeckComponent, outlet: 'leftOutlet'},
       {path: 'cardCreator', component: DynamicCardCreatorComponent, outlet: 'leftOutlet'},
       {path: 'quiz', component: QuizBoardComponent, outlet: 'leftOutlet'},
+      {
+        path: 'about',
+        component: AboutComponent,
+        outlet: 'leftOutlet',
+        title: 'About'
+      },
     ]
   },
   {

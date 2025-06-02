@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, ViewChild} from '@angular/core';
 import { MatTableModule, MatTable } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
@@ -24,13 +24,15 @@ export class DeckComponent implements AfterViewInit {
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['id', 'name'];
 
-  constructor(private cardStore: CardStoreService, private cdr: ChangeDetectorRef) {
+  constructor(private cardStore: CardStoreService) {
   }
 
   ngAfterViewInit(): void {
     this.dataSource.sort = this.sort;
     this.dataSource.paginator = this.paginator;
-    this.dataSource.data = EXAMPLE_DATA;
+    setTimeout(() => {
+      this.dataSource.data = EXAMPLE_DATA;
+    });
     this.table.dataSource = this.dataSource;
   }
 
@@ -44,12 +46,14 @@ export class DeckComponent implements AfterViewInit {
   switchDeck(deckName: string) {
     this.cardStore.switchDeck(deckName).subscribe(deck => {
       console.log(JSON.stringify(deck));
-      this.displayedColumns = deck.displayedColumns;
-      this.dataSource.data = deck.deckItems;
-      this.table.renderRows();
-      this.cdr.detectChanges();
-    })
+      setTimeout(() => {
+        this.displayedColumns = deck.displayedColumns;
+        this.dataSource.data = deck.deckItems;
+        this.table.renderRows();
+      });
+    });
   }
+
 }
 
 const EXAMPLE_DATA: DeckItem[] = [

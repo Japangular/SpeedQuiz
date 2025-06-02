@@ -1,19 +1,18 @@
 <form [formGroup]="cardForm">
   <div class="readingMeaning">
-    <input
-      #readingInput
-      formControlName="reading"
-      placeholder="Enter reading"
-      (keydown)="toggleHint($event)"
-      autofocus
-      directiveReadingMeaning [correctAnswer]="getHiraganaAnswer()" [strategy]=createStrategy(STRATEGY.READING) (onCorrectAnswer)="readingCorrect($event)"
-    >
-
-    <input
-      #meaningInput
-      formControlName="meaning"
-      placeholder="Enter meaning"
-      (keydown)="toggleHint($event)"
-      directiveReadingMeaning [correctAnswer]="getMeaningAnswer()" [strategy]=createStrategy(STRATEGY.MEANING) (onCorrectAnswer)="meaningCorrect($event)">
+    <ng-container *ngFor="let slot of quizAnswerSlots">
+      <input
+        #inputRef
+        [attr.data-name]="slot.name"
+        [attr.autofocus]="slot.autofocus ? '' : null"
+        [formControlName]="slot.name"
+        [placeholder]="slot.placeholder"
+        (keydown)="toggleHint($event)"
+        directiveReadingMeaning
+        [correctAnswer]="slot.correctAnswer"
+        [strategy]="slot.strategy"
+        (onCorrectAnswer)="slot.onCorrectAnswer?.($event)"
+      />
+    </ng-container>
   </div>
 </form>
