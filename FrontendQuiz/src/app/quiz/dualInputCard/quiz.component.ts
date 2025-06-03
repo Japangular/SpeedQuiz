@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {Card} from "./quiz.model";
+import {Card, QUIZ_ANSWER_SLOTS} from "./quiz.model";
 import {InputVerificationDirective} from '../utils/input-verification.directive';
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from "../utils/ValidationStrategy";
 import {QuizEvent, QuizUtilCard, QuizUtils} from '../utils/QuizUtils';
@@ -26,23 +26,7 @@ export class QuizComponent extends QuizUtils {
       correctReading: card.reading
     } as QuizUtilCard;
 
-    this.quizAnswerSlots = [
-      {
-        name: 'reading',
-        placeholder: 'Enter reading',
-        correctAnswer: card.reading,
-        strategy: this.createStrategy(STRATEGY.READING),
-        autofocus: true,
-        onCorrectAnswer: (isCorrect) => this.readingCorrect(isCorrect),
-      },
-      {
-        name: 'meaning',
-        placeholder: 'Enter meaning',
-        correctAnswer: card.meaning,
-        strategy: this.createStrategy(STRATEGY.MEANING),
-        onCorrectAnswer: (isCorrect) => this.meaningCorrect(isCorrect),
-      },
-    ];
+    this.quizAnswerSlots = QUIZ_ANSWER_SLOTS(card, this);
 
     const controls: Record<string, FormControl<string | null>> = {};
     this.quizAnswerSlots.forEach(slot => {
