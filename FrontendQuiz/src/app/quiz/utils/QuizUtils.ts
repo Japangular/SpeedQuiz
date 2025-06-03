@@ -1,8 +1,9 @@
 import {FormControl, FormGroup} from "@angular/forms";
 import {ElementRef, EventEmitter, QueryList} from "@angular/core";
 import {QuizAnswerSlot} from '../dualInputCard/quiz.component';
+import {AnswerHandler} from '../dualInputCard/quiz.model';
 
-export abstract class QuizUtils {
+export abstract class QuizUtils implements AnswerHandler{
   abstract emitQuizEvent: EventEmitter<QuizEvent>;
 
   abstract inputRefs: QueryList<ElementRef>;
@@ -29,27 +30,28 @@ export abstract class QuizUtils {
     }
   }
 
-  readingCorrect(readingCorrect: boolean): void {
-    this.isReadingCorrect = readingCorrect;
+  handleAnswerCorrect(name: 'reading' | 'meaning', isCorrect: boolean): void {
+    if (name === 'reading') {
+      this.isReadingCorrect = isCorrect;
 
-    if (readingCorrect && !this.isMeaningCorrect) {
-      const meaningInput = this.getInputElementByName('meaning');
-      meaningInput?.nativeElement.focus(); // Safe access
-    } else {
-      this.checkSolved();
+      if (isCorrect && !this.isMeaningCorrect) {
+        const meaningInput = this.getInputElementByName('meaning');
+        meaningInput?.nativeElement.focus();
+      } else {
+        this.checkSolved();
+      }
+    } else if (name === 'meaning') {
+      this.isMeaningCorrect = isCorrect;
+
+      if (!this.isReadingCorrect && isCorrect) {
+        const readingInput = this.getInputElementByName('reading');
+        readingInput?.nativeElement.focus();
+      } else {
+        this.checkSolved();
+      }
     }
   }
 
-  meaningCorrect(meaningCorrect: boolean): void {
-    this.isMeaningCorrect = meaningCorrect;
-
-    const readingInput = this.getInputElementByName('reading');
-    if (!this.isReadingCorrect && meaningCorrect) {
-      readingInput?.nativeElement.focus(); // Safe access
-    } else {
-      this.checkSolved();
-    }
-  }
 
   checkSolved() {
     if (this.isSolved()) {
