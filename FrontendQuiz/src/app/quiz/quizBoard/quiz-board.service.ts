@@ -1,23 +1,22 @@
 import {Injectable} from '@angular/core';
-import {Observable, ReplaySubject} from 'rxjs';
+import {Observable} from 'rxjs';
 import {Card} from '../dualInputCard/quiz.model';
-import {DeckIterator} from '../utils/deck-iterator/DeckIterator';
+import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuizBoardService {
-  private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
-  card$: Observable<Card> = this.cardSubject.asObservable();
+  card$: Observable<Card>;
 
   private deckIterator = new DeckIterator();
 
   constructor() {
-    this.getCard();
+    this.card$ = this.deckIterator.getCard$();
   }
 
-  getCard() {
-    this.cardSubject.next(this.deckIterator.getCard());
+  getDeckCommand(): DeckCommand {
+    return this.deckIterator;
   }
 
   nextCard(withoutHelp?: boolean) {

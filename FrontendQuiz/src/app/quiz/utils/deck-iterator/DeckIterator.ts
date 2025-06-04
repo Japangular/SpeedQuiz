@@ -1,7 +1,7 @@
 import {Card} from '../../dualInputCard/quiz.model';
 import {Observable, ReplaySubject} from 'rxjs';
 
-export class DeckIterator implements CardHandler {
+export class DeckIterator implements DeckCommand {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
   private card$: Observable<Card> = this.cardSubject.asObservable();
 
@@ -9,8 +9,14 @@ export class DeckIterator implements CardHandler {
   private startPos: number = 0;
   private deck: Card[];
 
-  constructor() {
+  constructor(startPos?: number) {
     this.deck = EXAMPLE_CARDS;
+    this.startPos = startPos && startPos < this.deck.length ? startPos : 0;
+    this.cardSubject.next(this.deck[this.startPos]);
+  }
+
+  getDeckCommand(): DeckCommand {
+    return this;
   }
 
   useHint(): void {
@@ -21,28 +27,24 @@ export class DeckIterator implements CardHandler {
     this.startPos = this.index;
   }
 
-  getCard(): Card {
-    return this.current;
-  }
-
   getCard$(): Observable<Card> {
     return this.card$;
   }
 
-  nextCard(): Card {
+  nextCard(): void {
     if (this.index < this.deck.length - 1){
       this.index++;
     } else {
       this.index = this.startPos;
     }
-    return this.current;
+    this.current;
   }
 
-  previousCard(): Card {
+  previousCard(): void {
     throw new Error('Method not implemented.');
   }
 
-  toggleCardType(cardType?: string): Card {
+  toggleCardType(cardType?: string): void {
     throw new Error('Method not implemented.');
   }
 
@@ -52,17 +54,17 @@ export class DeckIterator implements CardHandler {
     return card;
   }
 
-  next(): Card {
+  next(): void {
     if (this.index < this.deck.length - 1) this.index++;
-    return this.current;
+    this.current;
   }
 
-  jumpTo(predicate: (card: Card) => boolean): Card {
+  jumpTo(predicate: (card: Card) => boolean): void {
     const idx = this.deck.findIndex(predicate);
     if (idx >= 0) {
       this.index = idx;
     }
-    return this.current;
+    this.current;
   }
 
   reset(): void {
@@ -72,20 +74,23 @@ export class DeckIterator implements CardHandler {
 
 }
 
-export interface CardHandler {
-  getCard(): Card;
+export interface DeckCommand {
+  nextCard(): void;
 
-  nextCard(): Card;
-
-  previousCard(): Card;
+  previousCard(): void;
 
   useHint(): void;
 
   setAsStartPoint(): void;
 
-  toggleCardType(cardType?: string): Card;
+  toggleCardType(cardType?: string): void;
 
-  jumpTo(predicate: (card: Card) => boolean): Card;
+  jumpTo(predicate: (card: Card) => boolean): void;
+}
+
+export interface DeckState {
+  getCard$(): Observable<Card>;
+  // maybe add history$, currentIndex$, etc. in the future
 }
 
 const EXAMPLE_CARDS = [

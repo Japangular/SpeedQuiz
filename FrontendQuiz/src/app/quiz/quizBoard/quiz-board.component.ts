@@ -18,5 +18,5 @@ import {QuizActionBarComponent} from '../quiz-action-bar/quiz-action-bar.compone
   styleUrl: './quiz-board.component.css'
 })
 export class QuizBoardComponent {
-  constructor(protected ms: QuizBoardService) { }
+  constructor(protected deckIteratorService: QuizBoardService) { }
 }
