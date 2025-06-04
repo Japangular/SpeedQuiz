@@ -5,13 +5,10 @@ import {AnswerHandler} from '../dualInputCard/quiz.model';
 
 export abstract class QuizUtils implements AnswerHandler{
   abstract emitQuizEvent: EventEmitter<QuizEvent>;
-
   abstract inputRefs: QueryList<ElementRef>;
-
   abstract _quizUtilCard?: QuizUtilCard;
   abstract handleSolvedCard(): void;
   abstract handleHintPressed(): void;
-
   abstract getSlots(): QuizAnswerSlot[];
 
   hintPressed = false;
@@ -51,7 +48,6 @@ export abstract class QuizUtils implements AnswerHandler{
       }
     }
   }
-
 
   checkSolved() {
     if (this.isSolved()) {

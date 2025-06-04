@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {BackendService} from '../backend/backend.service';
-import {catchError, Observable, ReplaySubject} from 'rxjs';
+import {Observable, ReplaySubject} from 'rxjs';
 import {Card} from '../dualInputCard/quiz.model';
+import {DeckIterator} from '../utils/deck-iterator/DeckIterator';
 
 @Injectable({
   providedIn: 'root'
@@ -10,67 +10,61 @@ export class QuizBoardService {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
   card$: Observable<Card> = this.cardSubject.asObservable();
 
-  constructor(private backend: BackendService) {
+  private deckIterator = new DeckIterator();
+
+  constructor() {
     this.getCard();
   }
 
   getCard() {
-    this.backend.getCard().pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error fetching card', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(card => this.cardSubject.next(card));
+    this.cardSubject.next(this.deckIterator.getCard());
   }
 
-  nextCard() {
-    this.backend.nextCard().pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error fetching next card', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(() => this.getCard());
+  nextCard(withoutHelp?: boolean) {
+    if (withoutHelp === false) {
+      this.deckIterator.useHint();
+    }
+    this.deckIterator.nextCard();
   }
 
   useHint() {
-    this.backend.useHint().pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error using hint', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(() => this.nextCard());
+    this.deckIterator.useHint();
+    this.nextCard();
   }
 
   setAsStartPoint() {
-    this.backend.setAsStartPoint().pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error using startPoint', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(() => this.nextCard());
+    this.deckIterator.setAsStartPoint();
+    this.nextCard();
   }
 
   toggleCardType(cardType?: string) {
-    this.backend.toggleCardType(cardType).pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error using hint', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(() => this.nextCard());
+    this.deckIterator.toggleCardType(cardType);
+    this.deckIterator.nextCard();
   }
 
-  jumpTo(jumpKey: string){
-    this.backend.jumpTo(jumpKey).pipe(
-      catchError(error => {
-        // Handle error appropriately
-        console.error('Error using hint', error);
-        return [];  // You can return a fallback value or rethrow the error
-      })
-    ).subscribe(() => this.nextCard());
+  jumpTo(jumpKey: string) {
+    const type = detectJumpKeyType(jumpKey);
+
+    this.deckIterator.jumpTo(card  => {
+      switch (type) {
+        case 'index':
+          return card.index === parseInt(jumpKey);
+        case 'reading':
+          return card.reading === jumpKey;
+        case 'meaning':
+          return card.meaning.toLowerCase() === jumpKey.toLowerCase();
+        default:
+          return false;
+      }
+    });
   }
+}
+
+type JumpKeyType = 'index' | 'meaning' | 'reading' | 'unknown';
+
+function detectJumpKeyType(input: string): JumpKeyType {
+  if (/^\d+$/.test(input)) return 'index';
+  if (/^[\u3040-\u309F]+$/.test(input)) return 'reading';
+  if (/^[A-Za-z]+$/.test(input)) return 'meaning';
+  return 'unknown';
 }
