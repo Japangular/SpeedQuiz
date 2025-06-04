@@ -23,7 +23,6 @@ import {ModalService} from '../widget/modal/modal.service';
 export class CardViewComponent {
   @Input()
   currentCard?: Card | null;
-
   @Output()
   nextCard = new EventEmitter<boolean>();
 

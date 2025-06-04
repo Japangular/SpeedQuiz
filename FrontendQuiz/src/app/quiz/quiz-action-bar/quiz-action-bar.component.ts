@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import {QuizBoardService} from '../quizBoard/quiz-board.service';
+import {Component, Input} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import {DeckCommand} from "../utils/deck-iterator/DeckIterator";
 
 @Component({
   selector: 'app-quiz-action-bar',
@@ -13,20 +13,18 @@ import {FormsModule} from '@angular/forms';
 export class QuizActionBarComponent {
   inputValue: string = '';
 
-
-
-  constructor(protected ms: QuizBoardService) {
-  }
+  @Input()
+  deckCommand!: DeckCommand;
 
   nextCard(withoutHelp?: boolean) {
     if (withoutHelp === false) {
-      this.ms.useHint();
+      this.deckCommand.useHint();
     }
-    this.ms.nextCard();
+    this.deckCommand.nextCard();
   }
 
   useHint() {
-    this.ms.useHint();
+    this.deckCommand.useHint();
   }
 
   handleKeydown(event: KeyboardEvent) {
