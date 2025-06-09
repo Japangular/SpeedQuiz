@@ -8,10 +8,9 @@
                        (emitSelectedSubKanji)="handleSelectedKanji($event)">
         </app-one-liner>
 
-        <app-quiz [quizUtilCard]="getCard()" (emitQuizEvent)="toggleHint($event)"></app-quiz>
+        <app-answer-slots [quizUtilCard]="getCard().answers" (emitQuizEvent)="toggleHint($event)"></app-answer-slots>
 
-        <app-stroke-order-kanji *ngIf="currentCard.subjectType !== 'KANA_VOCABULARY' && currentCard.subjectType !== 'RADICAL'"
-                                [japanese]=currentCard.question>
+        <app-stroke-order-kanji *ngIf="isJapanese(currentCard)" [japanese]=currentCard.question>
         </app-stroke-order-kanji>
       </div>
     </div>

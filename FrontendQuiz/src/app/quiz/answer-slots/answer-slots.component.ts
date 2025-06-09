@@ -1,46 +1,42 @@
 import {Component, ElementRef, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {Card, QUIZ_ANSWER_SLOTS} from "./quiz.model";
+import {QUIZ_ANSWER_SLOTS, QuizAnswerSlot, AnswerCheckStrategy, AnswersMap} from "./quiz.model";
 import {InputVerificationDirective} from '../utils/input-verification.directive';
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from "../utils/ValidationStrategy";
-import {QuizEvent, QuizUtilCard, QuizUtils} from '../utils/QuizUtils';
+import {QuizEvent, QuizUtils} from '../utils/QuizUtils';
 import {NgForOf} from '@angular/common';
 
 @Component({
-  selector: 'app-quiz',
+  selector: 'app-answer-slots',
   standalone: true,
   imports: [ReactiveFormsModule, InputVerificationDirective, NgForOf],
-  templateUrl: './quiz.component.html',
-  styleUrls: ['./quiz.component.css']
+  templateUrl: './answer-slots.component.html',
+  styleUrls: ['./answer-slots.component.css']
 })
-export class QuizComponent extends QuizUtils {
+export class AnswerSlotsComponent extends QuizUtils {
   @ViewChildren('inputRef') inputRefs!: QueryList<ElementRef>;
 
-  override _quizUtilCard?: QuizUtilCard;
   quizAnswerSlots: QuizAnswerSlot[] = [];
 
   @Input()
-  set quizUtilCard(card: Card){
-    this._quizUtilCard = {
-      correctMeaning: card.meaning,
-      correctReading: card.reading
-    } as QuizUtilCard;
-
+  set quizUtilCard(card: AnswersMap){
     this.quizAnswerSlots = QUIZ_ANSWER_SLOTS(card, this);
 
     const controls: Record<string, FormControl<string | null>> = {};
+
     this.quizAnswerSlots.forEach(slot => {
       controls[slot.name] = new FormControl('');
     });
+
     this.cardForm = new FormGroup(controls);
+
+    this.isEverythingCorrect = new Array(this.getSlots().length).fill(false)
 
   // Wait for the view to update before focusing
   setTimeout(() => {
-    const inputToFocus = this.getInputElementByName('reading');
+    const inputToFocus = this.getInputElementByIndex(0);
     inputToFocus?.nativeElement.focus();
   });
-
-  console.log(this._quizUtilCard);
 }
 
   @Output()
@@ -54,10 +50,10 @@ export class QuizComponent extends QuizUtils {
     return this.quizAnswerSlots;
   }
 
-  createStrategy(strategy: STRATEGY): ValidationStrategy {
-    if(strategy === STRATEGY.READING){
+  createStrategy(strategy: AnswerCheckStrategy): ValidationStrategy {
+    if(strategy === AnswerCheckStrategy.EXACT_HIRAGANA_MATCH){
       return new RomajiConversionStrategy();
-    } else if (strategy === STRATEGY.MEANING){
+    } else if (strategy === AnswerCheckStrategy.LEVENSHTEIN_DISTANCE){
       return new LevenshteinStrategy();
     } else {
       throw new Error("wrong strategy");
@@ -77,17 +73,4 @@ export class QuizComponent extends QuizUtils {
   override handleHintPressed() {
     this.emitQuizEvent.next(QuizEvent.HINT_PRESSED);
   }
-}
-
-export enum STRATEGY {
-  MEANING, READING
-}
-
-export interface QuizAnswerSlot {
-  name: string; // 'reading', 'meaning', etc.
-  placeholder: string;
-  correctAnswer: string;
-  strategy: ValidationStrategy;
-  autofocus?: boolean;
-  onCorrectAnswer?: (correct: boolean) => void;
 }

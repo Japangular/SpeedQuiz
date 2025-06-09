@@ -1,20 +1,18 @@
 import {FormControl, FormGroup} from "@angular/forms";
 import {ElementRef, EventEmitter, QueryList} from "@angular/core";
-import {QuizAnswerSlot} from '../dualInputCard/quiz.component';
-import {AnswerHandler} from '../dualInputCard/quiz.model';
+import {AnswerHandler, QuizAnswerSlot} from '../answer-slots/quiz.model';
 
 export abstract class QuizUtils implements AnswerHandler{
   abstract emitQuizEvent: EventEmitter<QuizEvent>;
   abstract inputRefs: QueryList<ElementRef>;
-  abstract _quizUtilCard?: QuizUtilCard;
+
   abstract handleSolvedCard(): void;
   abstract handleHintPressed(): void;
   abstract getSlots(): QuizAnswerSlot[];
 
   hintPressed = false;
   cheated = false;
-  isReadingCorrect = false;
-  isMeaningCorrect = false;
+  isEverythingCorrect!: boolean[];
 
   cardForm: FormGroup<CardFormStructure> = new FormGroup({});
 
@@ -27,39 +25,36 @@ export abstract class QuizUtils implements AnswerHandler{
     }
   }
 
-  handleAnswerCorrect(name: 'reading' | 'meaning', isCorrect: boolean): void {
-    if (name === 'reading') {
-      this.isReadingCorrect = isCorrect;
+  handleAnswerCorrect(i: number, isCorrect: boolean): void {
+    this.isEverythingCorrect[i] = isCorrect;
 
-      if (isCorrect && !this.isMeaningCorrect) {
-        const meaningInput = this.getInputElementByName('meaning');
-        meaningInput?.nativeElement.focus();
-      } else {
-        this.checkSolved();
+    if (isCorrect) {
+      // Focus the next unanswered input (skipping already correct ones)
+      for (let j = 0; j < this.isEverythingCorrect.length; j++) {
+        if (!this.isEverythingCorrect[j]) {
+          const nextInput = this.getInputElementByIndex(j);
+          nextInput?.nativeElement.focus();
+          return;
+        }
       }
-    } else if (name === 'meaning') {
-      this.isMeaningCorrect = isCorrect;
-
-      if (!this.isReadingCorrect && isCorrect) {
-        const readingInput = this.getInputElementByName('reading');
-        readingInput?.nativeElement.focus();
-      } else {
-        this.checkSolved();
-      }
+      // If all are correct, check if the card is solved
+      this.checkSolved();
+    } else {
+      // If not correct, don't change focus — possibly stay or give feedback
+      console.log("fertig");
     }
   }
 
   checkSolved() {
     if (this.isSolved()) {
-      this.isReadingCorrect = false;
-      this.isMeaningCorrect = false;
+      this.isEverythingCorrect = new Array(this.getSlots().length).fill(false);
       this.resetFormGroup();
       this.handleSolvedCard();
     }
   }
 
   isSolved(): boolean {
-    return this.isMeaningCorrect && this.isReadingCorrect;
+    return this.isEverythingCorrect.every(value => value);
   }
 
   resetFormGroup() {
@@ -69,10 +64,8 @@ export abstract class QuizUtils implements AnswerHandler{
     this.cardForm = new FormGroup(newControls);
   }
 
-  getInputElementByName(name: string): ElementRef | undefined {
-    return this.inputRefs.find(el =>
-      el.nativeElement.getAttribute('data-name') === name
-    );
+  getInputElementByIndex(index: number): ElementRef | undefined {
+    return this.inputRefs.get(index);
   }
 }
 
@@ -85,6 +78,5 @@ export enum QuizEvent {
 }
 
 export interface QuizUtilCard {
-  correctReading: string;
-  correctMeaning: string;
+  answers: string[];
 }
