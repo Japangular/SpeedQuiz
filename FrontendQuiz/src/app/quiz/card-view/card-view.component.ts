@@ -1,6 +1,6 @@
 
-import {Card} from "../dualInputCard/quiz.model";
-import {QuizComponent} from "../dualInputCard/quiz.component";
+import {Card} from "../answer-slots/quiz.model";
+import {AnswerSlotsComponent} from "../answer-slots/answer-slots.component";
 import {NgIf} from "@angular/common";
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {StrokeOrderKanjiComponent} from '../widget/kanji-stroke-order-grid/stroke-order-kanji.component';
@@ -13,7 +13,7 @@ import {ModalService} from '../widget/modal/modal.service';
   standalone: true,
   imports: [
     OneLinerComponent,
-    QuizComponent,
+    AnswerSlotsComponent,
     StrokeOrderKanjiComponent,
     NgIf
   ],
@@ -50,8 +50,24 @@ export class CardViewComponent {
 
     }
   }
+
+  isJapanese(currentCard: Card) {
+    return currentCard.subjectType !== 'KANA_VOCABULARY' && currentCard.subjectType !== 'RADICAL' && hasKanji(currentCard.question);
+  }
 }
 
 export interface SelectedQuizEvent {
 
+}
+
+export function hasKanji(str: string): boolean {
+  return /[\u3400-\u4DBF\u4E00-\u9FFF]/.test(str);
+}
+
+export function isKanjiString(str: string): boolean {
+  return /^[\u3400-\u4DBF\u4E00-\u9FFF]+$/.test(str);
+}
+
+export function isKanji(char: string): boolean {
+  return /^[\u3400-\u4DBF\u4E00-\u9FFF]$/.test(char);
 }

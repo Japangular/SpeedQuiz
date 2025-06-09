@@ -1,7 +1,6 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {NgForOf} from "@angular/common";
-import {Card} from '../../dualInputCard/quiz.model';
+import {Card} from '../../answer-slots/quiz.model';
 
 @Component({
   selector: 'app-one-liner',
@@ -31,9 +30,6 @@ export class OneLinerComponent {
   emitSelectedSubKanji: EventEmitter<SelectedSubKanji> = new EventEmitter<SelectedSubKanji>();
 
   displayText: string = "";
-
-
-  private subscription!: Subscription;
   _isVisible = true;
 
   constructor() {
@@ -55,8 +51,7 @@ export class OneLinerComponent {
     if(!kanjiRegex.test(character)){
       return;
     }
-    const max = index;
-    for(let i = 0; i <= max; i++){
+    for(let i = 0; i <= index; i++){
       if(!kanjiRegex.test(this.displayText.charAt(i))){
         selectedSubKanji.characterPosition--;
       }

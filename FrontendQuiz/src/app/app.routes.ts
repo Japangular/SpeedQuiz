@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import {DeckComponent} from './features/deck/deck.component';
 import {DynamicCardCreatorComponent} from './features/dynamic-card-creator/dynamic-card-creator.component';
 import {SideNavComponent} from './layout/side-nav/side-nav.component';
-import {QuizBoardComponent} from './quiz/quizBoard/quiz-board.component';
+import {QuizBoardComponent} from './quiz/quiz-board/quiz-board.component';
 import {AboutComponent} from './layout/about/about.component';
 
 export const routes: Routes = [

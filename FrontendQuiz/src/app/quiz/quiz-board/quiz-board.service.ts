@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {Card} from '../dualInputCard/quiz.model';
+import {Card} from '../answer-slots/quiz.model';
 import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
+import {CardStoreService} from '../../services/card-store.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +10,13 @@ import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
 export class QuizBoardService {
   card$: Observable<Card>;
 
-  private deckIterator = new DeckIterator();
+  private readonly deckIterator: DeckIterator ;
 
-  constructor() {
+  constructor(private store: CardStoreService) {
+
+    this.deckIterator = new DeckIterator(store._currentDeck$);
     this.card$ = this.deckIterator.getCard$();
+    console.log("iterator has store: " + store.rnd);
   }
 
   getDeckCommand(): DeckCommand {
@@ -49,9 +53,9 @@ export class QuizBoardService {
         case 'index':
           return card.index === parseInt(jumpKey);
         case 'reading':
-          return card.reading === jumpKey;
+          return card.answers['reading'] === jumpKey;
         case 'meaning':
-          return card.meaning.toLowerCase() === jumpKey.toLowerCase();
+          return card.answers['meaning'].toLowerCase() === jumpKey.toLowerCase();
         default:
           return false;
       }
