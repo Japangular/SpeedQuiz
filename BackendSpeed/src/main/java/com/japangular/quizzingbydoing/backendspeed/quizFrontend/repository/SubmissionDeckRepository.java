@@ -1,4 +1,4 @@
-package com.japangular.quizzingbydoing.backendspeed.repository;
+package com.japangular.quizzingbydoing.backendspeed.quizFrontend.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
