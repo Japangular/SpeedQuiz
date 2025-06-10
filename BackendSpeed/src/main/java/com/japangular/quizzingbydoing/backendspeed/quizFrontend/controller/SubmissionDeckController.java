@@ -1,8 +1,8 @@
-package com.japangular.quizzingbydoing.backendspeed.controller;
+package com.japangular.quizzingbydoing.backendspeed.quizFrontend.controller;
 
 import com.japangular.quizzingbydoing.backendspeed.model.DeckMetadata;
 import com.japangular.quizzingbydoing.backendspeed.model.SubmissionDeck;
-import com.japangular.quizzingbydoing.backendspeed.repository.SubmissionDeckRepository;
+import com.japangular.quizzingbydoing.backendspeed.quizFrontend.repository.SubmissionDeckRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping()
+@RequestMapping("/quizApi")
 @CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @AllArgsConstructor
 public class SubmissionDeckController {
