@@ -26,6 +26,7 @@ services:
       - "8080:8080"
     volumes:
       - ./api.yaml:/app/api.yaml
+      - ./jmdict_e.xml:/app/jmdict_e.xml
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s

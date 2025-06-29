@@ -13,7 +13,7 @@ export class DeckApiService implements DeckApi {
   }
 
   availableDecksGet(): Observable<DeckMetadata[]> {
-    return this.quizApi.availableDecksGet(this.username);
+    return this.quizApi.quizApiAvailableDecksGet(this.username);
   }
 }
 

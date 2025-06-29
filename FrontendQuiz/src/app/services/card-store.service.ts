@@ -23,7 +23,7 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   }
 
   sendCurrentDeck(){
-    this.quizApi.submissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
+    this.quizApi.quizApiSubmissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
   }
 
   setCurrentDeck(deck: SubmissionDeck | DeckItem[]) {
@@ -50,7 +50,7 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   }
 
   switchDeck(deckName: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
-    return this.quizApi.submissionDeckGet(this.currentDeck.username, deckName).pipe(
+    return this.quizApi.quizApiSubmissionDeckGet(this.currentDeck.username, deckName).pipe(
       map(deck => mapSubmissionDeckToDeckItem(deck))
     );
   }

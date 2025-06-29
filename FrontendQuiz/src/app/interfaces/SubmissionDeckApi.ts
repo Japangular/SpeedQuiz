@@ -5,9 +5,9 @@ import {InjectionToken} from '@angular/core';
 import {DeckMetadata, DefaultService, SubmissionDeck} from '../../generated/api';
 
 export interface QuizApi {
-  submissionDeckGet(username: string, deckName: string): Observable<SubmissionDeck>;
-  submissionDeckPost(deck: SubmissionDeck): Observable<any>;
-  availableDecksGet(username: string): Observable<DeckMetadata[]>;
+  quizApiSubmissionDeckGet(username: string, deckName: string): Observable<SubmissionDeck>;
+  quizApiSubmissionDeckPost(deck: SubmissionDeck): Observable<any>;
+  quizApiAvailableDecksGet(username: string): Observable<DeckMetadata[]>;
 }
 
 export const QUIZ_API_TOKEN = new InjectionToken<QuizApi>('QUIZ_API');
