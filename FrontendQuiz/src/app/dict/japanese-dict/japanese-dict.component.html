@@ -1,0 +1,28 @@
+<mat-card>
+  <mat-form-field class="full-width" appearance="fill">
+    <mat-label>Search Japanese word</mat-label>
+    <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"/>
+    <button mat-icon-button matSuffix (click)="onSearch()">
+      <mat-icon>search</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+  <div *ngIf="kanjiResult">
+    {{ mapKanjiToQuizData(kanjiResult)  | json}}
+  </div>
+
+  <div *ngFor="let entry of entryResults; let i = index" class="entry-card">
+    <mat-card>
+      <mat-card-title>
+        {{ i }}
+      </mat-card-title>
+      <mat-card-content>
+        <!--<div><strong>Reading:</strong> {{ getReadings(entry) }}</div>
+        <div><strong>Meaning:</strong></div>-->
+        {{ mapEntryToQuizData(entry) | json}}
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-card>

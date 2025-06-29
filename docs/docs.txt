@@ -3,6 +3,7 @@ autogeneration in intellij: Project Structure -> set src and java as src [might 
 Docker-Compose:
 
 docker-compose down -v --remove-orphans
+Does not remove: Docker images, Build cache, Dangling volumes not referenced in the compose file
 docker-compose build --no-cache
 docker-compose up
 
@@ -33,6 +34,12 @@ docker network prune
 
 Optionally, remove all build cache:
 docker builder prune
+
+docker system prune -a --volumes (-a: Removes all unused images, not just dangling ones. --volumes: Removes unused volumes as well.)
+docker system df (This gives you a summary of disk usage.)
+docker image ls
+docker volume ls
+docker volume inspect <volume-name>
 
 docker volume ls
 docker volume rm speedquiz_db-data
