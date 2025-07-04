@@ -91,3 +91,5 @@ speedquizdb=# SELECT version();
 
 
 $ openapi-generator-cli generate   -i api.yaml   -g typescript-angular   -o FrontendQuiz/src/generated/api
+
+# wget ftp://ftp.edrdg.org/pub/Nihongo//JMdict_e.gz
