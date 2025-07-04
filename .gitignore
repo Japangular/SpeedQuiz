@@ -30,3 +30,5 @@ build/
 .vscode/
 
 ./FrontendQuiz/src/api
+
+JMdict_e.xml

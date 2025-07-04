@@ -57,10 +57,10 @@ import {PropertyType} from './submission-deck.model';
 })
 export class DynamicCardCreatorComponent implements OnInit {
   deckForm!: FormGroup;
-  displayedColumns: string[] = [];  // Columns for the table (based on properties)
+  displayedColumns: string[] = [];
   currentStep: number = 0;
   cards: { name: PropertyType; value: string }[] = [];
-  propertyTypes: { [key: string]: PropertyType } = {};  // Track property types
+  propertyTypes: { [key: string]: PropertyType } = {};
   username = "app initializer";
 
   constructor(private fb: FormBuilder, private submissionService: CardStoreService) {
@@ -69,8 +69,8 @@ export class DynamicCardCreatorComponent implements OnInit {
   ngOnInit(): void {
     this.deckForm = this.fb.group({
       deckName: ['', Validators.required],
-      properties: this.fb.array([]),  // Holds the properties like "question", "answer"
-      cards: this.fb.array([]),       // Will store actual cards
+      properties: this.fb.array([]),
+      cards: this.fb.array([]),
     });
   }
 
@@ -80,9 +80,9 @@ export class DynamicCardCreatorComponent implements OnInit {
 
   addProperty(propertyName: string): void {
     if (propertyName && !this.properties.value.includes(propertyName)) {
-      this.properties.push(this.fb.control(propertyName));  // Push property name as a form control
-      this.displayedColumns.push(propertyName);  // Add property name to table headers
-      (this.deckForm as FormGroup).addControl(propertyName, this.fb.control(''));  // Create form control for property
+      this.properties.push(this.fb.control(propertyName));
+      this.displayedColumns.push(propertyName);
+      (this.deckForm as FormGroup).addControl(propertyName, this.fb.control(''));
     }
   }
 
@@ -110,14 +110,11 @@ export class DynamicCardCreatorComponent implements OnInit {
   resetCardForm(): void {
     this.properties.controls.forEach((propertyControl) => {
       const propertyName = propertyControl.value;
-      this.deckForm.get(propertyName)?.reset('');  // Reset the value for each property
+      this.deckForm.get(propertyName)?.reset('');
     });
   }
 
   onCardSubmit(): void {
-    console.log('Deck Data:', this.deckForm.value);
-    console.log('Cards Data:', this.cards);
-
     this.submissionService.sendUserGeneratedDeck({
       deckName: this.deckForm.get('deckName')?.value,
       username: this.username,
@@ -126,7 +123,6 @@ export class DynamicCardCreatorComponent implements OnInit {
     });
   }
 
-  // Navigate between steps
   nextStep(step: number): void {
     this.currentStep = step;
   }
