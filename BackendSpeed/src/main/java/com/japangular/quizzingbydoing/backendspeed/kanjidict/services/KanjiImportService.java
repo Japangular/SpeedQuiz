@@ -6,13 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.entity.Kanji;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.exception.KanjiNotFoundException;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.repository.KanjiRepository;
-import com.japangular.quizzingbydoing.backendspeed.quizFrontend.controller.SubmissionDeckController;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,9 +21,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class KanjiImportService {
-
     private final KanjiRepository kanjiRepo;
     private static final Logger logger = LoggerFactory.getLogger(KanjiImportService.class);
+    private static final int BATCH_SIZE = 100; 
 
     public void importJson() throws IOException {
         logger.info("Starting to import the KanjiDic");
@@ -34,7 +32,6 @@ public class KanjiImportService {
             logger.info("KanjiDic already imported. Has " + kanjiRepo.count() + " entries");
             return;
         }
-        //kanjiRepo.deleteAll();
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -46,12 +43,16 @@ public class KanjiImportService {
                 importFromJson(mapper, in);
             }
         }
+
         logger.info("Finished import the KanjiDic");
         logger.info("Fire is " + getByKanji("火").toString());
     }
 
     public void importFromJson(ObjectMapper mapper, InputStream jsonStream) throws IOException {
         JsonNode root = mapper.readTree(jsonStream);
+
+        List<Kanji> kanjiList = new ArrayList<>();
+        int count = 0;
 
         for (JsonNode node : root) {
             String character = node.get(0).asText();
@@ -75,12 +76,23 @@ public class KanjiImportService {
             });
             k.setMetadata(metadata);
 
-            kanjiRepo.save(k);
+            kanjiList.add(k);
+            count++;
+
+            if (count % BATCH_SIZE == 0) {
+                kanjiRepo.saveAll(kanjiList); 
+                kanjiList.clear(); 
+            }
         }
+
+        if (!kanjiList.isEmpty()) {
+            kanjiRepo.saveAll(kanjiList);
+        }
+
+        logger.info("Imported " + count + " Kanji entries.");
     }
 
     public Kanji getByKanji(String kanji) {
         return kanjiRepo.findByKanji(kanji).orElseThrow(() -> new KanjiNotFoundException("Kanji not found: " + kanji));
     }
-
 }

@@ -1,30 +1,38 @@
 <mat-horizontal-stepper [linear]="true" [(selectedIndex)]="currentStep">
 
   <!-- Step 1: Deck Name -->
-  <mat-step [stepControl]="deckForm.controls['deckName']">
-    <form [formGroup]="deckForm">
+  <mat-step [stepControl]="deckForm().controls['deckName']">
+    <form [formGroup]="deckForm()">
       <mat-form-field class="full-width">
         <mat-label>Deck Name</mat-label>
         <input matInput formControlName="deckName" placeholder="Enter Deck Name">
-        <mat-error *ngIf="deckForm.controls['deckName'].hasError('required')">Deck name is required</mat-error>
+        <mat-error *ngIf="deckForm().controls['deckName'].hasError('required')">Deck name is required</mat-error>
       </mat-form-field>
     </form>
     <button mat-raised-button color="primary" (click)="nextStep(1)">Next</button>
   </mat-step>
 
   <!-- Step 2: Define Properties -->
-  <mat-step [stepControl]="deckForm.controls['properties']">
+  <mat-step [stepControl]="deckForm().controls['properties']">
     <h3>Define Properties for Cards</h3>
     <div>
+      <!-- Input for adding a new property -->
       <mat-form-field class="full-width">
-        <mat-label>Property</mat-label>
-        <input matInput #propertyInput (blur)="addProperty(propertyInput.value)" placeholder="Enter property name (e.g., question, answer)">
+        <mat-label (click)="clearPropertyInput()">Property</mat-label>
+        <input matInput #propertyInput (blur)="addProperty(propertyInput.value); clearInput(propertyInput)"
+               placeholder="Enter property name (e.g., question, answer)">
       </mat-form-field>
-      <div *ngFor="let property of properties.controls">
-        <mat-chip>{{ property.value }}</mat-chip>
+      <div *ngFor="let property of properties.controls; let i = index">
+        <!-- Display property as a chip when it's not being edited -->
+        <mat-chip (click)="deleteProperty(i)">
+          {{ property.value }}
+        </mat-chip>
       </div>
     </div>
+
+    <!-- Step navigation buttons -->
     <button mat-raised-button color="primary" (click)="nextStep(2)">Next</button>
+    <button mat-raised-button color="accent" (click)="nextStep(0)">Previous</button>
   </mat-step>
 
   <!-- Step 3: Set Property Types -->
@@ -33,7 +41,7 @@
     <div *ngFor="let property of properties.controls; let i = index">
       <mat-form-field class="full-width">
         <mat-label>Select Type for {{ property.value }}</mat-label>
-        <mat-select [(ngModel)]="propertyTypes[property.value]" (ngModelChange)="setPropertyType(property.value, $event)">
+        <mat-select [(ngModel)]="propertyTypes()[property.value]" (ngModelChange)="setPropertyType(property.value, $event)">
           <mat-option value="question">Question</mat-option>
           <mat-option value="answer">Answer</mat-option>
           <mat-option value="hint">Hint</mat-option>
@@ -44,12 +52,13 @@
       </mat-form-field>
     </div>
     <button mat-raised-button color="primary" (click)="nextStep(3)">Next</button>
+    <button mat-raised-button color="accent" (click)="nextStep(1)">Previous</button>
   </mat-step>
 
   <!-- Step 4: Add Cards -->
-  <mat-step [stepControl]="deckForm.controls['cards']">
+  <mat-step [stepControl]="deckForm().controls['cards']">
     <h3>Create Cards for Deck</h3>
-    <form [formGroup]="deckForm">
+    <form [formGroup]="deckForm()">
       <div *ngFor="let property of properties.controls">
         <mat-form-field class="full-width">
           <mat-label>{{ property.value | titlecase }}</mat-label>
@@ -59,26 +68,28 @@
       <button mat-raised-button color="primary" (click)="addCard()">Add Card</button>
     </form>
     <button mat-raised-button color="primary" (click)="nextStep(4)">Next</button>
+    <button mat-raised-button color="accent" (click)="nextStep(2)">Previous</button>
   </mat-step>
 
   <!-- Step 5: Preview Cards -->
   <mat-step>
     <h3>Preview Cards</h3>
 
-    <mat-table [dataSource]="cards">
-      <ng-container *ngFor="let property of displayedColumns" matColumnDef="{{ property }}">
+    <mat-table [dataSource]="cards()">
+      <ng-container *ngFor="let property of displayedColumns()" matColumnDef="{{ property }}">
         <mat-header-cell *matHeaderCellDef>
           {{ property | titlecase }}
-          ({{ propertyTypes[property] || 'unknown' }})  <!-- Show property type here -->
+          ({{ propertyTypes()[property] || 'unknown' }})  <!-- Show property type here -->
         </mat-header-cell>
         <mat-cell *matCellDef="let card">{{ card[property] }}</mat-cell>
       </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
     </mat-table>
 
     <button mat-raised-button color="primary" (click)="onCardSubmit()">Submit Deck</button>
+    <button mat-raised-button color="accent" (click)="nextStep(3)">Previous</button>
   </mat-step>
 
 </mat-horizontal-stepper>
