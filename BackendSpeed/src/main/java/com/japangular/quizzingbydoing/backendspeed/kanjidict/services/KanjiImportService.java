@@ -23,15 +23,27 @@ import java.util.Map;
 public class KanjiImportService {
     private final KanjiRepository kanjiRepo;
     private static final Logger logger = LoggerFactory.getLogger(KanjiImportService.class);
-    private static final int BATCH_SIZE = 100; 
+    private static final int BATCH_SIZE = 100;
+    private boolean finishedImport = false;
+    private Long kanjiRepoCount = null;
+
+    public long getKanjiRepoCount(){
+        if(kanjiRepoCount == null){
+            this.kanjiRepoCount = kanjiRepo.count();
+        }
+        return kanjiRepoCount;
+    }
 
     public void importJson() throws IOException {
-        logger.info("Starting to import the KanjiDic");
-
-        if (kanjiRepo.count() > 0) {
-            logger.info("KanjiDic already imported. Has " + kanjiRepo.count() + " entries");
+        long count = getKanjiRepoCount();
+        if (count == 10383) {
+            logger.info("KanjiDic already imported. Has " + getKanjiRepoCount() + " entries");
+            return;
+        } else if (count > 0) {
+            logger.warn("KanjiDic is partly imported. Has " + getKanjiRepoCount() + " entries");
             return;
         }
+        logger.info("Starting to import the KanjiDic");
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -43,9 +55,9 @@ public class KanjiImportService {
                 importFromJson(mapper, in);
             }
         }
-
+        this.kanjiRepoCount = kanjiRepo.count();
+        finishedImport = true;
         logger.info("Finished import the KanjiDic");
-        logger.info("Fire is " + getByKanji("火").toString());
     }
 
     public void importFromJson(ObjectMapper mapper, InputStream jsonStream) throws IOException {
@@ -92,7 +104,7 @@ public class KanjiImportService {
         logger.info("Imported " + count + " Kanji entries.");
     }
 
-    public Kanji getByKanji(String kanji) {
-        return kanjiRepo.findByKanji(kanji).orElseThrow(() -> new KanjiNotFoundException("Kanji not found: " + kanji));
+    public boolean hasImported() {
+        return finishedImport;
     }
 }

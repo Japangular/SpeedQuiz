@@ -9,8 +9,17 @@
 
   <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
 
-  <div *ngIf="kanjiResult">
-    {{ mapKanjiToQuizData(kanjiResult)  | json}}
+  <div *ngIf="kanjiResults">
+    <mat-table *ngIf="kanjiResults.length > 0" [dataSource]="kanjiResults">
+      <!-- Dynamically create column headers and rows -->
+      <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+        <mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{ element[column] | json }}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
   </div>
 
   <div *ngFor="let entry of entryResults; let i = index" class="entry-card">

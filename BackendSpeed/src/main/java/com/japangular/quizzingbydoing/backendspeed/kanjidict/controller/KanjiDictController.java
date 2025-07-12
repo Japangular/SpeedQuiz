@@ -4,7 +4,7 @@ import com.japangular.quizzingbydoing.backendspeed.jm_dict_e.controller.Dictiona
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.dto.KanjiDTO;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.entity.Kanji;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.services.KanjiImportService;
-import lombok.AllArgsConstructor;
+import com.japangular.quizzingbydoing.backendspeed.kanjidict.services.KanjiSearchService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 @RestController
@@ -20,20 +23,32 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class KanjiDictController {
   private final KanjiImportService kanjiImportService;
+  private final KanjiSearchService kanjiSearchService;
 
   static boolean firstTime = true;
-  private static final Logger logger = LoggerFactory.getLogger(DictionaryController.class);
+  private static final Logger logger = LoggerFactory.getLogger(KanjiDictController.class);
 
   @GetMapping("/search")
-  public ResponseEntity<KanjiDTO> search(@RequestParam String k) throws IOException {
-    logger.info("Kanji dict search started: " + k);
-    if(checkFirst()) {
-      logger.info("start import");
+  public ResponseEntity<List<KanjiDTO>> search(@RequestParam String k) throws IOException {
+    logger.info("Kanji dict search started: {}", k);
+    if(kanjiImportService.getKanjiRepoCount() < 1) {
+      logger.info("search request: Kanji dict needs to be imported, starting now");
       this.kanjiImportService.importJson();
     }
-    Kanji result = kanjiImportService.getByKanji(k);
+    logger.info("Searching out of " + kanjiImportService.getKanjiRepoCount());
+    return ResponseEntity.ok(kanjiSearchService.getByKanji(k));
+  }
 
-    return ResponseEntity.ok(toDto(result));
+  @GetMapping("/jouyou")
+  public ResponseEntity<List<KanjiDTO>> jouyou() throws IOException {
+    logger.info("Progressing Jouyou Kanji request");
+    if (!kanjiImportService.hasImported() && checkFirst()) {
+      logger.info("jouyou request: Kanji dict needs to be imported, starting now");
+      this.kanjiImportService.importJson();
+    }
+    logger.info("Searching out of " + kanjiImportService.getKanjiRepoCount());
+    logger.info("Finished: returning jouyou Kanji");
+    return ResponseEntity.ok(kanjiSearchService.getJouyou());
   }
 
   private static Boolean checkFirst(){
@@ -42,16 +57,6 @@ public class KanjiDictController {
     return result;
   }
 
-  public KanjiDTO toDto(Kanji kanji) {
-    return new KanjiDTO(
-        kanji.getId(),
-        kanji.getKanji(),
-        kanji.getOnyomi(),
-        kanji.getKunyomi(),
-        kanji.getMeanings(),
-        kanji.getTags(),
-        kanji.getMetadata()
-    );
-  }
+
 
 }
