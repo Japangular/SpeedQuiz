@@ -12,9 +12,13 @@ export class JapaneseDictService {
   constructor(private http: HttpClient) {
   }
 
-  searchKanji(term: string): Observable<Kanji> {
+  searchKanji(term: string): Observable<KanjiDTO[]> {
     const params = new HttpParams().set('k', term);
-    return this.http.get<Kanji>(this.apiUrl+"/kanjiDict/search", {params});
+    return this.http.get<KanjiDTO[]>(this.apiUrl+"/kanjiDict/search", {params});
+  }
+
+  jouyouKanjis(): Observable<KanjiDTO[]> {
+    return this.http.get<KanjiDTO[]>(this.apiUrl+"/kanjiDict/jouyou");
   }
 
   searchEntries(term: string): Observable<Entry[]> {
@@ -23,14 +27,11 @@ export class JapaneseDictService {
   }
 }
 
-export interface Kanji {
-  id: number;
+export interface KanjiDTO {
   kanji: string;
   onyomi: string[];
   kunyomi: string[];
   meanings: string[];
-  tags: string[];
-  metadata: { [key: string]: any };
 }
 
 export interface KanjiQuizData {
@@ -40,9 +41,9 @@ export interface KanjiQuizData {
   meanings: string[];
 }
 
-export function mapKanjiToQuizData(kanji: Kanji): KanjiQuizData {
-  const {id, tags, metadata, ...quizData} = kanji;
-  return quizData;
+export function mapKanjiToQuizData(kanji: KanjiDTO): KanjiQuizData {
+  //const {id, tags, metadata, ...quizData} = kanji;
+  return kanji;
 }
 
 export interface Entry {

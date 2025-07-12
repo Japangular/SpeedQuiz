@@ -1,13 +1,25 @@
 import { Component } from '@angular/core';
-import {Entry, JapaneseDictService, Kanji, mapKanjiToQuizData} from './japanese-dict.service';
+import {Entry, JapaneseDictService, KanjiDTO, mapKanjiToQuizData} from './japanese-dict.service';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {JsonPipe, NgForOf, NgIf} from '@angular/common';
+import {JsonPipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import {MatInput} from '@angular/material/input';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatProgressBar} from '@angular/material/progress-bar';
 import {FormsModule} from '@angular/forms';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable
+} from '@angular/material/table';
 
 @Component({
   selector: 'app-japanese-dict',
@@ -25,6 +37,17 @@ import {FormsModule} from '@angular/forms';
     NgIf,
     MatLabel,
     JsonPipe,
+    MatTable,
+    MatColumnDef,
+    MatHeaderCell,
+    MatCell,
+    MatCellDef,
+    MatHeaderRow,
+    MatRow,
+    MatHeaderRowDef,
+    MatRowDef,
+    MatHeaderCellDef,
+    TitleCasePipe,
   ],
   templateUrl: './japanese-dict.component.html',
   styleUrl: './japanese-dict.component.css'
@@ -32,10 +55,10 @@ import {FormsModule} from '@angular/forms';
 export class JapaneseDictComponent {
   searchTerm = '火';
   entryResults: Entry[] = [];
-  kanjiResult?: Kanji;
+  kanjiResults: any[] = []; // This will hold the results from the API
+  displayedColumns: string[] = []; // This will hold the dynamic columns
   loading = false;
-
-
+  jouyouKanjis: KanjiDTO[] = [];
 
   constructor(private dictionaryService: JapaneseDictService) {
   }
@@ -48,12 +71,18 @@ export class JapaneseDictComponent {
 
   }
 
+  parseJouyouKanjis(){
+    if(this.jouyouKanjis.length === 0){
+      this.dictionaryService.jouyouKanjis().subscribe(kanjis => this.jouyouKanjis = kanjis);
+    }
+  }
+
   searchKanji() {
     this.dictionaryService.searchKanji(this.searchTerm).subscribe({
-      next: (data) => {
-        console.log("data received");
-        this.kanjiResult = data;
-        console.log(JSON.stringify(this.kanjiResult));
+      next: (data: KanjiDTO[]) => {
+        console.log("number of kanji received: " + data.length);
+        this.kanjiResults = data;
+        this.displayedColumns = Object.keys(data[0]);
         this.loading = false;
       },
       error: (err) => {

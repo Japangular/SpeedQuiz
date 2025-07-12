@@ -70,11 +70,6 @@ export class DynamicCardCreatorComponent implements OnInit {
     });
   }
 
-  setValueAndFocus(value: string): void {
-    this.propertyInput.nativeElement.value = value;  // Set new value
-    this.propertyInput.nativeElement.focus();        // Focus the input field
-  }
-
   get properties(): FormArray {
     return (this.dynamicDeck.deckForm.get('properties') as FormArray);
   }
@@ -152,23 +147,6 @@ export class DynamicCardCreatorComponent implements OnInit {
     const propertyInputControl = this.dynamicDeck.deckForm.get('propertyName'); // adjust to the actual form control name
     if (propertyInputControl) {
       propertyInputControl.setValue('');
-    }
-  }
-
-  savePropertyName(index: number, event: Event): void {
-    // Cast event.target as HTMLInputElement or null
-    const inputElement = event.target as HTMLInputElement | null;
-
-    // Null check before accessing 'value'
-    if (inputElement) {
-      const newName = inputElement.value;
-
-      // Update the property if the name has changed
-      if (newName && this.properties.controls[index].value !== newName) {
-        this.properties.at(index).setValue(newName);
-        this.dynamicDeck.displayedColumns[index] = newName;
-        this.deckProperty.nextDynamicDeck(this.dynamicDeck);
-      }
     }
   }
 
