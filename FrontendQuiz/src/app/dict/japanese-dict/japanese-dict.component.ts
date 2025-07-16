@@ -20,6 +20,7 @@ import {
   MatRowDef,
   MatTable
 } from '@angular/material/table';
+import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 
 @Component({
   selector: 'app-japanese-dict',
@@ -48,6 +49,8 @@ import {
     MatRowDef,
     MatHeaderCellDef,
     TitleCasePipe,
+    MatRadioGroup,
+    MatRadioButton,
   ],
   templateUrl: './japanese-dict.component.html',
   styleUrl: './japanese-dict.component.css'
@@ -55,19 +58,102 @@ import {
 export class JapaneseDictComponent {
   searchTerm = '火';
   entryResults: Entry[] = [];
-  kanjiResults: any[] = []; // This will hold the results from the API
-  displayedColumns: string[] = []; // This will hold the dynamic columns
-  loading = false;
+  kanjiResults: any[] = [];
+  displayedColumns: string[] = [];
+  _loading = false;
+  TIMEOUT_MS = 30000;
+  private _loadingTimeoutHandle: any;
   jouyouKanjis: KanjiDTO[] = [];
 
   constructor(private dictionaryService: JapaneseDictService) {
   }
 
+  set loading(value: boolean) {
+    if (value && !this._loading) {
+      console.log("loading on");
+      this._loading = true;
+
+      this._loadingTimeoutHandle = setTimeout(() => {
+        if (this._loading) {
+          console.warn("Search timed out.");
+          this._loading = false;
+          alert("This functionality doesn't work as expected. Please try something else.");
+        }
+      }, this.TIMEOUT_MS);
+    } else if (!value && this._loading) {
+      console.log("loading off");
+      this._loading = false;
+
+
+      if (this._loadingTimeoutHandle) {
+        clearTimeout(this._loadingTimeoutHandle);
+        this._loadingTimeoutHandle = null;
+      }
+    }
+  }
+
+  get loading(): boolean {
+    return this._loading;
+  }
+
   onSearch(): void {
-    if (!this.searchTerm.trim()) return;
-    this.searchKanji();
+    const term = this.searchTerm.trim();
+    if (!term) return;
+
     this.loading = true;
-    console.log("asking backend for term " + this.searchTerm.trim())
+
+    console.log("asking backend for term " + term);
+
+    switch (this.selectedOption) {
+      case SearchMode.Kanji:
+        this.searchKanji();
+        this.TIMEOUT_MS = 2000;
+        break;
+
+      case SearchMode.Tokenize:
+        console.log("tokenize");
+        const a = this.TIMEOUT_MS;
+        this.TIMEOUT_MS = 2000;
+        this.tokenizeText();
+        this.TIMEOUT_MS = a;
+        break;
+
+      case SearchMode.VocabCards:
+        this.generateVocabCards();
+        break;
+
+      case SearchMode.JoujouKanjis:
+        this.parseJouyouKanjis();
+        this.TIMEOUT_MS = 2000;
+        break;
+
+      default:
+        console.warn('Invalid search mode selected:', this.selectedOption);
+        this.loading = false;
+        break;
+    }
+  }
+
+  tokenizeText() {
+    this.dictionaryService.searchMecab(this.searchTerm).subscribe(tokens => {
+      this.kanjiResults = tokens.map(token => {
+        const {surface, features} = token;
+
+        return {
+          surface,
+          ...features
+        };
+      });
+
+      if (this.kanjiResults.length > 0) {
+        this.displayedColumns = Object.keys(this.kanjiResults[0]);
+      }
+
+      this.loading = false;
+    });
+  }
+
+  generateVocabCards(){
 
   }
 
@@ -113,9 +199,17 @@ export class JapaneseDictComponent {
 
   protected readonly mapEntryToQuizData = mapEntryToQuizData;
   protected readonly mapKanjiToQuizData = mapKanjiToQuizData;
+  searchModes = SearchMode;
+  selectedOption: SearchMode = SearchMode.Kanji;
+
 }
 
-
+export enum SearchMode {
+  Kanji = 'kanji',
+  Tokenize = 'tokenize',
+  VocabCards = 'vocab_cards',
+  JoujouKanjis = 'jouyouKanjis',
+}
 
 function mapEntryToQuizData(entry: any) {
   const kanji = entry.kele?.map((k: any) => k.keb).join(", ") || "";
@@ -134,7 +228,7 @@ function mapEntryToQuizData(entry: any) {
     crossReferences: xrefs,
     antonyms: ants,
     miscTags: misc,
-    question: `What does the word "${kanji}" (${readings}) mean?`, // Example question
+    question: `What does the word "${kanji}" (${readings}) mean?`,
     info: pos.join(", ") + (misc.length ? " — " + misc.join(", ") : ""),
     hints: xrefs.length ? "See also: " + xrefs.join(", ") : "",
   };

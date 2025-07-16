@@ -1,10 +1,9 @@
 package com.japangular.quizzingbydoing.backendspeed.kanjidict.controller;
 
-import com.japangular.quizzingbydoing.backendspeed.jm_dict_e.controller.DictionaryController;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.dto.KanjiDTO;
-import com.japangular.quizzingbydoing.backendspeed.kanjidict.entity.Kanji;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.services.KanjiImportService;
 import com.japangular.quizzingbydoing.backendspeed.kanjidict.services.KanjiSearchService;
+import com.japangular.quizzingbydoing.backendspeed.kanjidict.services.MecabService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -24,6 +22,7 @@ import java.util.List;
 public class KanjiDictController {
   private final KanjiImportService kanjiImportService;
   private final KanjiSearchService kanjiSearchService;
+  private final MecabService mecabService;
 
   static boolean firstTime = true;
   private static final Logger logger = LoggerFactory.getLogger(KanjiDictController.class);
@@ -51,12 +50,21 @@ public class KanjiDictController {
     return ResponseEntity.ok(kanjiSearchService.getJouyou());
   }
 
+  @GetMapping("/parseMecab")
+  public ResponseEntity<List<Map<String, Object>>> parseMecab(@RequestParam String k) throws IOException {
+    logger.info("Kanji dict parseMecab started: {}", k);
+
+    // Get the parsed data
+    List<Map<String, Object>> parsedData = mecabService.parseJapaneseToJson(k);
+
+    // Return parsed data as JSON response
+    return ResponseEntity.ok(parsedData);
+  }
+
   private static Boolean checkFirst(){
     boolean result = firstTime;
     firstTime = false;
     return result;
   }
-
-
 
 }
