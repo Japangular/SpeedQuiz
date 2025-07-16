@@ -1,7 +1,14 @@
 <mat-card>
-  <mat-form-field class="full-width" appearance="fill">
+  <mat-radio-group [(ngModel)]="selectedOption" [disabled]="loading">
+    <mat-radio-button [value]="searchModes.Kanji">Search Kanji</mat-radio-button>
+    <mat-radio-button [value]="searchModes.Tokenize">Tokenize Text</mat-radio-button>
+    <mat-radio-button [value]="searchModes.VocabCards">Generate Vocab Cards from Text</mat-radio-button>
+    <mat-radio-button [value]="searchModes.JoujouKanjis">Show Jouyou Kanjis</mat-radio-button>
+  </mat-radio-group>
+
+  <mat-form-field class="full-width" appearance="fill" >
     <mat-label>Search Japanese word</mat-label>
-    <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"/>
+    <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" [disabled]="loading"/>
     <button mat-icon-button matSuffix (click)="onSearch()">
       <mat-icon>search</mat-icon>
     </button>

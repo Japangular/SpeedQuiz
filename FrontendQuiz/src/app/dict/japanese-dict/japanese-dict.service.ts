@@ -25,6 +25,11 @@ export class JapaneseDictService {
     const params = new HttpParams().set('q', term);
     return this.http.get<Entry[]>(this.apiUrl + "/kanjiDict/search", {params});
   }
+
+  searchMecab(term: string): Observable<WordFeature[]> {
+    const params = new HttpParams().set('k', term);
+    return this.http.get<WordFeature[]>(this.apiUrl + "/kanjiDict/parseMecab", {params});
+  }
 }
 
 export interface KanjiDTO {
@@ -83,4 +88,20 @@ export interface LSource {
   lsType: string;
   wasei: string;
 }
+
+export interface WordFeature {
+  surface: string;
+  features: {
+    partOfSpeech: string;
+    subClass1: string;
+    subClass2: string;
+    subClass3: string;
+    inflection: string;
+    conjugation: string;
+    rootForm: string;
+    reading: string;
+    pronunciation: string;
+  };
+}
+
 

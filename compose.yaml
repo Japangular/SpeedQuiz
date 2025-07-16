@@ -22,6 +22,7 @@ services:
       OPENAPI_SPEC_PATH: /app/api.yaml
     depends_on:
       - db
+      - python_dict
     ports:
       - "8080:8080"
     volumes:
@@ -57,6 +58,19 @@ services:
       - "80:80"
     depends_on:
       - frontend
+
+  python_dict:
+    build:
+      context: .
+      dockerfile: PythonDict/Dockerfile.python_dict
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://python_dict:8000/docs" ]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
 
 volumes:
   db-data:

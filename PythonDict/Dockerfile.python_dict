@@ -1,0 +1,23 @@
+# Dockerfile.python_dict
+FROM python:3.12-slim
+
+# Install MeCab and system dictionary
+RUN apt-get update && apt-get install -y mecab libmecab-dev mecab-ipadic-utf8 curl
+
+# Set MeCab config path
+ENV MECABRC=/etc/mecabrc
+
+# Set working directory
+WORKDIR /app
+
+# Copy app code
+COPY PythonDict/mecab_service.py .
+
+# Install Python dependencies
+RUN pip install fastapi uvicorn mecab-python3
+
+# Expose the FastAPI port
+EXPOSE 8000
+
+# Run the FastAPI app
+CMD ["uvicorn", "mecab_service:app", "--host", "0.0.0.0", "--port", "8000"]
