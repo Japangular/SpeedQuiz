@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import { environment } from '../../environments/environment';
+import {Entry, KanjiDTO, WordFeature} from './japanese-dict.model';
 
 @Injectable({
   providedIn: 'root'
@@ -32,76 +33,6 @@ export class JapaneseDictService {
   }
 }
 
-export interface KanjiDTO {
-  kanji: string;
-  onyomi: string[];
-  kunyomi: string[];
-  meanings: string[];
-}
 
-export interface KanjiQuizData {
-  kanji: string;
-  onyomi: string[];
-  kunyomi: string[];
-  meanings: string[];
-}
-
-export function mapKanjiToQuizData(kanji: KanjiDTO): KanjiQuizData {
-  //const {id, tags, metadata, ...quizData} = kanji;
-  return kanji;
-}
-
-export interface Entry {
-  entSeq: number;
-  kEle: KElement[];
-  rEle: RElement[];
-  sense: Sense[];
-}
-
-export interface KElement {
-  keb: string;
-  keInf: string[];
-  kePri: string[];
-}
-
-export interface RElement {
-  reb: string;
-  reInf: string[];
-  rePri: string[];
-}
-
-export interface Sense {
-  pos: string[];
-  xref: string[];
-  ant: string[];
-  field: string[];
-  misc: string[];
-  sInf: string[];
-  lsource: LSource[];
-  dial: string[];
-  gloss: string[];
-}
-
-export interface LSource {
-  value: string;
-  lang: string;
-  lsType: string;
-  wasei: string;
-}
-
-export interface WordFeature {
-  surface: string;
-  features: {
-    partOfSpeech: string;
-    subClass1: string;
-    subClass2: string;
-    subClass3: string;
-    inflection: string;
-    conjugation: string;
-    rootForm: string;
-    reading: string;
-    pronunciation: string;
-  };
-}
 
 
