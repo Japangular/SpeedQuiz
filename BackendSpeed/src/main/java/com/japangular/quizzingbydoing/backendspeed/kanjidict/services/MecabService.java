@@ -56,18 +56,24 @@ public class MecabService {
         logger.warn("Skipping line due to incorrect format: {}", line);
         continue;
       }
-
+logger.info("mecab parts: " + parts[0]);
       // Extract surface form and features
-      String surface = parts[0]; // Surface form
+      String surface = parts[0].contains("parsed") && parts[0].contains(":") ? parts[0].split(":")[1] : parts[0]; // Surface form
+      if (parts[0].contains("parsed") && parts[0].contains(":")) {
+        surface = surface.substring(1);
+      }
       String features = parts[1]; // Features (comma-separated)
 
       // Split features by commas
       String[] featureArray = features.split(",");
 
-      // Skip lines that don't have enough feature elements
       if (featureArray.length < 9) {
-        logger.warn("Skipping line with insufficient feature elements: {}", line);
-        continue;
+        featureArray = Arrays.copyOf(featureArray, 9);
+        for (int i = 0; i < featureArray.length; i++) {
+          if (featureArray[i] == null) {
+            featureArray[i] = "*"; // or "UNKNOWN"
+          }
+        }
       }
 
       // Create a map for the feature tuple

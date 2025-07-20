@@ -1,5 +1,5 @@
 <mat-card>
-  <mat-radio-group [(ngModel)]="selectedOption" [disabled]="loading">
+  <mat-radio-group [value]="dict.selectedOption()" (change)="dict.selectedOption.set($any($event.value))" [disabled]="loading()">
     <mat-radio-button [value]="searchModes.Kanji">Search Kanji</mat-radio-button>
     <mat-radio-button [value]="searchModes.Tokenize">Tokenize Text</mat-radio-button>
     <mat-radio-button [value]="searchModes.VocabCards">Generate Vocab Cards from Text</mat-radio-button>
@@ -8,35 +8,24 @@
 
   <mat-form-field class="full-width" appearance="fill" >
     <mat-label>Search Japanese word</mat-label>
-    <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()" [disabled]="loading"/>
-    <button mat-icon-button matSuffix (click)="onSearch()">
+    <input matInput [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" (keyup.enter)="triggerSearch()" [disabled]="loading()"/>
+    <button mat-icon-button matSuffix (click)="triggerSearch()">
       <mat-icon>search</mat-icon>
     </button>
   </mat-form-field>
 
-  <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
 
-  <div *ngIf="kanjiResults">
-    <mat-table *ngIf="kanjiResults.length > 0" [dataSource]="kanjiResults">
+  <div *ngIf="tableResults()">
+    <mat-table *ngIf="tableResults().length > 0" [dataSource]="tableResults()">
       <!-- Dynamically create column headers and rows -->
-      <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+      <ng-container *ngFor="let column of displayedColumns()" [matColumnDef]="column">
         <mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</mat-header-cell>
-        <mat-cell *matCellDef="let element">{{ element[column] | json }}</mat-cell>
+        <mat-cell *matCellDef="let element">{{ element[column]  }}</mat-cell>
       </ng-container>
 
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
     </mat-table>
-  </div>
-
-  <div *ngFor="let entry of entryResults; let i = index" class="entry-card">
-    <mat-card>
-      <mat-card-title>
-        {{ i }}
-      </mat-card-title>
-      <mat-card-content>
-        {{ mapEntryToQuizData(entry) | json}}
-      </mat-card-content>
-    </mat-card>
   </div>
 </mat-card>
