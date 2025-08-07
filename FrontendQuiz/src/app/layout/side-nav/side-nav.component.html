@@ -1,19 +1,32 @@
 <mat-sidenav-container class="sidenav-container">
 
   <!-- Left Sidebar -->
-  <mat-sidenav id=leftDrawer #leftDrawer class="sidenav" fixedInViewport
+  <mat-sidenav id="leftDrawer" #leftDrawer class="sidenav" fixedInViewport
                [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
                [mode]="(isHandset$ | async) ? 'over' : 'side'"
                [opened]="(isHandset$ | async) === false"
                position="start">
-    <mat-toolbar>Left Menu</mat-toolbar>
-    <mat-nav-list>
-      <a mat-button (click)="toggleLeftDrawer()">Hide</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['table'] }}]">Table</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['cardCreator'] }}]">Deck Stepper</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['quiz'] }}]">Open the Quiz</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['dict'] }}]">Open the Dict</a>
-    </mat-nav-list>
+
+    <div class="sidebar-container">
+      <mat-toolbar>Left Menu</mat-toolbar>
+
+      <mat-nav-list class="nav-list">
+        <a mat-button (click)="toggleLeftDrawer()">Hide</a>
+        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['table'] }}]">Table</a>
+        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['cardCreator'] }}]">Deck Stepper</a>
+        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['quiz'] }}]">Open the Quiz</a>
+        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['dict'] }}]">Open the Dict</a>
+        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['anki'] }}]">Open the Anki table</a>
+
+        <!-- Spacer -->
+        <div class="spacer"></div>
+
+        <!-- Bottom item -->
+        <a mat-list-item class="bottom-item" [routerLink]="[{ outlets: { leftOutlet: ['about'] }}]">
+          About
+        </a>
+      </mat-nav-list>
+    </div>
   </mat-sidenav>
 
   <!-- Main content area -->
@@ -33,6 +46,8 @@
 
     <!-- Router outlet for left side navigation -->
     <router-outlet name="leftOutlet"></router-outlet>
+
+
   </mat-sidenav-content>
 
 </mat-sidenav-container>

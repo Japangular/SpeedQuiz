@@ -1,0 +1,29 @@
+/* styles.css or component-specific styles */
+.full-width-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mat-header-cell, .mat-cell {
+  padding: 0;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.mat-header-cell {
+  font-weight: 600;
+  background-color: #f5f5f5;
+}
+
+/* Spacer to push the bottom item down */
+.spacer {
+  min-height: 0;
+  background-color: #ffeb3b;
+}
+
+/* Flex parent */
+.anki-layout {
+  display: flex;
+  flex-direction: column;
+}

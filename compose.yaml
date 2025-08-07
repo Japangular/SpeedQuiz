@@ -1,5 +1,12 @@
 version: '3.8'
 
+networks:
+  custom_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16  # avoid 192.168.x.x
+
 services:
   db:
     image: postgres:16
@@ -28,6 +35,7 @@ services:
     volumes:
       - ./api.yaml:/app/api.yaml
       - ./JMdict_e.xml:/app/jmdict_e.xml
+      - ./anki/collection.db:/app/anki/collection.db
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s

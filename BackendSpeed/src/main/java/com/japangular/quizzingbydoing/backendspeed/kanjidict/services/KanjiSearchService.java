@@ -28,33 +28,49 @@ public class KanjiSearchService {
   }
 
   public List<KanjiDTO> getByKanji(String kanji) {
-    // Step 1: Convert the string to a Set of unique kanji characters (filtering non-kanji characters)
     Set<Character> uniqueKanjis = new HashSet<>();
     for (char c : kanji.toCharArray()) {
-      if (isKanji(c)) {  // Step 2: Only process valid kanji characters
-        uniqueKanjis.add(c); // Automatically handles uniqueness
+      if (isKanji(c)) {
+        uniqueKanjis.add(c);
       }
     }
 
-    // Step 3: Retrieve the Kanjis from the repository
     List<KanjiDTO> kanjiList = new ArrayList<>();
+
+    logger.info("Searching kanjis for input string: '{}', unique kanjis: {}", kanji, uniqueKanjis);
+
     for (Character c : uniqueKanjis) {
-      Optional<Kanji> foundKanji = kanjiRepo.findByKanji(String.valueOf(c));
+      Optional<Kanji> foundKanji;
+      try {
+        foundKanji = kanjiRepo.findByKanji(String.valueOf(c));
+        if (foundKanji.isPresent()) {
+          logger.debug("Found Kanji in DB: {}", foundKanji.get().getKanji());
+          kanjiList.add(toDto(foundKanji.get()));
+        } else {
+          logger.warn("Kanji '{}' not found in database", c);
+        }
+      } catch (Exception e) {
 
-      // Step 4: If the kanji is found in the repository, add it to the result list
-      foundKanji.ifPresent(value -> kanjiList.add(toDto(value)));
+        logger.error("Error fetching Kanji '{}' from database", c, e);
+      }
     }
-
     return kanjiList;
   }
 
-  // Utility function to check if a character is a valid Kanji
   private boolean isKanji(char c) {
-    // Check if the character is within the Kanji Unicode range (for simplicity, we assume this range)
-    return (c >= '一' && c <= '龯') || (c >= '㐀' && c <= '䶿'); // Kanji ranges
+    return (c >= '一' && c <= '龯') || (c >= '㐀' && c <= '䶿');
   }
 
-  public List<KanjiDTO> getJouyou(){
-    return kanjiRepo.findByTag("{jouyou}").stream().map(this::toDto).collect(Collectors.toList());
+  public List<KanjiDTO> getJouyou() {
+    logger.info("Fetching Kanji with 'jouyou' tag");
+    try {
+      List<Kanji> results = kanjiRepo.findByTag("{jouyou}");
+      logger.info("Found {} Kanjis with 'jouyou' tag", results.size());
+      return results.stream().map(this::toDto).collect(Collectors.toList());
+    } catch (Exception e) {
+      logger.error("Error fetching 'jouyou' Kanjis from DB", e);
+      return Collections.emptyList();
+    }
   }
 }
+

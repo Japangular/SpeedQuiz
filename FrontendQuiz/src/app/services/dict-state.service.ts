@@ -22,11 +22,8 @@ export class DictStateService {
   search(selectedOption: SearchMode, query: string) {
     switch (selectedOption) {
       case SearchMode.Kanji:
-        this.searchKanji(query);
-        break;
-
       case SearchMode.Tokenize:
-        console.log("tokenize");
+        this.searchKanji(query);
         this.tokenizeText(query);
         break;
 

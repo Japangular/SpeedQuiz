@@ -9,6 +9,7 @@ import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
 import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 import {RouterLink, RouterOutlet} from '@angular/router';
+import {FooterComponent} from '../footer/footer.component';
 
 @Component({
   selector: 'app-side-nav',
@@ -24,7 +25,8 @@ import {RouterLink, RouterOutlet} from '@angular/router';
     MatToolbar,
     RouterOutlet,
     RouterLink,
-    MatAnchor
+    MatAnchor,
+    FooterComponent
   ],
   templateUrl: './side-nav.component.html',
   standalone: true,

@@ -5,6 +5,7 @@ import {SideNavComponent} from './layout/side-nav/side-nav.component';
 import {QuizBoardComponent} from './quiz/quiz-board/quiz-board.component';
 import {AboutComponent} from './layout/about/about.component';
 import {JapaneseDictComponent} from './dict/japanese-dict/japanese-dict.component';
+import {AnkiTableComponent} from './anki-table/anki-table.component';
 
 export const routes: Routes = [
   {path: 'table', component: DeckComponent},
@@ -18,6 +19,7 @@ export const routes: Routes = [
       {path: 'cardCreator', component: DynamicCardCreatorComponent, outlet: 'leftOutlet'},
       {path: 'quiz', component: QuizBoardComponent, outlet: 'leftOutlet'},
       {path: 'dict', component: JapaneseDictComponent, outlet: 'leftOutlet', title: 'dict'},
+      {path: 'anki', component: AnkiTableComponent, outlet: 'leftOutlet', title: 'anki'},
       {path: 'about', component: AboutComponent, outlet: 'leftOutlet', title: 'About'},
     ]
   },

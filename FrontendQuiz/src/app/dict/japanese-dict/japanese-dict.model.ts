@@ -83,6 +83,7 @@ export enum SearchMode {
   Tokenize = 'tokenize',
   VocabCards = 'vocab_cards',
   JoujouKanjis = 'jouyouKanjis',
+  Combined = 'CombinedRows',
 }
 
 export function mapEntryToQuizData(entry: any) {
