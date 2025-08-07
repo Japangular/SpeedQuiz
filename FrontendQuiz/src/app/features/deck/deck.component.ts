@@ -53,7 +53,6 @@ export class DeckComponent implements AfterViewInit {
       });
     });
   }
-
 }
 
 const EXAMPLE_DATA: DeckItem[] = [

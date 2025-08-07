@@ -1,0 +1,36 @@
+<!-- Make this the flex container -->
+<div class="anki-layout">
+
+  <!-- Move *ngIf here to avoid breaking flex -->
+  <ng-container *ngIf="ankiPage() as page">
+
+    <!-- Table -->
+    <div class="mat-elevation-z2 ankiPage2">
+      <table mat-table [dataSource]="page.data" class="full-width-table" matSort aria-label="Deck Table">
+        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            {{ columnLabels[column] || column }}
+          </th>
+          <td mat-cell *matCellDef="let row">{{ row[column] }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" #headerRow></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" #rowElement></tr>
+      </table>
+    </div>
+
+    <!-- Spacer -->
+    <div class="spacer" #spacer></div>
+
+    <!-- Paginator -->
+    <div #paginatorContainer>
+      <mat-paginator
+        [length]="page.info?.totalAvailableRows || 0"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[5, 10, 20]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+
+  </ng-container>
+</div>

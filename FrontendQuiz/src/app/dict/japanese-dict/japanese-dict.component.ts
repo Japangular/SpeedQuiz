@@ -1,7 +1,7 @@
 import {Component, effect, signal, WritableSignal} from '@angular/core';
-import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
+import {MatCard} from '@angular/material/card';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {JsonPipe, NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
 import {MatInput} from '@angular/material/input';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -20,15 +20,13 @@ import {
   MatTable
 } from '@angular/material/table';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
-import {Entry, KanjiDTO, SearchMode, mapEntryToQuizData, WORD_FEATURE_COLUMNS, WORD_FEATURE_PROPERTIES} from './japanese-dict.model';
+import {mapEntryToQuizData, SearchMode, WORD_FEATURE_PROPERTIES} from './japanese-dict.model';
 import {DictStateService} from '../../services/dict-state.service';
 
 @Component({
   selector: 'app-japanese-dict',
   imports: [
-    MatCardContent,
     MatFormField,
-    MatCardTitle,
     MatCard,
     NgForOf,
     MatIcon,
@@ -38,7 +36,6 @@ import {DictStateService} from '../../services/dict-state.service';
     FormsModule,
     NgIf,
     MatLabel,
-    JsonPipe,
     MatTable,
     MatColumnDef,
     MatHeaderCell,
@@ -134,4 +131,24 @@ export class JapaneseDictComponent {
     }
   }
 
+  selectedColumns: Set<string> = new Set();
+
+  toggleColumnSelection(column: string) {
+    console.log(column + " header was clicked")
+    if (this.dict.selectedOption() === this.searchModes.Combined) {
+      if (this.selectedColumns.has(column)) {
+        this.selectedColumns.delete(column);
+      } else {
+        this.selectedColumns.add(column);
+      }
+    }
+  }
+
+  isColumnSelected(column: string): boolean {
+    return this.selectedColumns.has(column);
+  }
+
+  isJousou() {
+    return this.dict.selectedOption() == SearchMode.JoujouKanjis
+  }
 }
