@@ -27,3 +27,13 @@
   display: flex;
   flex-direction: column;
 }
+
+.paginator-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.paginator-controls a {
+  white-space: nowrap; /* Prevents text wrap on the button */
+}

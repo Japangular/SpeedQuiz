@@ -25,11 +25,10 @@ public class JpaSqliteConfig {
   public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        // Fetching the properties from the application.properties using env.getProperty
         dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.sqlite.driverClassName")));
         dataSource.setUrl(env.getProperty("spring.datasource.sqlite.url"));
-        dataSource.setUsername(env.getProperty("spring.datasource.sqlite.username", ""));  // SQLite doesn't need a username
-        dataSource.setPassword(env.getProperty("spring.datasource.sqlite.password", ""));  // SQLite doesn't need a password
+        dataSource.setUsername(env.getProperty("spring.datasource.sqlite.username", ""));
+        dataSource.setPassword(env.getProperty("spring.datasource.sqlite.password", ""));
 
         return dataSource;
     }

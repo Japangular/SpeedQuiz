@@ -1,7 +1,7 @@
-import {AfterViewInit, Component, ElementRef, HostListener, OnDestroy, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
+import {Component, ElementRef, HostListener, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
 import {AnkiTableService} from './anki-table.service';
-import {JsonPipe, NgForOf, NgIf} from '@angular/common';
-import {AnkiPage} from './anki-table.model';
+import {NgForOf, NgIf} from '@angular/common';
+import {AnkiCard, AnkiPage} from './anki-table.model';
 import {
   MatCell,
   MatCellDef,
@@ -12,11 +12,12 @@ import {
   MatHeaderRowDef,
   MatRow,
   MatRowDef,
-  MatTable
+  MatTable,
 } from '@angular/material/table';
 import {MatSort, MatSortHeader} from '@angular/material/sort';
-import {MatButton} from '@angular/material/button';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
+import {MatCheckbox} from '@angular/material/checkbox';
+import {MatAnchor} from '@angular/material/button';
 
 @Component({
   selector: 'app-anki-table',
@@ -37,17 +38,24 @@ import {MatPaginator, PageEvent} from '@angular/material/paginator';
     MatHeaderCellDef,
     MatSort,
     MatPaginator,
+    MatCheckbox,
+    MatAnchor,
   ],
   templateUrl: './anki-table.component.html',
   styleUrl: './anki-table.component.css'
 })
 export class AnkiTableComponent {
   ankiPage = signal<AnkiPage | null>(null);
-  displayedColumns = ['index', 'question', 'reading', 'meaning'];
+  displayedColumns = ['select', 'index', 'question', 'reading', 'meaning'];
+  dataColumns = ['index', 'question', 'reading', 'meaning']; // for the loop
+
   pageSize = 100;
   pageIndex = 0;
 
+  selectedRows = new Set<string>();
+
   columnLabels: Record<string, string> = {
+    select: '',
     index: 'Index',
     question: 'Question',
     reading: 'Reading',
@@ -60,6 +68,8 @@ export class AnkiTableComponent {
   @ViewChild('spacer') spacer!: ElementRef;
   @ViewChild('headerRow') headerRow!: ElementRef;
   @ViewChildren('rowElement', {read: ElementRef}) rowElements!: QueryList<ElementRef>;
+
+  lastClickedIndex: string | null = null;
 
   constructor(private anki: AnkiTableService, private elRef: ElementRef) {
     const offset = this.pageIndex * this.pageSize;
@@ -105,7 +115,6 @@ export class AnkiTableComponent {
     if (this.spacer?.nativeElement) {
       this.spacer.nativeElement.style.height = `${Math.max(spacerHeight, 0)}px`;
     }
-
   }
 
   loadPage() {
@@ -124,6 +133,53 @@ export class AnkiTableComponent {
   @HostListener('window:resize', [])
   onResize() {
     this.autoSetPageSize();
+  }
+
+  toggleRow(row: AnkiCard, event: MouseEvent) {
+    if (event.shiftKey && this.lastClickedIndex) {
+      const pageData = this.ankiPage()?.data || [];
+      const lastIdx = pageData.findIndex(r => r.index === this.lastClickedIndex);
+      const currentIdx = pageData.findIndex(r => r.index === row.index);
+
+      if (lastIdx !== -1 && currentIdx !== -1) {
+        const [start, end] = [lastIdx, currentIdx].sort((a, b) => a - b);
+        for (let i = start; i <= end; i++) {
+          this.selectedRows.add(pageData[i].index);
+        }
+      }
+    } else {
+      if (this.selectedRows.has(row.index)) {
+        this.selectedRows.delete(row.index);
+      } else {
+        this.selectedRows.add(row.index);
+      }
+    }
+    this.lastClickedIndex = row.index;
+  }
+
+  isAllSelected(): boolean {
+    const pageData = this.ankiPage()?.data || [];
+    return pageData.length > 0 && pageData.every(row => this.selectedRows.has(row.index));
+  }
+
+  isSomeSelected(): boolean {
+    const pageData = this.ankiPage()?.data || [];
+    return !this.isAllSelected() && pageData.some(row => this.selectedRows.has(row.index));
+  }
+
+  toggleSelectAll(event: any) {
+    const pageData = this.ankiPage()?.data || [];
+    if (event.checked) {
+      pageData.forEach(row => this.selectedRows.add(row.index));
+    } else {
+      pageData.forEach(row => this.selectedRows.delete(row.index));
+    }
+  }
+
+  learnSelected() {
+    const pageData = this.ankiPage()?.data || [];
+    const selected = pageData.filter(d => d.index in this.selectedRows).sort();
+    this.anki.learnSelected(selected);
   }
 }
 

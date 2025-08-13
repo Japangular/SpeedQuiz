@@ -7,7 +7,26 @@
     <!-- Table -->
     <div class="mat-elevation-z2 ankiPage2">
       <table mat-table [dataSource]="page.data" class="full-width-table" matSort aria-label="Deck Table">
-        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+        <!-- Checkbox Column -->
+        <!-- Select column -->
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              (change)="toggleSelectAll($event)"
+              [checked]="isAllSelected()"
+              [indeterminate]="isSomeSelected()">
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox
+              (click)="toggleRow(row, $event)"
+              [checked]="selectedRows.has(row.index)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <!-- Other columns -->
+        <ng-container *ngFor="let column of dataColumns" [matColumnDef]="column">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             {{ columnLabels[column] || column }}
           </th>
@@ -22,7 +41,8 @@
     <div class="spacer" #spacer></div>
 
     <!-- Paginator -->
-    <div #paginatorContainer>
+    <div #paginatorContainer class="paginator-controls">
+      <a mat-button (click)="learnSelected()">Learn selected rows</a>
       <mat-paginator
         [length]="page.info?.totalAvailableRows || 0"
         [pageSize]="pageSize"
