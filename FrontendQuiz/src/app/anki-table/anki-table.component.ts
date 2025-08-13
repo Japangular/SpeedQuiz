@@ -177,8 +177,13 @@ export class AnkiTableComponent {
   }
 
   learnSelected() {
+    if(this.selectedRows.size == 0){
+      return;
+    }
     const pageData = this.ankiPage()?.data || [];
-    const selected = pageData.filter(d => d.index in this.selectedRows).sort();
+    const selectedIds = Array.from(this.selectedRows);
+    const selected = pageData.filter(d => selectedIds.includes(d.index));
+    console.log("anki-table: learn selected was pressed, " + selected.length + " rows were selected");
     this.anki.learnSelected(selected);
   }
 }
