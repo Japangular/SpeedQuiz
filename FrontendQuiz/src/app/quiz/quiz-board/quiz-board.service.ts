@@ -13,7 +13,6 @@ export class QuizBoardService {
   private readonly deckIterator: DeckIterator ;
 
   constructor(private store: CardStoreService) {
-
     this.deckIterator = new DeckIterator(store._currentDeck$);
     this.card$ = this.deckIterator.getCard$();
     console.log("iterator has store: " + store.rnd);

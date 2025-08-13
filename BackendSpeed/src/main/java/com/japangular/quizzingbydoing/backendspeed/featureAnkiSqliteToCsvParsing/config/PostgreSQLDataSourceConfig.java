@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -63,7 +64,13 @@ public class PostgreSQLDataSourceConfig {
 
     public Map<String, Object> hibernateProperties() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "update");  // Set 'update' for SQLite
+        properties.put("hibernate.hbm2ddl.auto", "update");
         return properties;
     }
+
+    @Bean(name = "postgresqlJdbcTemplate")
+    public JdbcTemplate postgresqlJdbcTemplate(@Qualifier("postgresqlDataSource") DataSource dataSource) {
+        return new JdbcTemplate(dataSource);
+    }
+
 }
