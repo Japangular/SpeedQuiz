@@ -4,6 +4,8 @@ import {Card} from '../answer-slots/quiz.model';
 import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
 import {CardStoreService} from '../../../services/card-store.service';
 import {ModalService} from '../widget/modal/modal.service';
+import {AnkiCard} from '../../anki-table/anki-table.model';
+import {PropertyType, SubmissionDeck} from '../../../../generated/api';
 
 @Injectable({
   providedIn: 'root'
@@ -60,6 +62,33 @@ export class QuizBoardService {
           return false;
       }
     });
+  }
+
+  learnSelected(ankiCards: AnkiCard[]){
+    if (!ankiCards || ankiCards.length == 0)
+      return;
+
+    const cards = ankiCards.map(card => ({
+      index: card.index,
+      question: card.question,
+      reading: card.reading,
+      meaning: card.meaning,
+      hint: [card.index, card.question, card.reading, card.meaning].join(" : "),
+    }));
+    const deck = {
+      deckName: "SelectedAnkiDeck",
+      username: "ankiUser",
+      properties: {
+        index: PropertyType.Info,
+        question: PropertyType.Question,
+        reading: PropertyType.Answer,
+        meaning: PropertyType.Answer,
+        hint: PropertyType.Hint
+      },
+      cards: cards,
+    } as SubmissionDeck;
+
+    this.store.setCurrentDeck(deck);
   }
 }
 

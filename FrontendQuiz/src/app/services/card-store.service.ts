@@ -16,7 +16,6 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   currentDeck = {deckName: "initial Deck", username: "app initializer", properties: {}, cards: []} as SubmissionDeck;
   _currentDeck: BehaviorSubject<SubmissionDeck> = new BehaviorSubject(this.currentDeck);
   _currentDeck$: Observable<SubmissionDeck> = this._currentDeck.asObservable();
-  rnd = Math.random();
 
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
 
