@@ -15,10 +15,10 @@ export class ModalService {
   }
 
   openHintModal(card: Card) {
-    this.dialog.open(HintModalComponent, {data: card});
+    this.dialog.open(HintModalComponent, {data: {card}});
   }
 
   openEditCardModal(card: Card){
-    this.dialog.open(EditCardModalComponent, {data: card})
+    this.dialog.open(HintModalComponent, {data: {card}});
   }
 }

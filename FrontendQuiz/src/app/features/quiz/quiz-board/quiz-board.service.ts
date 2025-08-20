@@ -3,6 +3,7 @@ import {Observable} from 'rxjs';
 import {Card} from '../answer-slots/quiz.model';
 import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
 import {CardStoreService} from '../../../services/card-store.service';
+import {ModalService} from '../widget/modal/modal.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,10 +13,13 @@ export class QuizBoardService {
 
   private readonly deckIterator: DeckIterator ;
 
-  constructor(private store: CardStoreService) {
+  constructor(private store: CardStoreService, private modal: ModalService) {
     this.deckIterator = new DeckIterator(store._currentDeck$);
     this.card$ = this.deckIterator.getCard$();
-    console.log("iterator has store: " + store.rnd);
+  }
+
+  openHintModal(card: Card){
+    this.modal.openHintModal(card);
   }
 
   getDeckCommand(): DeckCommand {
@@ -23,10 +27,7 @@ export class QuizBoardService {
   }
 
   nextCard(withoutHelp?: boolean) {
-    if (withoutHelp === false) {
-      this.deckIterator.useHint();
-    }
-    this.deckIterator.nextCard();
+    this.deckIterator.proceed(withoutHelp);
   }
 
   useHint() {

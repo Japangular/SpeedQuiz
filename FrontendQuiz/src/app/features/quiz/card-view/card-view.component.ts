@@ -1,12 +1,12 @@
 
 import {Card} from "../answer-slots/quiz.model";
 import {AnswerSlotsComponent} from "../answer-slots/answer-slots.component";
-import {NgIf} from "@angular/common";
+import {AsyncPipe, NgIf} from "@angular/common";
 import {Component, EventEmitter, Input, OnInit, Output, Signal} from "@angular/core";
 import {StrokeOrderKanjiComponent} from '../widget/kanji-stroke-order-grid/stroke-order-kanji.component';
 import {OneLinerComponent, SelectedSubKanji} from '../widget/one-liner/one-liner.component';
 import {QuizEvent} from '../utils/QuizUtils';
-import {ModalService} from '../widget/modal/modal.service';
+import {QuizBoardService} from '../quiz-board/quiz-board.service';
 
 @Component({
   selector: 'app-card-view',
@@ -15,7 +15,8 @@ import {ModalService} from '../widget/modal/modal.service';
     OneLinerComponent,
     AnswerSlotsComponent,
     StrokeOrderKanjiComponent,
-    NgIf
+    NgIf,
+    AsyncPipe
   ],
   templateUrl: './card-view.component.html',
   styleUrl: './card-view.component.css'
@@ -26,27 +27,23 @@ export class CardViewComponent {
   @Output()
   nextCard = new EventEmitter<boolean>();
 
-  constructor(private modal: ModalService) {
-  }
-
-  getCard(): Card {
-    return this.currentCard ?? {} as Card;
+  constructor(protected deckIteratorService: QuizBoardService) {
   }
 
   handleSelectedKanji($event: SelectedSubKanji) {
 
   }
 
-  toggleHint($event: QuizEvent) {
+  toggleHint(currentCard: Card, $event: QuizEvent) {
     switch ($event) {
       case QuizEvent.CARD_SOLVED_WITH_HINT:
-        this.nextCard.emit(false);
+        this.deckIteratorService.nextCard(false);
         break;
       case QuizEvent.CARD_SOLVED:
-        this.nextCard.emit(true);
+        this.deckIteratorService.nextCard(true);
         break;
       case QuizEvent.HINT_PRESSED:
-        this.modal.openHintModal(this.getCard());
+        this.deckIteratorService.openHintModal(currentCard);
 
     }
   }
