@@ -1,6 +1,7 @@
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {DeckCommand} from "../utils/deck-iterator/DeckIterator";
+import {QuizBoardService} from '../quiz-board/quiz-board.service';
 
 @Component({
   selector: 'app-quiz-action-bar',
@@ -13,8 +14,11 @@ import {DeckCommand} from "../utils/deck-iterator/DeckIterator";
 export class QuizActionBarComponent {
   inputValue: string = '';
 
-  @Input()
   deckCommand!: DeckCommand;
+
+  constructor(protected deckIteratorService: QuizBoardService) {
+    this.deckCommand = deckIteratorService.getDeckCommand();
+  }
 
   nextCard(withoutHelp?: boolean) {
     if (withoutHelp === false) {
