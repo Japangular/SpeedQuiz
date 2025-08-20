@@ -1,6 +1,6 @@
 import {Injectable, signal} from '@angular/core';
-import {Entry, KanjiDTO, SearchMode} from '../dict/japanese-dict/japanese-dict.model';
-import {JapaneseDictService} from '../dict/japanese-dict/japanese-dict.service';
+import {JapaneseDictService} from '../features/dict/japanese-dict/japanese-dict.service';
+import {Entry, KanjiDTO, SearchMode} from '../features/dict/japanese-dict/japanese-dict.model';
 
 @Injectable({
   providedIn: 'root'

@@ -1,14 +1,8 @@
 import {DeckMetadata} from '../../../generated/api';
+import {PropertyType as ApiPropertyType} from '../../../generated/api';
 
-export enum PropertyType {
-  QUESTION = 'question',
-  ANSWER = 'answer',
-  HINT = 'hint',
-  IMAGE = 'image',
-  SVG = 'svg',
-  AUDIOFILE = 'audio',
-  UNKNOWN = 'unknown'  // Define an UNKNOWN type if needed
-}
+export const PropertyType = ApiPropertyType;
+export type PropertyType = typeof PropertyType[keyof typeof PropertyType];
 
 export interface Card {
   [key: string]: string;

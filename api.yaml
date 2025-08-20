@@ -103,4 +103,7 @@ components:
         - image
         - svg
         - audio
+        - hiragana
+        - answer_list
+        - info
         - unknown

@@ -1,13 +1,13 @@
 import {Inject, Injectable} from '@angular/core';
 import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {DeckItem} from '../features/deck/deck-datasource';
 import {
   UserGeneratedDeck,
   UserGeneratedDeckSubmissionService
 } from '../features/dynamic-card-creator/submission-deck.model';
 import {PropertyType, SubmissionDeck} from '../../generated/api';
 import {map} from 'rxjs/operators';
+import {DeckItem} from '../features/deck-table/deck/deck-datasource';
 
 @Injectable({
   providedIn: 'root'
