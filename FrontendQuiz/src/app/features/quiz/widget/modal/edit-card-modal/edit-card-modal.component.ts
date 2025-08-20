@@ -8,7 +8,7 @@ import {MatInputModule} from '@angular/material/input';
 
 @Component({
   selector: 'app-edit-card-modal',
-  standalone: true, // since you’re using standalone components
+  standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule],
   templateUrl: './edit-card-modal.component.html',
   styleUrls: ['./edit-card-modal.component.css']

@@ -3,7 +3,6 @@ import {MatDialog} from '@angular/material/dialog';
 import {CombinedReadings, KanjiModalComponent} from './kanji-modal/kanji-modal.component';
 import {HintModalComponent} from './hint-modal/hint-modal.component';
 import {Card} from '../../answer-slots/quiz.model';
-import {EditCardModalComponent} from './edit-card-modal/edit-card-modal.component';
 
 @Injectable({providedIn: 'root'})
 export class ModalService {
