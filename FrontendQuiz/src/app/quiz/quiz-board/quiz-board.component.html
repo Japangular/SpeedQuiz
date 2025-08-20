@@ -1,4 +1,0 @@
-<div>
-  <app-quiz-action-bar [deckCommand]=this.deckIteratorService.getDeckCommand()></app-quiz-action-bar>
-  <app-card-view [currentCard]="this.deckIteratorService.card$ | async" (nextCard)=this.deckIteratorService.nextCard($event)></app-card-view>
-</div>
