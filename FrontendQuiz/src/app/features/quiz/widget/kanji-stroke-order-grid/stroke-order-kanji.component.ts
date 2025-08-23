@@ -23,7 +23,7 @@ export class StrokeOrderKanjiComponent {
   isWrapContent: boolean = false; // alter this value to change behavior
 
   @Output()
-  strokeOrderComplete: EventEmitter<boolean> = new EventEmitter<boolean>();
+  emitStrokeOrderComplete: EventEmitter<boolean> = new EventEmitter<boolean>();
   isHorizontal: boolean = true;
 
   changeOrientation() {
@@ -31,7 +31,7 @@ export class StrokeOrderKanjiComponent {
   }
 
   handleStrokeOrderComplete(b: boolean){
-    this.strokeOrderComplete.emit(b);
+    this.emitStrokeOrderComplete.emit(b);
   }
 
   toggleStrokeNumbers(b: boolean){

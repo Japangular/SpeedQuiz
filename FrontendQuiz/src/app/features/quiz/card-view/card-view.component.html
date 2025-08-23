@@ -8,12 +8,15 @@
                        (emitSelectedSubKanji)="handleSelectedKanji($event)">
         </app-one-liner>
 
-        <app-answer-slots [quizUtilCard]="currentCard.answers"
+        <app-answer-slots [quizUtilCard]="currentCard.answers | filterAnswers: currentCard.question"
                           (emitQuizEvent)="toggleHint(currentCard, $event)">
         </app-answer-slots>
 
         <app-stroke-order-kanji *ngIf="isJapanese(currentCard)"
-                                [japanese]="currentCard.question">
+                                [japanese]="currentCard.question"
+                                [isWrapContent] = false
+                                (emitStrokeOrderComplete) = "handleStrokeOrderComplete()"
+        >
         </app-stroke-order-kanji>
       </div>
     </ng-container>

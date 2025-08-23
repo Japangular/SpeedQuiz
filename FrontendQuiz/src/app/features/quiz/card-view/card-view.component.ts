@@ -2,11 +2,12 @@
 import {Card} from "../answer-slots/quiz.model";
 import {AnswerSlotsComponent} from "../answer-slots/answer-slots.component";
 import {AsyncPipe, NgIf} from "@angular/common";
-import {Component, EventEmitter, Input, OnInit, Output, Signal} from "@angular/core";
+import {Component, computed, EventEmitter, Input, OnInit, Output, Signal} from "@angular/core";
 import {StrokeOrderKanjiComponent} from '../widget/kanji-stroke-order-grid/stroke-order-kanji.component';
 import {OneLinerComponent, SelectedSubKanji} from '../widget/one-liner/one-liner.component';
 import {QuizEvent} from '../utils/QuizUtils';
 import {QuizBoardService} from '../quiz-board/quiz-board.service';
+import {FilterAnswersPipe} from '../utils/filter-answers.pipe';
 
 @Component({
   selector: 'app-card-view',
@@ -16,7 +17,8 @@ import {QuizBoardService} from '../quiz-board/quiz-board.service';
     AnswerSlotsComponent,
     StrokeOrderKanjiComponent,
     NgIf,
-    AsyncPipe
+    AsyncPipe,
+    FilterAnswersPipe
   ],
   templateUrl: './card-view.component.html',
   styleUrl: './card-view.component.css'
@@ -31,7 +33,7 @@ export class CardViewComponent {
   }
 
   handleSelectedKanji($event: SelectedSubKanji) {
-
+    console.log("selectedSubKanji: " + JSON.stringify($event));
   }
 
   toggleHint(currentCard: Card, $event: QuizEvent) {
@@ -51,6 +53,11 @@ export class CardViewComponent {
   isJapanese(currentCard: Card) {
     return currentCard.subjectType !== 'KANA_VOCABULARY' && currentCard.subjectType !== 'RADICAL' && hasKanji(currentCard.question);
   }
+
+  handleStrokeOrderComplete() {
+
+  }
+
 }
 
 export interface SelectedQuizEvent {
