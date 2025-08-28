@@ -15,6 +15,7 @@ import {CommonModule} from "@angular/common";
 export class StrokeOrderKanjiComponent {
   @ViewChild(KanjiDisplayComponent)
   kanjiDisplay!: KanjiDisplayComponent;
+  isCorrect = BorderColor.ORANGE;
 
   @Input()
   japanese?: string;
@@ -31,10 +32,13 @@ export class StrokeOrderKanjiComponent {
   }
 
   handleStrokeOrderComplete(b: boolean){
+    b ? this.isCorrect = BorderColor.GREEN : this.isCorrect = BorderColor.RED;
     this.emitStrokeOrderComplete.emit(b);
   }
 
-  toggleStrokeNumbers(b: boolean){
-    this.kanjiDisplay.toggleStrokeNumbers(b);
-  }
+  protected readonly BorderColor = BorderColor;
+}
+
+enum BorderColor {
+  ORANGE, RED, GREEN
 }

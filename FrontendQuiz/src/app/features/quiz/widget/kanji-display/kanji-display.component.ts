@@ -49,7 +49,9 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
   }
 
   getSvgUrl(kanji: string): string {
-    return `${environment.apiBaseUrl}/kanji_svgs/${encodeURIComponent(kanji)}.svg`;
+    const cp =
+      kanjiToKanjiVGFilename(kanji);
+    return `http://localhost/kanjivg/${encodeURIComponent(cp)}`;
   }
 
   ngAfterViewInit() {
@@ -186,4 +188,17 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
       }
     }
   }
+}
+
+function kanjiToKanjiVGFilename(kanji: string): string {
+  if (kanji.length !== 1) {
+    throw new Error("Input must be a single Kanji character.");
+  }
+
+  const codePoint = kanji.codePointAt(0); // handles surrogate pairs
+  if (!codePoint) {
+    throw new Error("Invalid character.");
+  }
+
+  return codePoint.toString(16).padStart(5, '0') + '.svg';
 }
