@@ -1,0 +1,17 @@
+<form (ngSubmit)="check(from.valueAsNumber, to.valueAsNumber)">
+  <label> From: <input type="number" #from min="0" [max]="jouyouCount"></label>
+  <label> To: <input type="number" #to min="0" [max]="jouyouCount"></label>
+  <button type="submit">Load Kanji</button>
+</form>
+
+
+<div #kanjiBoard class="kanji-board">
+  <div *ngFor="let wk of wallKanjis">
+    <app-stroke-order-kanji
+      #kanjiRef
+      [japanese]="wk.kanji"
+      [isWrapContent]="false"
+      (emitStrokeOrderComplete)="setWk(wk, $event)">
+    </app-stroke-order-kanji>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+<!-- Input field linked to FormControl -->
+<input type="text" [formControl]="kanjiControl" placeholder="Enter kanji"/>
+
+<!-- Stroke order component with debounced value -->
+<app-stroke-order-kanji
+  [japanese]="debouncedKanji"
+  [isWrapContent]="false"
+  (emitStrokeOrderComplete)="setWk(null, $event)">
+</app-stroke-order-kanji>

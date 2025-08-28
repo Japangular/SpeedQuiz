@@ -1,6 +1,8 @@
 import {Injectable, signal} from '@angular/core';
 import {JapaneseDictService} from '../features/dict/japanese-dict/japanese-dict.service';
 import {Entry, KanjiDTO, SearchMode} from '../features/dict/japanese-dict/japanese-dict.model';
+import {catchError, Observable, of} from 'rxjs';
+import {map, tap} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +17,7 @@ export class DictStateService {
 
   selectedOption = signal<SearchMode>(SearchMode.Kanji);
   searchTerm = signal<string>('火');
+  private jouyouKanjisLoaded = false;
 
   constructor(private dictionaryService: JapaneseDictService) {
   }
@@ -59,10 +62,28 @@ export class DictStateService {
 
   }
 
-  parseJouyouKanjis() {
-    if (this.jouyouKanjis.length === 0) {
-      this.dictionaryService.jouyouKanjis().subscribe(kanjis => this.jouyouKanjis.set(kanjis));
+  parseJouyouKanjis(): Observable<boolean> {
+    if (!this.jouyouKanjisLoaded) {
+      return this.dictionaryService.jouyouKanjis().pipe(
+        tap(kanjis => {
+          this.jouyouKanjis.set(kanjis);
+          this.jouyouKanjisLoaded = true;
+        }),
+        map(() => true),
+        catchError(() => {
+          // Optionally: set the flag to avoid infinite retries, or leave it false to allow retries
+          this.jouyouKanjisLoaded = true;
+          return of(false);
+        })
+      );
+    } else {
+      return of(true);
     }
+  }
+
+
+  jouyou(){
+    return this.jouyouKanjis();
   }
 
   searchKanji(searchTerm: string) {

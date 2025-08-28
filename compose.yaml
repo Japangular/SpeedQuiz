@@ -66,6 +66,8 @@ services:
       - "80:80"
     depends_on:
       - frontend
+    volumes:
+      - ./KanjiVG:/usr/share/nginx/html/kanjivg:ro
 
   python_dict:
     build:

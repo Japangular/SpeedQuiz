@@ -6,6 +6,8 @@ import {DeckComponent} from './features/deck-table/deck/deck.component';
 import {QuizBoardComponent} from './features/quiz/quiz-board/quiz-board.component';
 import {JapaneseDictComponent} from './features/dict/japanese-dict/japanese-dict.component';
 import {AnkiTableComponent} from './features/anki-table/anki-table.component';
+import {KanjiWallComponent} from './features/kanji-wall/kanji-wall.component';
+import {TestComponent} from './features/test/test.component';
 
 export const routes: Routes = [
   {path: 'table', component: DeckComponent},
@@ -20,6 +22,8 @@ export const routes: Routes = [
       {path: 'quiz', component: QuizBoardComponent, outlet: 'leftOutlet'},
       {path: 'dict', component: JapaneseDictComponent, outlet: 'leftOutlet', title: 'dict'},
       {path: 'anki', component: AnkiTableComponent, outlet: 'leftOutlet', title: 'anki'},
+      {path: 'kanjiWall', component: KanjiWallComponent, outlet: 'leftOutlet', title: 'KanjiWall'},
+      {path: 'testing', component: TestComponent, outlet: 'leftOutlet'},
       {path: 'about', component: AboutComponent, outlet: 'leftOutlet', title: 'About'},
     ]
   },

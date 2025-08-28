@@ -64,7 +64,7 @@ public class KanjiSearchService {
   public List<KanjiDTO> getJouyou() {
     logger.info("Fetching Kanji with 'jouyou' tag");
     try {
-      List<Kanji> results = kanjiRepo.findByTag("{jouyou}");
+      List<Kanji> results = kanjiRepo.findByTag("jouyou");
       logger.info("Found {} Kanjis with 'jouyou' tag", results.size());
       return results.stream().map(this::toDto).collect(Collectors.toList());
     } catch (Exception e) {
