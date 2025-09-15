@@ -3,6 +3,8 @@ import {MatDialog} from '@angular/material/dialog';
 import {CombinedReadings, KanjiModalComponent} from './kanji-modal/kanji-modal.component';
 import {HintModalComponent} from './hint-modal/hint-modal.component';
 import {Card} from '../../answer-slots/quiz.model';
+import {DeckCompletedModalComponent} from './deck-completed/deck-completed-modal.component';
+import {Observable} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class ModalService {
@@ -19,5 +21,9 @@ export class ModalService {
 
   openEditCardModal(card: Card){
     this.dialog.open(HintModalComponent, {data: {card}});
+  }
+
+  openDeckCompletedModal(cards: Card[]): Observable<'restart' | 'goToAnki' | undefined> {
+    return this.dialog.open(DeckCompletedModalComponent, {data: {cards}}).afterClosed();
   }
 }

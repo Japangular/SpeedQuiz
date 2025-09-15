@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class FrontendService {
-  private static final Logger logger = LoggerFactory.getLogger(FrontendService.class);
+public class FrontendCsvService {
+  private static final Logger logger = LoggerFactory.getLogger(FrontendCsvService.class);
 
   private final FieldsToCsvService fieldsToCsvService;
   private List<QuestionReadingMeaning> qrmList;
@@ -23,23 +23,38 @@ public class FrontendService {
     return currentPosition.getAndIncrement();
   }
 
-  public FrontendService(FieldsToCsvService fieldsToCsvService) {
+  public FrontendCsvService(FieldsToCsvService fieldsToCsvService) {
     this.fieldsToCsvService = fieldsToCsvService;
   }
 
-  public List<QuestionReadingMeaning> getTablePage(int limit, int offset){
+  public List<QuestionReadingMeaning> getFilteredQrmList(String questionFilter) {
+    if (qrmList == null) {
+      loadCsv();
+    }
+    if (questionFilter != null && !questionFilter.trim().isEmpty()) {
+      return qrmList.stream().filter(q -> q.getQuestion().contains(questionFilter)).toList();
+    } else {
+      return qrmList;
+    }
+  }
+
+  public List<QuestionReadingMeaning> getTablePage(int limit, int offset, String questionFilter) {
     if(qrmList==null){
       loadCsv();
     }
+    List<QuestionReadingMeaning> questionReadingMeanings = qrmList;
     List<QuestionReadingMeaning> result;
-    if(qrmList.size() > offset + limit) {
-      result = qrmList.subList(offset, offset + limit);
+    if(questionFilter != null && !questionFilter.trim().isEmpty()){
+      questionReadingMeanings = qrmList.stream().filter(q -> q.getQuestion().contains(questionFilter)).toList();
+    }
+    if(questionReadingMeanings.size() > offset + limit) {
+      result = questionReadingMeanings.subList(offset, offset + limit);
     } else {
-      if(qrmList.size() > offset) {
-        result = qrmList.subList(offset, qrmList.size());
+      if(questionReadingMeanings.size() > offset) {
+        result = questionReadingMeanings.subList(offset, questionReadingMeanings.size());
       } else return new ArrayList<>();
     }
-    logger.info(String.format("Loaded %d questions from csv", result.size()));
+    logger.info("Loaded {} questions from csv", result.size());
     return result;
   }
 
@@ -67,5 +82,9 @@ public class FrontendService {
     }
 
     return total;
+  }
+
+  public List<QuestionReadingMeaning> getFilteredQuestions(String kanji){
+    return qrmList.stream().filter(qrm -> qrm.getQuestion().contains(kanji)).toList();
   }
 }

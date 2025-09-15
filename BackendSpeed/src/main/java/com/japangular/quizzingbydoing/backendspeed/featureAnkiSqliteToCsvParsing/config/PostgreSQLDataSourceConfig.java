@@ -23,7 +23,8 @@ import java.util.Map;
 @EnableJpaRepositories(
     basePackages = {
         "com.japangular.quizzingbydoing.backendspeed.quizFrontend.repository",
-        "com.japangular.quizzingbydoing.backendspeed.kanjidict.repository"
+        "com.japangular.quizzingbydoing.backendspeed.kanjidict.repository",
+        "com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.repository"
     },
     entityManagerFactoryRef = "postgresqlEntityManagerFactory",
     transactionManagerRef = "postgresqlTransactionManager"
@@ -56,7 +57,10 @@ public class PostgreSQLDataSourceConfig {
     ) {
         return builder
             .dataSource(dataSource)
-            .packages("com.japangular.quizzingbydoing.backendspeed.kanjidict.entity") // Package where your PostgreSQL entities are located
+            .packages(
+                "com.japangular.quizzingbydoing.backendspeed.kanjidict.entity",
+                "com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.entity"
+            ) // Package where your PostgreSQL entities are located
             .persistenceUnit("postgresql")
             .properties(hibernateProperties())
             .build();

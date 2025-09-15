@@ -1,0 +1,13 @@
+<h1 mat-dialog-title>Deck completed</h1>
+
+<div mat-dialog-content>
+  <p><strong>Questions you solved:</strong></p>
+  <ul>
+    <li *ngFor="let question of solvedQuestions">{{ question }}</li>
+  </ul>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onRestart()">Restart</button>
+  <button mat-button (click)="onGoToAnki()">Go to Anki Table</button>
+</div>
