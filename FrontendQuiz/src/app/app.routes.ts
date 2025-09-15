@@ -8,6 +8,8 @@ import {JapaneseDictComponent} from './features/dict/japanese-dict/japanese-dict
 import {AnkiTableComponent} from './features/anki-table/anki-table.component';
 import {KanjiWallComponent} from './features/kanji-wall/kanji-wall.component';
 import {TestComponent} from './features/test/test.component';
+import {OverviewComponent} from './features/overview/overview.component';
+import {KanjiDetailComponent} from './features/kanji-details/kanji-details.component';
 
 export const routes: Routes = [
   {path: 'table', component: DeckComponent},
@@ -23,7 +25,9 @@ export const routes: Routes = [
       {path: 'dict', component: JapaneseDictComponent, outlet: 'leftOutlet', title: 'dict'},
       {path: 'anki', component: AnkiTableComponent, outlet: 'leftOutlet', title: 'anki'},
       {path: 'kanjiWall', component: KanjiWallComponent, outlet: 'leftOutlet', title: 'KanjiWall'},
+      {path: 'overview', component: OverviewComponent, outlet: 'leftOutlet', title: 'Overview'},
       {path: 'testing', component: TestComponent, outlet: 'leftOutlet'},
+      {path: 'kanjiDetails/:kanji', component: KanjiDetailComponent, outlet: 'leftOutlet'},
       {path: 'about', component: AboutComponent, outlet: 'leftOutlet', title: 'About'},
     ]
   },

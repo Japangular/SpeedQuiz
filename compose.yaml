@@ -75,12 +75,12 @@ services:
       dockerfile: PythonDict/Dockerfile.python_dict
     ports:
       - "8000:8000"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://python_dict:8000/docs" ]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
+ #   healthcheck:
+ #     test: [ "CMD", "curl", "-f", "http://python_dict:8000/docs" ]
+ #     interval: 30s
+ #     retries: 5
+ #     start_period: 10s
+ #     timeout: 10s
 
 volumes:
   db-data:

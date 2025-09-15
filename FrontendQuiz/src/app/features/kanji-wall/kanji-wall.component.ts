@@ -3,6 +3,7 @@ import {StrokeOrderKanjiComponent} from '../quiz/widget/kanji-stroke-order-grid/
 import {NgForOf, NgStyle} from '@angular/common';
 import {DictStateService} from '../../services/dict-state.service';
 import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-kanji-wall',
@@ -28,7 +29,7 @@ export class KanjiWallComponent implements AfterViewInit {
   oldFrom = 0;
   oldTo = 0;
 
-  constructor(private dict: DictStateService) {
+  constructor(private dict: DictStateService, private router: Router) {
   }
 
   ngAfterViewInit() {
@@ -95,6 +96,20 @@ export class KanjiWallComponent implements AfterViewInit {
         // subscription will fire and `updateLayout()` will run again automatically.
       }
     });
+  }
+
+  onKanjiClick(event: MouseEvent, wk: WallKanji) {
+    if (event.shiftKey) {
+      this.router.navigate(['/quizCardApp', {outlets: {leftOutlet: ['kanjiDetails', wk.kanji]}}])
+        .then(result => {
+          console.log('Navigation result:', result); // Should log 'true' if successful
+        })
+        .catch(err => {
+          console.error('Navigation failed:', err); // Logs error if navigation fails
+        });
+
+      event.stopPropagation(); // optional: prevent bubbling
+    }
   }
 }
 

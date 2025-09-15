@@ -6,7 +6,7 @@
 
     <!-- Table -->
     <div class="mat-elevation-z2 ankiPage2">
-      <table mat-table [dataSource]="page.data" class="full-width-table" matSort aria-label="Deck Table">
+      <table mat-table [dataSource]="filteredData" class="full-width-table" matSort aria-label="Deck Table">
         <!-- Checkbox Column -->
         <!-- Select column -->
         <ng-container matColumnDef="select">
@@ -16,6 +16,7 @@
               [checked]="isAllSelected()"
               [indeterminate]="isSomeSelected()">
             </mat-checkbox>
+            Select
           </th>
           <td mat-cell *matCellDef="let row">
             <mat-checkbox
@@ -30,8 +31,38 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             {{ columnLabels[column] || column }}
           </th>
-          <td mat-cell *matCellDef="let row">{{ row[column] }}</td>
+          <td mat-cell
+              *matCellDef="let row"
+              [ngClass]="{ 'highlight-column': highlightQuestionColumn && column === 'question' }">
+            <ng-container *ngIf="column === 'question'; else normalCell" >
+              <ng-container *ngFor="let char of row[column]?.split('')">
+                <span (click)="applyQuestionFilterFromClick(char)" >{{ char }}</span>
+              </ng-container>
+            </ng-container>
+
+            <ng-template #normalCell>
+              {{ row[column] }}
+            </ng-template>
+          </td>
         </ng-container>
+
+        <ng-container matColumnDef="ignore">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <mat-checkbox
+              (change)="ignoreSelectAll($event)"
+              [checked]="isIgnoredSelected()"
+              [indeterminate]="isSomeIgnored()">
+            </mat-checkbox>
+            Ignore
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox
+              (change)="ignoreRow(row, $event)"
+              [checked]="ignoredRows.has(row.index)">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns" #headerRow></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" #rowElement></tr>
       </table>
@@ -43,7 +74,11 @@
     <!-- Paginator -->
     <div #paginatorContainer class="paginator-controls">
       <a mat-button (click)="learnSelected()">Learn selected rows</a>
-      <a mat-button (click)="deleteSelected()">Delete selected rows</a>
+      <a mat-button *ngIf="isSomeIgnored" (click)="persistIgnoredAnkiRows()">Persist ignored rows</a>
+      <mat-chip color="primary" selected removable (click)="clearQuestionFilter()">
+        {{getFilterChipText()}}
+      </mat-chip>
+
       <mat-paginator
         [length]="page.info.totalAvailableRows || 0"
         [pageSize]="pageSize"

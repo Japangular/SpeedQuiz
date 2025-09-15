@@ -37,3 +37,17 @@
 .paginator-controls a {
   white-space: nowrap; /* Prevents text wrap on the button */
 }
+
+.highlight-column {
+  animation: columnFlash 1.5s ease-out;
+  background-color: #fff3cd !important; /* soft yellow */
+}
+
+@keyframes columnFlash {
+  0% {
+    background-color: #ffeeba;
+  }
+  100% {
+    background-color: transparent;
+  }
+}

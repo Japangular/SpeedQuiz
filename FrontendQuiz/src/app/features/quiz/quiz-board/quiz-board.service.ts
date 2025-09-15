@@ -6,6 +6,7 @@ import {CardStoreService} from '../../../services/card-store.service';
 import {ModalService} from '../widget/modal/modal.service';
 import {AnkiCard} from '../../anki-table/anki-table.model';
 import {PropertyType, SubmissionDeck} from '../../../../generated/api';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +17,7 @@ export class QuizBoardService {
   private readonly deckIterator: DeckIterator ;
 
   constructor(private store: CardStoreService, private modal: ModalService) {
-    this.deckIterator = new DeckIterator(store._currentDeck$);
+    this.deckIterator = new DeckIterator(store._currentDeck$, modal);
     this.card$ = this.deckIterator.getCard$();
   }
 

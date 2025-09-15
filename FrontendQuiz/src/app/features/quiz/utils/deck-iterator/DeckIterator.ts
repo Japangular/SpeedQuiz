@@ -1,6 +1,7 @@
 import {Card, mapDeck} from '../../answer-slots/quiz.model';
 import {Observable, ReplaySubject} from 'rxjs';
 import {SubmissionDeck} from '../../../../../generated/api';
+import {ModalService} from '../../widget/modal/modal.service';
 
 export class DeckIterator implements DeckCommand {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);
@@ -10,7 +11,7 @@ export class DeckIterator implements DeckCommand {
   private startPos: number = 0;
   private deck: Card[];
 
-  constructor(private deck$: Observable<SubmissionDeck>, startPos?: number) {
+  constructor(private deck$: Observable<SubmissionDeck>, private modalService: ModalService, startPos?: number) {
     this.deck = EXAMPLE_CARDS;
     this.startPos = startPos && startPos < this.deck.length ? startPos : 0;
     this.cardSubject.next(this.deck[this.startPos]);
@@ -52,7 +53,20 @@ export class DeckIterator implements DeckCommand {
     if (this.index < this.deck.length - 1){
       this.index++;
     } else {
-      this.index = this.startPos;
+      this.modalService.openDeckCompletedModal(this.deck).subscribe(result => {
+        if (result === 'restart') {
+          // Handle restart action
+          console.log('Restarting...');
+          this.index = this.startPos;
+        } else if (result === 'goToAnki') {
+          // Handle go to Anki action
+          console.log('Going to Anki...');
+        } else {
+          // Handle case when result is undefined
+          console.log('No action taken');
+          this.index = this.startPos;
+        }
+      });
     }
     this.current;
   }
