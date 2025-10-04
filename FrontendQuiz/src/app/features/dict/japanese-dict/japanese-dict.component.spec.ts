@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { JapaneseDictComponent } from './japanese-dict.component';
+import {JapaneseDictComponent} from './japanese-dict.component';
 
 describe('JapaneseDictComponent', () => {
   let component: JapaneseDictComponent;

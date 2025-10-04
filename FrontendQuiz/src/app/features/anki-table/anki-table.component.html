@@ -1,10 +1,6 @@
-<!-- Make this the flex container -->
 <div class="anki-layout">
-
-  <!-- Move *ngIf here to avoid breaking flex -->
   <ng-container *ngIf="ankiPage() as page">
 
-    <!-- Table -->
     <div class="mat-elevation-z2 ankiPage2">
       <table mat-table [dataSource]="filteredData" class="full-width-table" matSort aria-label="Deck Table">
         <!-- Checkbox Column -->
@@ -62,7 +58,6 @@
             </mat-checkbox>
           </td>
         </ng-container>
-
         <tr mat-header-row *matHeaderRowDef="displayedColumns" #headerRow></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" #rowElement></tr>
       </table>
@@ -74,8 +69,8 @@
     <!-- Paginator -->
     <div #paginatorContainer class="paginator-controls">
       <a mat-button (click)="learnSelected()">Learn selected rows</a>
-      <a mat-button *ngIf="isSomeIgnored" (click)="persistIgnoredAnkiRows()">Persist ignored rows</a>
-      <mat-chip color="primary" selected removable (click)="clearQuestionFilter()">
+
+      <mat-chip color="primary" removable (click)="clearQuestionFilter()">
         {{getFilterChipText()}}
       </mat-chip>
 
@@ -86,7 +81,11 @@
         [pageSizeOptions]="[5, 10, 20]"
         (page)="onPageChange($event)">
       </mat-paginator>
+
+      <a mat-button *ngIf="isSomeIgnored" (click)="persistIgnoredAnkiRows()">Persist ignored rows</a>
     </div>
+
+    <app-paginator
 
   </ng-container>
 </div>

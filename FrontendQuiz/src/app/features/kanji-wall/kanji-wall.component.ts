@@ -1,17 +1,20 @@
 import {AfterViewInit, Component, ElementRef, HostListener, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {StrokeOrderKanjiComponent} from '../quiz/widget/kanji-stroke-order-grid/stroke-order-kanji.component';
-import {NgForOf, NgStyle} from '@angular/common';
+import {NgForOf} from '@angular/common';
 import {DictStateService} from '../../services/dict-state.service';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
+import {StrokeOrderKanjiComponent} from '../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+import {WallKanji} from './kanji-wall.model';
 
 @Component({
   selector: 'app-kanji-wall',
   imports: [
     StrokeOrderKanjiComponent,
     NgForOf,
-    NgStyle,
-    FormsModule
+    FormsModule,
+    StrokeOrderKanjiComponent,
+    StrokeOrderKanjiComponent,
+    StrokeOrderKanjiComponent
   ],
   templateUrl: './kanji-wall.component.html',
   styleUrl: './kanji-wall.component.css'
@@ -111,9 +114,4 @@ export class KanjiWallComponent implements AfterViewInit {
       event.stopPropagation(); // optional: prevent bubbling
     }
   }
-}
-
-export interface WallKanji {
-  kanji: string;
-  isSolved: boolean;
 }

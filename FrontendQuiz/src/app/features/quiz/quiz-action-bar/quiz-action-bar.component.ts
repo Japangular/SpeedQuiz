@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {DeckCommand} from "../utils/deck-iterator/DeckIterator";
 import {QuizBoardService} from '../quiz-board/quiz-board.service';
+import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 
 @Component({
   selector: 'app-quiz-action-bar',

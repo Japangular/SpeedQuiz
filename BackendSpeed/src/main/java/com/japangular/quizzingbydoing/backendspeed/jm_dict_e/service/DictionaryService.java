@@ -5,6 +5,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -21,10 +23,12 @@ import java.util.stream.Collectors;
 public class DictionaryService {
 
   private final List<Entry> entries = new ArrayList<>();
+  private static final Logger logger = LoggerFactory.getLogger(DictionaryService.class);
   String filename = "/app/jmdict_e.xml";
 
   @PostConstruct
   public void loadDictionary() throws Exception {
+    logger.info("Loading Dictionary by parsing XML from " + filename + "...");
     File file = new File(filename);
     JAXBContext context = JAXBContext.newInstance(Entry.class);
     Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -56,7 +60,7 @@ public class DictionaryService {
 
         }
       }
-      System.out.println("Loaded " + entries.size() + " entries");
+      logger.info("Dictionary loaded successfully. Loaded " + entries.size() + " entries");
     }
   }
 

@@ -36,12 +36,12 @@ services:
       - ./api.yaml:/app/api.yaml
       - ./JMdict_e.xml:/app/jmdict_e.xml
       - ./anki/collection.db:/app/anki/collection.db
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+#      interval: 30s
+#      retries: 5
+#      start_period: 10s
+#      timeout: 10s
 
   frontend:
     build:
@@ -51,12 +51,12 @@ services:
       - "4200:80"  # You may not need to expose this port as Nginx will serve the content
     volumes:
       - ./api.yaml:/app/api.yaml
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4200" ]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:4200" ]
+#      interval: 30s
+#      retries: 5
+#      start_period: 10s
+#      timeout: 10s
 
   nginx:
     build:

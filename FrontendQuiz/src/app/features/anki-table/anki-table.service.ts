@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {AnkiCard, AnkiPage, AnkiPageInfo} from './anki-table.model';
+import {AnkiCard, AnkiPage, AnkiPageInfo, DEV_DECK_NAME, UserTableStates} from './anki-table.model';
 import {environment} from '../../environments/environment';
 import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
 
@@ -47,11 +47,4 @@ export class AnkiTableService {
   applyQuestionFilter(charOrWord: string) {
 
   }
-}
-
-export const DEV_DECK_NAME = "dev_ignored_anki_rows";
-
-export interface UserTableStates {
-  deckname: string;
-  rowIds: string[];
 }

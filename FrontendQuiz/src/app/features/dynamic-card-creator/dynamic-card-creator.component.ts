@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatStep, MatStepper} from '@angular/material/stepper';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';

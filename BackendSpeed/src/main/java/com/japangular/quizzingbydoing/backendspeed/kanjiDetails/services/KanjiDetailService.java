@@ -1,7 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.kanjiDetails.services;
 
 import com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.model.QuestionReadingMeaning;
-import com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.services.FieldsToCsvService;
 import com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.services.FrontendCsvService;
 import com.japangular.quizzingbydoing.backendspeed.kanjiDetails.model.KanjiDetails;
 import lombok.AllArgsConstructor;

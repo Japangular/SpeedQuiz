@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { KanjiWallComponent } from './kanji-wall.component';
+import {KanjiWallComponent} from './kanji-wall.component';
 
 describe('KanjiWallComponent', () => {
   let component: KanjiWallComponent;

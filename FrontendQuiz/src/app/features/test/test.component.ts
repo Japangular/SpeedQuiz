@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
-import {InputDisplayComponent} from '../quiz/widget/input-display/input-display.component';
+import {Component} from '@angular/core';
+import {InputDisplayComponent} from '../../widgets/input-display/input-display.component';
 
 @Component({
   selector: 'app-test',
   imports: [
+    InputDisplayComponent,
     InputDisplayComponent
   ],
   templateUrl: './test.component.html',

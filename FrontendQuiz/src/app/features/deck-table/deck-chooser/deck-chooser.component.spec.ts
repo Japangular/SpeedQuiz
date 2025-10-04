@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DeckChooserComponent } from './deck-chooser.component';
+import {DeckChooserComponent} from './deck-chooser.component';
 
 describe('DeckChooserComponent', () => {
   let component: DeckChooserComponent;

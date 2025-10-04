@@ -1,6 +1,6 @@
-import {Inject, Injectable, InjectionToken} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
-import { Observable } from 'rxjs';
+import {Observable} from 'rxjs';
 import {DeckMetadata} from '../../generated/api';
 
 @Injectable({

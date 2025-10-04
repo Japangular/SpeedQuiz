@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {DynamicCardCreatorComponent} from './features/dynamic-card-creator/dynamic-card-creator.component';
 import {SideNavComponent} from './layout/side-nav/side-nav.component';
 import {AboutComponent} from './layout/about/about.component';
@@ -10,6 +10,7 @@ import {KanjiWallComponent} from './features/kanji-wall/kanji-wall.component';
 import {TestComponent} from './features/test/test.component';
 import {OverviewComponent} from './features/overview/overview.component';
 import {KanjiDetailComponent} from './features/kanji-details/kanji-details.component';
+import {TranscriptionTranslationTableComponent} from './features/transcription-translation/transcription-translation-table.component';
 
 export const routes: Routes = [
   {path: 'table', component: DeckComponent},
@@ -28,6 +29,7 @@ export const routes: Routes = [
       {path: 'overview', component: OverviewComponent, outlet: 'leftOutlet', title: 'Overview'},
       {path: 'testing', component: TestComponent, outlet: 'leftOutlet'},
       {path: 'kanjiDetails/:kanji', component: KanjiDetailComponent, outlet: 'leftOutlet'},
+      {path: 'transcriptTable', component: TranscriptionTranslationTableComponent, outlet: 'leftOutlet'},
       {path: 'about', component: AboutComponent, outlet: 'leftOutlet', title: 'About'},
     ]
   },
