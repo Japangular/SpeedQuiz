@@ -1,11 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {StrokeOrderKanjiComponent} from '../quiz/widget/kanji-stroke-order-grid/stroke-order-kanji.component';
 import {Location} from '@angular/common';
+import {StrokeOrderKanjiComponent} from '../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
 
 @Component({
   selector: 'app-kanji-details',
   imports: [
+    StrokeOrderKanjiComponent,
     StrokeOrderKanjiComponent
   ],
   templateUrl: './kanji-details.component.html',

@@ -1,6 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {QUIZ_ANSWER_SLOTS, QuizAnswerSlot, AnswerCheckStrategy, AnswersMap} from "./quiz.model";
+import {AnswerCheckStrategy, AnswersMap, QUIZ_ANSWER_SLOTS, QuizAnswerSlot} from "./quiz.model";
 import {InputVerificationDirective} from '../utils/input-verification.directive';
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from "../utils/ValidationStrategy";
 import {QuizEvent, QuizUtils} from '../utils/QuizUtils';

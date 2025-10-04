@@ -1,12 +1,12 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {Card} from '../answer-slots/quiz.model';
-import {DeckCommand, DeckIterator} from '../utils/deck-iterator/DeckIterator';
+import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {CardStoreService} from '../../../services/card-store.service';
-import {ModalService} from '../widget/modal/modal.service';
 import {AnkiCard} from '../../anki-table/anki-table.model';
 import {PropertyType, SubmissionDeck} from '../../../../generated/api';
-import {Router} from '@angular/router';
+import {ModalService} from '../../../widgets/modal/modal.service';
+import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 
 @Injectable({
   providedIn: 'root'

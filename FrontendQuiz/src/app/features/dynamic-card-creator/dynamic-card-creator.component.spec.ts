@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { DynamicCardCreatorComponent } from './dynamic-card-creator.component';
+import {DynamicCardCreatorComponent} from './dynamic-card-creator.component';
 
 describe('DynamicCardCreatorComponent', () => {
   let component: DynamicCardCreatorComponent;

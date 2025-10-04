@@ -74,7 +74,7 @@ docker exec -it postgres-container-speedquiz bash
  psql -h localhost -U speedquiz -d speedquizdb
 DROP TABLE flyway_schema_history CASCADE;
 
-# if flyway has not permission:
+# if flyway has no permission:
 
 GRANT USAGE, CREATE ON SCHEMA public TO speedquiz;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO speedquiz;

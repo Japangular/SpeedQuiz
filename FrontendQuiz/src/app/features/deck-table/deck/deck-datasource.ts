@@ -1,12 +1,9 @@
-import { DataSource } from '@angular/cdk/collections';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { map } from 'rxjs/operators';
-import {Observable, merge, BehaviorSubject} from 'rxjs';
-
-export interface DeckItem {
-  [key: string]: string;
-}
+import {DataSource} from '@angular/cdk/collections';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
+import {map} from 'rxjs/operators';
+import {BehaviorSubject, merge, Observable} from 'rxjs';
+import {DeckItem} from './deck-table.model';
 
 export class DeckDataSource extends DataSource<DeckItem> {
   private dataSubject = new BehaviorSubject<DeckItem[]>([]);

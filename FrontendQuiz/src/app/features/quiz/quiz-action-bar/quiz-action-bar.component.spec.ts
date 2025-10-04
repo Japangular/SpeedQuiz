@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { QuizActionBarComponent } from './quiz-action-bar.component';
+import {QuizActionBarComponent} from './quiz-action-bar.component';
 
 describe('QuizActionBarComponent', () => {
   let component: QuizActionBarComponent;

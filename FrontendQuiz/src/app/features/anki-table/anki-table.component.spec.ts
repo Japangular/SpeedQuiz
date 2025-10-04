@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { AnkiTableComponent } from './anki-table.component';
+import {AnkiTableComponent} from './anki-table.component';
 
 describe('AnkiTableComponent', () => {
   let component: AnkiTableComponent;

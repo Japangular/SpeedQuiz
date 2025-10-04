@@ -1,6 +1,6 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { AnkiTableService } from './anki-table.service';
+import {AnkiTableService} from './anki-table.service';
 
 describe('AnkiTableService', () => {
   let service: AnkiTableService;

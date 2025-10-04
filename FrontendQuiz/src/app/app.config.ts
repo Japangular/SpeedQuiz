@@ -1,7 +1,7 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import {provideRouter} from '@angular/router';
 
-import { routes } from './app.routes';
+import {routes} from './app.routes';
 import {INJECTED_QUIZ_API} from './interfaces/SubmissionDeckApi';
 import {HTTP_INTERCEPTORS, provideHttpClient} from '@angular/common/http';
 import {LoggerInterceptor} from './interceptor/LoggerInterceptor';

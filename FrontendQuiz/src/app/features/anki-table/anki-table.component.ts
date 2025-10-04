@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, HostListener, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
-import {AnkiTableService, UserTableStates} from './anki-table.service';
+import {AnkiTableService} from './anki-table.service';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {AnkiCard, AnkiPage} from './anki-table.model';
 import {
@@ -19,9 +19,8 @@ import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {MatAnchor} from '@angular/material/button';
 import {Router} from '@angular/router';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatChip} from '@angular/material/chips';
-import {MatIcon} from '@angular/material/icon';
+import {PaginatorComponent} from '../../widgets/paginator/paginator.component';
 
 @Component({
   selector: 'app-anki-table',
@@ -44,11 +43,9 @@ import {MatIcon} from '@angular/material/icon';
     MatPaginator,
     MatCheckbox,
     MatAnchor,
-    MatFormField,
-    MatLabel,
     MatChip,
-    MatIcon,
     NgClass,
+    PaginatorComponent,
   ],
   templateUrl: './anki-table.component.html',
   styleUrl: './anki-table.component.css'
@@ -246,7 +243,7 @@ export class AnkiTableComponent implements AfterViewInit {
   toggleSelectAll(event: any) {
     const pageData = this.ankiPage()?.data || [];
     if (event.checked) {
-      pageData.forEach(row => this.selectedRows.add(row.index));
+      pageData.filter(row => !this.ignoredRows.has(row.index)).forEach(row => this.selectedRows.add(row.index));
     } else {
       pageData.forEach(row => this.selectedRows.delete(row.index));
     }

@@ -1,13 +1,13 @@
-
 import {Card} from "../answer-slots/quiz.model";
 import {AnswerSlotsComponent} from "../answer-slots/answer-slots.component";
 import {AsyncPipe, NgIf} from "@angular/common";
-import {Component, computed, EventEmitter, Input, OnInit, Output, Signal} from "@angular/core";
-import {StrokeOrderKanjiComponent} from '../widget/kanji-stroke-order-grid/stroke-order-kanji.component';
-import {OneLinerComponent, SelectedSubKanji} from '../widget/one-liner/one-liner.component';
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {QuizEvent} from '../utils/QuizUtils';
 import {QuizBoardService} from '../quiz-board/quiz-board.service';
 import {FilterAnswersPipe} from '../utils/filter-answers.pipe';
+import {OneLinerComponent, SelectedSubKanji} from '../../../widgets/one-liner/one-liner.component';
+import {StrokeOrderKanjiComponent} from '../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+import {hasKanji} from './card-view.model';
 
 @Component({
   selector: 'app-card-view',
@@ -18,7 +18,12 @@ import {FilterAnswersPipe} from '../utils/filter-answers.pipe';
     StrokeOrderKanjiComponent,
     NgIf,
     AsyncPipe,
-    FilterAnswersPipe
+    FilterAnswersPipe,
+    OneLinerComponent,
+    OneLinerComponent,
+    StrokeOrderKanjiComponent,
+    StrokeOrderKanjiComponent,
+    StrokeOrderKanjiComponent
   ],
   templateUrl: './card-view.component.html',
   styleUrl: './card-view.component.css'
@@ -58,20 +63,4 @@ export class CardViewComponent {
 
   }
 
-}
-
-export interface SelectedQuizEvent {
-
-}
-
-export function hasKanji(str: string): boolean {
-  return /[\u3400-\u4DBF\u4E00-\u9FFF]/.test(str);
-}
-
-export function isKanjiString(str: string): boolean {
-  return /^[\u3400-\u4DBF\u4E00-\u9FFF]+$/.test(str);
-}
-
-export function isKanji(char: string): boolean {
-  return /^[\u3400-\u4DBF\u4E00-\u9FFF]$/.test(char);
 }
