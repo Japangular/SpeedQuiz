@@ -17,7 +17,7 @@ export abstract class QuizUtils implements AnswerHandler{
   cardForm: FormGroup<CardFormStructure> = new FormGroup({});
 
   toggleHint(event: KeyboardEvent) {
-    if (event.key === 'ß') {
+    if (event.ctrlKey && event.code === 'KeyH' || event.key === 'ß') {
       event.preventDefault();
       this.hintPressed = !this.hintPressed;
       this.cheated = true;

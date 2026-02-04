@@ -259,7 +259,7 @@ export class AnkiTableComponent implements AfterViewInit {
     }
 
     this.anki.learnSelected(this.extractSelectedRows());
-    this.router.navigate(['/quizCardApp', {outlets: {leftOutlet: ['quiz']}}])
+    this.router.navigate(["/quiz"])
       .then(result => {
         console.log('Navigation result:', result); // Should log 'true' if successful
       })

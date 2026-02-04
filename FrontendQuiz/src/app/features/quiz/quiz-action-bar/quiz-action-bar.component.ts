@@ -40,8 +40,6 @@ export class QuizActionBarComponent {
   processInput() {
     const trimmedInput = this.inputValue.trim();
     if (!trimmedInput) return;
-
-
     this.inputValue = ''; // Clear the input after emitting
   }
 }
