@@ -1,57 +1,72 @@
 <mat-sidenav-container class="sidenav-container">
 
   <!-- Left Sidebar -->
-  <mat-sidenav id="leftDrawer" #leftDrawer class="sidenav" fixedInViewport
-               [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-               [mode]="(isHandset$ | async) ? 'over' : 'side'"
-               [opened]="(isHandset$ | async) === false"
-               position="start">
-
+  <mat-sidenav
+    #leftDrawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === false"
+    position="start"
+  >
     <div class="sidebar-container">
-      <mat-toolbar>Left Menu</mat-toolbar>
+      <mat-toolbar color="primary" class="toolbar">
+        <button
+          mat-icon-button
+          aria-label="Toggle sidenav"
+          (click)="leftDrawer.toggle()"
+        >
+          <mat-icon>menu</mat-icon>
+        </button></mat-toolbar>
 
       <mat-nav-list class="nav-list">
-        <a mat-button (click)="toggleLeftDrawer()">Hide</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['table'] }}]">Table</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['cardCreator'] }}]">Deck Stepper</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['quiz'] }}]">Open quiz</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['dict'] }}]">Open dict</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['anki'] }}]">Open anki table</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['kanjiWall'] }}]">Open kanji wall</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['overview'] }}]">Open overview</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['transcriptTable'] }}]">Open transcripts</a>
-        <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['testing'] }}]">Just testing</a>
 
-        <!-- Spacer -->
-        <div class="spacer"></div>
+        <!-- Top utility -->
+        <a mat-button (click)="leftDrawer.toggle()">Hide</a>
 
-        <!-- Bottom item -->
-        <a mat-list-item class="bottom-item" [routerLink]="[{ outlets: { leftOutlet: ['about'] }}]">
-          About
+        <!-- Main navigation -->
+        <a
+          mat-list-item
+          *ngFor="let item of navItems"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [class.bottom-item]="item.data?.['bottom']"
+        >
+          <mat-icon
+            *ngIf="item.data?.['icon']"
+            matListItemIcon
+          >
+            {{ item.data?.['icon'] }}
+          </mat-icon>
+
+          <span matListItemTitle>
+            {{ item.data?.['label'] }}
+          </span>
         </a>
+
       </mat-nav-list>
     </div>
   </mat-sidenav>
 
-  <!-- Main content area -->
+  <!-- Main Content -->
   <mat-sidenav-content>
-    <!-- Header: Top bar with title and actions -->
+
     <mat-toolbar color="primary" class="toolbar">
       <button
-        type="button"
-        aria-label="Toggle left sidenav"
+        *ngIf=!leftDrawer.opened
         mat-icon-button
-        (click)="leftDrawer.toggle()">
-        <mat-icon aria-label="Left side nav toggle icon">menu</mat-icon>
+        aria-label="Toggle sidenav"
+        (click)="leftDrawer.toggle()"
+      >
+        <mat-icon>menu</mat-icon>
       </button>
+
       <span class="toolbar-title">SpeedQuiz</span>
     </mat-toolbar>
 
-
-    <!-- Router outlet for left side navigation -->
-    <router-outlet name="leftOutlet"></router-outlet>
-
+    <!-- Routed views -->
+    <router-outlet></router-outlet>
 
   </mat-sidenav-content>
-
 </mat-sidenav-container>

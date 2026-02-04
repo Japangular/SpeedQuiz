@@ -13,30 +13,76 @@ import {KanjiDetailComponent} from './features/kanji-details/kanji-details.compo
 import {TranscriptionTranslationTableComponent} from './features/transcription-translation/transcription-translation-table.component';
 
 export const routes: Routes = [
-  {path: 'table', component: DeckComponent},
-  {path: 'cardCreator', component: DynamicCardCreatorComponent},
   {
-    path: 'quizCardApp',
-    component: SideNavComponent, // Parent layout for the left and right side navigation
+    path: '',
+    component: SideNavComponent,
     children: [
-      // Left side navigation routes
-      {path: 'table', component: DeckComponent, outlet: 'leftOutlet'},
-      {path: 'cardCreator', component: DynamicCardCreatorComponent, outlet: 'leftOutlet'},
-      {path: 'quiz', component: QuizBoardComponent, outlet: 'leftOutlet'},
-      {path: 'dict', component: JapaneseDictComponent, outlet: 'leftOutlet', title: 'dict'},
-      {path: 'anki', component: AnkiTableComponent, outlet: 'leftOutlet', title: 'anki'},
-      {path: 'kanjiWall', component: KanjiWallComponent, outlet: 'leftOutlet', title: 'KanjiWall'},
-      {path: 'overview', component: OverviewComponent, outlet: 'leftOutlet', title: 'Overview'},
-      {path: 'testing', component: TestComponent, outlet: 'leftOutlet'},
-      {path: 'kanjiDetails/:kanji', component: KanjiDetailComponent, outlet: 'leftOutlet'},
-      {path: 'transcriptTable', component: TranscriptionTranslationTableComponent, outlet: 'leftOutlet'},
-      {path: 'about', component: AboutComponent, outlet: 'leftOutlet', title: 'About'},
+      {
+        path: 'table',
+        component: DeckComponent,
+        data: {label: 'Table', icon: 'table_chart'}
+      },
+      {
+        path: 'cardCreator',
+        component: DynamicCardCreatorComponent,
+        data: {label: 'Deck Stepper', icon: 'style'}
+      },
+      {
+        path: 'quiz',
+        component: QuizBoardComponent,
+        data: {label: 'Quiz', icon: 'web'}
+      },
+      {
+        path: 'dict',
+        component: JapaneseDictComponent,
+        title: 'Dict',
+        data: {label: 'Dictionary', icon: 'menu_book'}
+      },
+      {
+        path: 'anki',
+        component: AnkiTableComponent,
+        title: 'Anki',
+        data: {label: 'Anki Table', icon: 'view_list'}
+      },
+      {
+        path: 'kanjiWall',
+        component: KanjiWallComponent,
+        title: 'Kanji Wall',
+        data: {label: 'Kanji Wall', icon: 'grid_view'}
+      },
+      {
+        path: 'overview',
+        component: OverviewComponent,
+        title: 'Overview',
+        data: {label: 'Overview', icon: 'dashboard'}
+      },
+      {
+        path: 'transcriptTable',
+        component: TranscriptionTranslationTableComponent,
+        data: {label: 'Transcripts', icon: 'translate'}
+      },
+      {
+        path: 'testing',
+        component: TestComponent,
+        data: {label: 'Testing', icon: 'build'}
+      },
+
+      // ❌ not in sidenav (no label)
+      {
+        path: 'kanjiDetails/:kanji',
+        component: KanjiDetailComponent
+      },
+
+      // pinned to bottom
+      {
+        path: 'about',
+        component: AboutComponent,
+        title: 'About',
+        data: {label: 'About', bottom: true, icon: 'info'}
+      }
     ]
   },
-  {
-    path: 'about',
-    component: AboutComponent,
-    title: 'About'
-  },
-  {path: '', redirectTo: '/quizCardApp', pathMatch: 'full'},
+
+  // fallback
+  {path: '', redirectTo: '/table', pathMatch: 'full'}
 ];
