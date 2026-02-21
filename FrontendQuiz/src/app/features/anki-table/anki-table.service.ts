@@ -1,32 +1,21 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {AnkiCard, AnkiPage, AnkiPageInfo, DEV_DECK_NAME, UserTableStates} from './anki-table.model';
-import {environment} from '../../environments/environment';
+import {AnkiCard, AnkiPage, AnkiPageInfo, UserTableStates} from './anki-table.model';
 import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
+import {AnkiSourceService} from './anki-source.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AnkiTableService {
 
-  private apiUrl = `${environment.apiBaseUrl}`;
-
-  constructor(private http: HttpClient, private quizBoardService: QuizBoardService) {
+  constructor(private sourceService: AnkiSourceService, private quizBoardService: QuizBoardService) {
   }
 
   getPage(limit: number = 10, offset: number = 0, questionFilter = ""): Observable<AnkiPage> {
-    const params = new HttpParams()
-      .set('limit', limit.toString())
-      .set('offset', offset.toString())
-      .set('questionFilter', questionFilter.toString())
-    ;
-
-    return this.http.get<AnkiPage>(`${this.apiUrl}/anki/questionReadingMeaning`, {params});
+    return this.sourceService.getPage(limit, offset, questionFilter);
   }
 
   getTotal(): Observable<AnkiPageInfo> {
-    return this.http.get<AnkiPageInfo>(`${this.apiUrl}/anki/tableInformation`);
+    return this.sourceService.getTotal();
   }
 
   learnSelected(ankiCards: AnkiCard[]){
@@ -37,11 +26,11 @@ export class AnkiTableService {
 
   persistIgnoredAnkiRows(rowIds: string[]): Observable<string>{
     console.log(rowIds);
-    return this.http.post<string>(`${this.apiUrl}/anki/persistIgnoredAnkiRows`, {deckname: DEV_DECK_NAME, rowIds: rowIds});
+    return this.sourceService.persistIgnoredAnkiRows(rowIds);
   }
 
   getIgnoredAnkiRows(): Observable<UserTableStates> {
-    return this.http.get<UserTableStates>(`${this.apiUrl}/anki/getIgnoredAnkiRows`);
+    return this.sourceService.getIgnoredAnkiRows();
   }
 
   applyQuestionFilter(charOrWord: string) {

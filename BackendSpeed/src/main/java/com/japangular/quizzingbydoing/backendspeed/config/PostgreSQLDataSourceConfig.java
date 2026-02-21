@@ -22,10 +22,10 @@ import java.util.Map;
 @EnableTransactionManagement
 @EnableJpaRepositories(
     basePackages = {
-        "com.japangular.quizzingbydoing.backendspeed.quizFrontend.repository",
-        "com.japangular.quizzingbydoing.backendspeed.kanjidict.repository",
-        "com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.repository",
-        "com.japangular.quizzingbydoing.backendspeed.transcriptCards.repositories",
+        "com.japangular.quizzingbydoing.backendspeed.features.quizFrontend.repository",
+        "com.japangular.quizzingbydoing.backendspeed.features.kanjidict.repository",
+        "com.japangular.quizzingbydoing.backendspeed.features.ankiSqliteToCsvParsing.repository",
+        "com.japangular.quizzingbydoing.backendspeed.features.transcriptCards.repositories",
     },
     entityManagerFactoryRef = "postgresqlEntityManagerFactory",
     transactionManagerRef = "postgresqlTransactionManager"
@@ -59,9 +59,9 @@ public class PostgreSQLDataSourceConfig {
         return builder
             .dataSource(dataSource)
             .packages(
-                "com.japangular.quizzingbydoing.backendspeed.kanjidict.entity",
-                "com.japangular.quizzingbydoing.backendspeed.featureAnkiSqliteToCsvParsing.entity",
-                "com.japangular.quizzingbydoing.backendspeed.transcriptCards.entities"
+                "com.japangular.quizzingbydoing.backendspeed.features.kanjidict.entity",
+                "com.japangular.quizzingbydoing.backendspeed.features.ankiSqliteToCsvParsing.entity",
+                "com.japangular.quizzingbydoing.backendspeed.features.transcriptCards.entities"
             ) // Package where your PostgreSQL entities are located
             .persistenceUnit("postgresql")
             .properties(hibernateProperties())

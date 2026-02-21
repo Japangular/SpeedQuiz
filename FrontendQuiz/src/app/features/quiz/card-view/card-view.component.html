@@ -1,5 +1,5 @@
 <div class="main-content">
-  <div class="zoomed">
+  <div [class.zoomed]="enableZoom">
     <ng-container *ngIf="deckIteratorService.card$ | async as currentCard">
       <div>
         <app-one-liner type="question"
@@ -14,8 +14,8 @@
 
         <app-stroke-order-kanji *ngIf="isJapanese(currentCard)"
                                 [japanese]="currentCard.question"
-                                [isWrapContent] = false
-                                (emitStrokeOrderComplete) = "handleStrokeOrderComplete()"
+                                [isWrapContent]=false
+                                (emitStrokeOrderComplete)="handleStrokeOrderComplete()"
         >
         </app-stroke-order-kanji>
       </div>

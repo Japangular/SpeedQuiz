@@ -1,0 +1,17 @@
+.quiz-step-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* stepper header + mat-card padding + toolbar */
+  overflow: hidden;
+}
+
+.quiz-content {
+  flex: 1;
+  min-height: 0; /* allows flex child to shrink below content size */
+  overflow: hidden;
+}
+
+.no_bottom {
+  padding-bottom: 0;
+  margin-bottom: 0;
+}

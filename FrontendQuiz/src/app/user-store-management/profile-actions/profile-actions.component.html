@@ -1,0 +1,18 @@
+<div class="profile-actions" *ngIf="profileService.profile$ | async as profile">
+  <button mat-button [matMenuTriggerFor]="menu" class="profile-button">
+    <mat-icon color="primary">account_circle</mat-icon>
+    {{ profile.displayName }}
+  </button>
+
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="localSave()">
+      <mat-icon>save</mat-icon>
+      Local Save
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="clearSession()">
+      <mat-icon color="warn">logout</mat-icon>
+      Clear session
+    </button>
+  </mat-menu>
+</div>

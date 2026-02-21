@@ -5,7 +5,7 @@ import {QuizActionBarComponent} from '../quiz-action-bar/quiz-action-bar.compone
 import {ModalService} from '../../../widgets/modal/modal.service';
 
 @Component({
-  selector: 'app-main',
+  selector: 'app-quiz-board',
   standalone: true,
   imports: [
     CardViewComponent,

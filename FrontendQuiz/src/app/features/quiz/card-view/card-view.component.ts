@@ -33,6 +33,7 @@ export class CardViewComponent {
   currentCard?: Card | null;
   @Output()
   nextCard = new EventEmitter<boolean>();
+  @Input() enableZoom: boolean = true;
 
   constructor(protected deckIteratorService: QuizBoardService) {
   }

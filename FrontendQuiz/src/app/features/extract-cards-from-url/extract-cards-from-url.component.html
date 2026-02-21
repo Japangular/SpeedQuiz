@@ -1,0 +1,138 @@
+<mat-card class="import-card">
+  <mat-card-title>
+    <mat-icon color="primary">cloud_download</mat-icon>
+    Import cards
+  </mat-card-title>
+
+  <mat-horizontal-stepper [linear]="true" color=primary animationDuration="0ms">
+
+    <!-- STEP 1: Credentials -->
+    <mat-step [completed]="!!connectionStatus">
+      <form [formGroup]="credentialsForm">
+        <ng-template matStepLabel>API credentials</ng-template>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Provider</mat-label>
+          <mat-select formControlName="provider">
+            <mat-option value="wanikani">WaniKani</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username for Url</mat-label>
+          <input matInput type="password" formControlName=claimedName>
+          <mat-hint>Used to prevent sharing of token</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>API Token</mat-label>
+          <input matInput type="password" formControlName="token">
+          <mat-hint>Token is never stored</mat-hint>
+        </mat-form-field>
+
+        <div class="step-actions" *ngIf="!connectionStatus">
+          <button
+            mat-raised-button
+            color="accent"
+            (click)="testConnection()"
+            [disabled]="credentialsForm.invalid || loading"
+          >
+            Test connection
+          </button>
+        </div>
+
+        <mat-progress-bar
+          color="primary"
+          *ngIf="loading"
+          mode="indeterminate">
+        </mat-progress-bar>
+
+        <div *ngIf="connectionStatus" class="status success">
+          <mat-icon color="primary">check_circle</mat-icon>
+          Connected as {{ connectionStatus.username! }}
+        </div>
+
+        <div *ngIf="connectionError" class="status error">
+          <mat-icon color="warn">error</mat-icon>
+          {{ connectionError }}
+        </div>
+
+        <div class="step-actions">
+          <button
+            mat-button
+            color="accent"
+            matStepperNext
+            [disabled]="!payload"
+          >
+            Next
+          </button>
+        </div>
+      </form>
+    </mat-step>
+
+    <!-- STEP 2: Preview & Select -->
+    <mat-step>
+      <ng-template matStepLabel>Preview homework</ng-template>
+      <ng-template matStepContent>
+        <app-anki-table [bottomBuffer]="72"></app-anki-table>
+
+        <span class="step-actions">
+          <button mat-button color="accent" matStepperPrevious>
+            Back
+          </button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onStartQuiz()"
+            [disabled]="!ankiTable?.selectedRows?.size"
+          >
+            Practice selected
+          </button>
+        </span>
+      </ng-template>
+    </mat-step>
+
+    <!-- STEP 3: Quiz -->
+    <mat-step>
+      <ng-template matStepLabel>Practice</ng-template>
+      <ng-template matStepContent>
+        <div class="quiz-step-layout">
+          <div class="quiz-content">
+            <app-card-view [enableZoom]="false"></app-card-view>
+          </div>
+          <div class="step-actions">
+            <button mat-button color="accent" matStepperPrevious>
+              Back to selection
+            </button>
+            <button mat-raised-button color="primary" matStepperNext>
+              Finish
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </mat-step>
+
+    <!-- STEP 4: Persist / Finish -->
+    <mat-step>
+      <ng-template matStepLabel>Finish</ng-template>
+
+      <div class="finish-state">
+        <mat-icon color="accent">done_all</mat-icon>
+
+        <p>
+          {{ selectedCards.length }} cards practiced.
+        </p>
+
+        <div class="step-actions">
+          <button mat-button color="primary" (click)="goToDecks()">
+            Go to decks
+          </button>
+          <button mat-button color="accent" (click)="resetStepper()">
+            Import more
+          </button>
+        </div>
+      </div>
+    </mat-step>
+
+  </mat-horizontal-stepper>
+</mat-card>

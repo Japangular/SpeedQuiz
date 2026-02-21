@@ -42,3 +42,4 @@ testem.log
 Thumbs.db
 
 src/generated
+generated_contexts
