@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, HostListener, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, HostListener, Input, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
 import {AnkiTableService} from './anki-table.service';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {AnkiCard, AnkiPage} from './anki-table.model';
@@ -45,7 +45,6 @@ import {PaginatorComponent} from '../../widgets/paginator/paginator.component';
     MatAnchor,
     MatChip,
     NgClass,
-    PaginatorComponent,
   ],
   templateUrl: './anki-table.component.html',
   styleUrl: './anki-table.component.css'
@@ -81,6 +80,8 @@ export class AnkiTableComponent implements AfterViewInit {
   @ViewChildren('rowElement', {read: ElementRef}) rowElements!: QueryList<ElementRef>;
 
   lastClickedIndex: string | null = null;
+
+  @Input() bottomBuffer: number = 0;
 
   constructor(private anki: AnkiTableService, private elRef: ElementRef, private router: Router) {
     const offset = this.pageIndex * this.pageSize;
@@ -136,18 +137,16 @@ export class AnkiTableComponent implements AfterViewInit {
   }
 
   autoSetPageSize() {
-    const fullPageHeight = window.innerHeight;
+    // Use getBoundingClientRect().top to automatically account for everything above
+    // this component (toolbar, stepper header, mat-card, etc.) regardless of context
+    const tableTop = this.elRef.nativeElement.getBoundingClientRect().top;
+    const fullPageHeight = window.innerHeight - tableTop;
 
     const paginatorHeight = this.paginatorContainer?.nativeElement?.offsetHeight || 0;
-
-    const header = document.querySelector('mat-toolbar') as HTMLElement;
-    const headerHeight = header?.offsetHeight || 56;
-
     const headerRowHeight = this.headerRow?.nativeElement?.offsetHeight || 56;
+    const spacingBuffer = this.bottomBuffer;
 
-    const spacingBuffer = 0;
-
-    const availableHeight = fullPageHeight - paginatorHeight - headerHeight - headerRowHeight - spacingBuffer;
+    const availableHeight = fullPageHeight - paginatorHeight - headerRowHeight - spacingBuffer;
 
     const rowHeight = this.rowElements.first?.nativeElement?.offsetHeight;
 
@@ -164,7 +163,7 @@ export class AnkiTableComponent implements AfterViewInit {
       this.pageIndex = 0;
       this.loadPage();
     }
-    const spacerHeight = fullPageHeight - usedHeight - paginatorHeight - headerHeight - headerRowHeight - spacingBuffer;
+    const spacerHeight = fullPageHeight - usedHeight - paginatorHeight - headerRowHeight - spacingBuffer;
 
     if (this.spacer?.nativeElement) {
       this.spacer.nativeElement.style.height = `${Math.max(spacerHeight, 0)}px`;

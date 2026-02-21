@@ -23,10 +23,10 @@ services:
     build:
       context: .
       dockerfile: BackendSpeed/Dockerfile.backend
-    command: java -version
     environment:
       SPRING_PROFILES_ACTIVE: docker
       OPENAPI_SPEC_PATH: /app/api.yaml
+      APP_WANIKANI_USE_DEV_CACHE: "true"
     depends_on:
       - db
       - python_dict

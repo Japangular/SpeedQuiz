@@ -11,6 +11,10 @@ import {TestComponent} from './features/test/test.component';
 import {OverviewComponent} from './features/overview/overview.component';
 import {KanjiDetailComponent} from './features/kanji-details/kanji-details.component';
 import {TranscriptionTranslationTableComponent} from './features/transcription-translation/transcription-translation-table.component';
+import {ExtractCardsFromUrlComponent} from './features/extract-cards-from-url/extract-cards-from-url.component';
+import {AnkiSourceService} from './features/anki-table/anki-source.service';
+import {BackendSourceService} from './features/anki-table/backend-source.service';
+import {AnkiTableService} from './features/anki-table/anki-table.service';
 
 export const routes: Routes = [
   {
@@ -42,7 +46,11 @@ export const routes: Routes = [
         path: 'anki',
         component: AnkiTableComponent,
         title: 'Anki',
-        data: {label: 'Anki Table', icon: 'view_list'}
+        data: {label: 'Anki Table', icon: 'view_list'},
+        providers: [
+          {provide: AnkiSourceService, useClass: BackendSourceService},
+          AnkiTableService,
+        ]
       },
       {
         path: 'kanjiWall',
@@ -65,6 +73,11 @@ export const routes: Routes = [
         path: 'testing',
         component: TestComponent,
         data: {label: 'Testing', icon: 'build'}
+      },
+      {
+        path: 'extract from url',
+        component: ExtractCardsFromUrlComponent,
+        data: {label: 'Extract Cards', icon: 'stadium'}
       },
 
       // ❌ not in sidenav (no label)

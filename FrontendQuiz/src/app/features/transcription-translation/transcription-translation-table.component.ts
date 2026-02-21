@@ -36,8 +36,7 @@ import {MatSnackBar} from '@angular/material/snack-bar';
     MatRowDef,
     MatCard,
     MatCardContent,
-    TranscriptUploadComponent,
-    AsyncPipe
+    TranscriptUploadComponent
   ],
   templateUrl: './transcription-translation-table.component.html',
   styleUrl: './transcription-translation-table.component.css'

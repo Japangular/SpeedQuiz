@@ -8,10 +8,6 @@ import {AnkiTableService} from '../../features/anki-table/anki-table.service';
 @Component({
   selector: 'app-paginator',
   imports: [
-    MatAnchor,
-    MatChip,
-    MatPaginator,
-    NgIf
   ],
   templateUrl: './paginator.component.html',
   styleUrl: './paginator.component.css'

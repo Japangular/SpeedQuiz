@@ -1,0 +1,62 @@
+<div class="provision-container">
+  <mat-card class="provision-card">
+    <mat-card-title>
+      <mat-icon color="primary">person_add</mat-icon>
+      Welcome to JapanGular
+    </mat-card-title>
+
+    <mat-card-content>
+      <!-- New user -->
+      <section *ngIf="mode === 'new'">
+        <p>Pick a name to get started. No email or password needed.</p>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Display name</mat-label>
+          <input matInput [(ngModel)]="displayName" placeholder="e.g. TenshiFan42">
+        </mat-form-field>
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="startLearning()"
+            [disabled]="!displayName?.trim() || loading"
+          >
+            Start learning
+          </button>
+          <button mat-button color="accent" (click)="mode = 'restore'">
+            I have a save file
+          </button>
+        </div>
+      </section>
+
+      <!-- Restore existing -->
+      <section *ngIf="mode === 'restore'">
+        <p>Paste your save file contents, or upload the JSON file.</p>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Paste save JSON</mat-label>
+          <textarea matInput [(ngModel)]="importJson" rows="5"></textarea>
+        </mat-form-field>
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="restoreProfile()"
+            [disabled]="!importJson?.trim() || loading"
+          >
+            Restore
+          </button>
+          <button mat-button (click)="mode = 'new'">
+            Back
+          </button>
+        </div>
+      </section>
+
+      <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
+
+      <p *ngIf="error" class="error-text">{{ error }}</p>
+    </mat-card-content>
+  </mat-card>
+</div>
