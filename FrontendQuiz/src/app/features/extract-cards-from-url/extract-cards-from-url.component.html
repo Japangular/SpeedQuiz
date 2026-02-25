@@ -124,6 +124,20 @@
         </p>
 
         <div class="step-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="saveCards()"
+            [disabled]="saving || saved || selectedCards.length === 0"
+          >
+            <mat-icon>save</mat-icon>
+            {{ saved ? 'Saved!' : 'Save to my decks' }}
+          </button>
+        </div>
+
+        <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
+
+        <div class="step-actions">
           <button mat-button color="primary" (click)="goToDecks()">
             Go to decks
           </button>

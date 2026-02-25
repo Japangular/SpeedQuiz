@@ -1,1 +1,0 @@
-add emote placeholder, let the user load their emotes, maybe also background, maybe via url or drag and drop

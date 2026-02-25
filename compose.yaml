@@ -11,9 +11,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: speedquizdb
-      POSTGRES_USER: speedquiz
-      POSTGRES_PASSWORD: X9@1b6Y2p3Z4w3k5P5L6m1
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
@@ -25,6 +25,8 @@ services:
       dockerfile: BackendSpeed/Dockerfile.backend
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
       OPENAPI_SPEC_PATH: /app/api.yaml
       APP_WANIKANI_USE_DEV_CACHE: "true"
     depends_on:
@@ -36,32 +38,20 @@ services:
       - ./api.yaml:/app/api.yaml
       - ./JMdict_e.xml:/app/jmdict_e.xml
       - ./anki/collection.db:/app/anki/collection.db
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-#      interval: 30s
-#      retries: 5
-#      start_period: 10s
-#      timeout: 10s
 
   frontend:
     build:
       context: .
       dockerfile: FrontendQuiz/Dockerfile.frontend
     ports:
-      - "4200:80"  # You may not need to expose this port as Nginx will serve the content
+      - "4200:80"
     volumes:
       - ./api.yaml:/app/api.yaml
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:4200" ]
-#      interval: 30s
-#      retries: 5
-#      start_period: 10s
-#      timeout: 10s
 
   nginx:
     build:
       context: .
-      dockerfile: FrontendQuiz/Dockerfile.frontend  # Build from the frontend Dockerfile
+      dockerfile: FrontendQuiz/Dockerfile.frontend
     ports:
       - "80:80"
     depends_on:
@@ -75,12 +65,6 @@ services:
       dockerfile: PythonDict/Dockerfile.python_dict
     ports:
       - "8000:8000"
- #   healthcheck:
- #     test: [ "CMD", "curl", "-f", "http://python_dict:8000/docs" ]
- #     interval: 30s
- #     retries: 5
- #     start_period: 10s
- #     timeout: 10s
 
 volumes:
   db-data:

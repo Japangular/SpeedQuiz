@@ -39,7 +39,18 @@ export class ProvisionComponent {
   startLearning(): void {
     const name = this.displayName.trim();
     if (!name) return;
+    this.doProvision(name);
+  }
 
+  /**
+   * Skips the name input — generates something like "Learner-a7x3"
+   */
+  skipWithRandomName(): void {
+    const suffix = Math.random().toString(36).substring(2, 6);
+    this.doProvision(`Learner-${suffix}`);
+  }
+
+  private doProvision(name: string): void {
     this.loading = true;
     this.error = '';
 
@@ -47,10 +58,8 @@ export class ProvisionComponent {
       this.loading = false;
       if (profile) {
         this.snackBar.open(`Welcome, ${profile.displayName}!`, 'OK', {duration: 3000});
-        // The parent component (AppComponent or SideNav) watches profile$
-        // and will swap in the real UI automatically.
       } else {
-        this.error = 'Name might already be taken, or the server is unavailable. Try a different name.';
+        this.error = 'Could not create session. The server may be unavailable.';
       }
     });
   }

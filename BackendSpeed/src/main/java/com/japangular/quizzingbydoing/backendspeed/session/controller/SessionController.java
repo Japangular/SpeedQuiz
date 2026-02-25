@@ -28,7 +28,6 @@ public class SessionController {
   private final SessionRepository sessionRepository;
   private static final Logger logger = LoggerFactory.getLogger(SessionController.class);
 
-  // Only allow alphanumeric, underscores, hyphens, spaces — no HTML/script
   private static final Pattern SAFE_NAME = Pattern.compile("^[\\w\\- ]{1,30}$");
 
   @PostMapping("/provision")
@@ -46,10 +45,8 @@ public class SessionController {
       return ResponseEntity.badRequest().build();
     }
 
-    if (sessionRepository.isDisplayNameTaken(sanitized)) {
-      logger.warn("Display name already taken (length: {})", sanitized.length());
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
-    }
+    // No uniqueness check — display name is cosmetic.
+    // The UUID token is the real identity. Multiple users can share a name.
 
     UUID token = sessionRepository.provision(sanitized);
     return ResponseEntity.status(HttpStatus.CREATED)

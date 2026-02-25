@@ -6,14 +6,15 @@ import {MatListItem, MatNavList} from "@angular/material/list";
 import {MatSidenav, MatSidenavContainer, MatSidenavContent} from "@angular/material/sidenav";
 import {MatToolbar} from "@angular/material/toolbar";
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
-import {ActivatedRoute, Route, Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, Route, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {MatLabel} from '@angular/material/input';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {LocalProfileService} from '../../user-store-management/local-profile.service';
 import {ProvisionComponent} from '../../user-store-management/provision/provision.component';
 import {ProfileActionsComponent} from '../../user-store-management/profile-actions/profile-actions.component';
+import {SiteModeService} from '../../site-mode/site-mode.service';
+import {AccessGateComponent} from '../../site-mode/access-gate/access-gate.component';
 
 @Component({
   selector: 'app-side-nav',
@@ -33,10 +34,10 @@ import {ProfileActionsComponent} from '../../user-store-management/profile-actio
     RouterLinkActive,
     NgForOf,
     NgIf,
-    MatLabel,
     MatProgressBarModule,
     ProvisionComponent,
     ProfileActionsComponent,
+    AccessGateComponent,
   ],
   templateUrl: './side-nav.component.html',
   standalone: true,
@@ -48,6 +49,7 @@ export class SideNavComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private route = inject(ActivatedRoute);
   profileService = inject(LocalProfileService);
+  siteModeService = inject(SiteModeService);
 
   isHandset$ = this.breakpointObserver
     .observe(Breakpoints.Handset)
