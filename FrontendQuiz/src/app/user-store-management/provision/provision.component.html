@@ -2,7 +2,7 @@
   <mat-card class="provision-card">
     <mat-card-title>
       <mat-icon color="primary">person_add</mat-icon>
-      Welcome to JapanGular
+      Welcome to SpeedQuiz
     </mat-card-title>
 
     <mat-card-content>
@@ -13,6 +13,7 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Display name</mat-label>
           <input matInput [(ngModel)]="displayName" placeholder="e.g. TenshiFan42">
+          <mat-hint>Just a label — others can use the same name</mat-hint>
         </mat-form-field>
 
         <div class="actions">
@@ -24,6 +25,12 @@
           >
             Start learning
           </button>
+          <button mat-stroked-button (click)="skipWithRandomName()" [disabled]="loading">
+            Skip
+          </button>
+        </div>
+
+        <div class="restore-link">
           <button mat-button color="accent" (click)="mode = 'restore'">
             I have a save file
           </button>

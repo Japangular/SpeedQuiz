@@ -39,3 +39,5 @@ generate_context.sh
 project_context*.txt
 generated_contexts/
 docs/
+
+.env

@@ -6,7 +6,7 @@ import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {JsonPipe, NgForOf, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {MatListModule} from '@angular/material/list';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
@@ -21,8 +21,9 @@ import {AnkiCard, mapToAnkiCard} from '../anki-table/anki-table.model';
 import {ExtractCardStateService} from './extract-card-state.service';
 import {CardStoreService} from '../../services/card-store.service';
 import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
-import {QuizBoardComponent} from '../quiz/quiz-board/quiz-board.component';
 import {CardViewComponent} from '../quiz/card-view/card-view.component';
+import {LocalProfileService} from '../../user-store-management/local-profile.service';
+import {PropertyType, SubmissionDeck} from '../../../generated/api';
 
 async function hashToken(token: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -72,6 +73,7 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
   private jsonSource = inject(JsonSourceService);
   private stateService = inject(ExtractCardStateService);
   private quizBoardService = inject(QuizBoardService);
+  private profileService = inject(LocalProfileService);
   quizContainerHeight = 400; // safe fallback
 
   @ViewChild(MatStepper) stepper!: MatStepper;
@@ -79,8 +81,9 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
   @ViewChild('quizContainer') quizContainer!: ElementRef;
 
   selectedCards: AnkiCard[] = [];
-  //Cached session found for "luither". Click Test Connection to use the cache.
-  // token failed for given connection
+  saving = false;
+  saved = false;
+
   ngOnInit(){
     // 1. Try in-memory state first (navigating within the SPA)
     const saved = this.stateService.restore();
@@ -135,7 +138,6 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
   loading = false;
   connectionStatus?: {
     username: string;
-   // level: number;
   };
   connectionError!: string;
 
@@ -146,7 +148,6 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
    * Step 1: test API connection
    * ----------------------------------------- */
   async testConnection(): Promise<void> {
-    // Allow submission if claimedName is filled AND either token or cached hash exists
     const {provider, claimedName, token} = this.credentialsForm.value;
     if (!claimedName || !provider) {
       return;
@@ -156,15 +157,12 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
     this.connectionStatus = undefined;
     this.connectionError = "";
 
-    // Determine tokenHash: from fresh token or from localStorage cache
     const cached = this.stateService.loadTokenHash();
     let tokenHashValue: string | undefined;
 
     if (token) {
-      // User provided a fresh token → hash it
       tokenHashValue = await hashToken(token);
     } else if (cached && cached.claimedName === claimedName && cached.provider === provider) {
-      // No token entered, but we have a cached hash for this user
       tokenHashValue = cached.tokenHash;
     }
 
@@ -189,14 +187,11 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
             this.connectionStatus = {username: status.connectedUser? status.connectedUser : "no username"};
             this.payload = status.payload;
 
-            // Feed payload into the JsonSourceService so the embedded
-            // AnkiTableComponent can display it in step 2.
             if (this.payload) {
               const cards = mapToAnkiCard(JSON.stringify(this.payload));
               this.jsonSource.setCards(cards);
             }
 
-            // Save the hash to localStorage for future sessions
             if (tokenHashValue) {
               this.stateService.saveTokenHash({
                 claimedName: claimedName,
@@ -211,7 +206,6 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
               {duration: 3000}
             );
           } else if (status.connectionTested && status.connectionFailed) {
-            // Cache might be stale → clear it
             this.stateService.clearTokenHash();
             this.snackBar.open("token failed for given connection", 'Close', {
               duration: 4000,
@@ -285,7 +279,51 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
   }
 
   /* -----------------------------------------
-   * Step 3: finalize import
+   * Step 4: save practiced cards to backend
+   * ----------------------------------------- */
+  saveCards(): void {
+    if (this.selectedCards.length === 0 || this.saving) return;
+
+    this.saving = true;
+
+    const provider = this.credentialsForm.value.provider ?? 'unknown';
+    const username = this.profileService.getDisplayName() ?? 'anonymous';
+
+    // Build a SubmissionDeck from the practiced AnkiCards
+    const deck: SubmissionDeck = {
+      deckName: `${provider}-import-${new Date().toISOString().slice(0, 10)}`,
+      username: username,
+      properties: {
+        question: PropertyType.Question,
+        reading: PropertyType.Answer,
+        meaning: PropertyType.Answer,
+      },
+      cards: this.selectedCards.map(card => ({
+        question: card.question,
+        reading: card.reading,
+        meaning: card.meaning,
+      })),
+    };
+
+    this.importService.saveDeck(deck).subscribe({
+      next: () => {
+        this.saving = false;
+        this.saved = true;
+        this.snackBar.open(
+          `${this.selectedCards.length} cards saved to "${deck.deckName}"`,
+          'OK',
+          {duration: 3000}
+        );
+      },
+      error: () => {
+        this.saving = false;
+        this.snackBar.open('Failed to save cards', 'Close', {duration: 4000});
+      },
+    });
+  }
+
+  /* -----------------------------------------
+   * Step 3: finalize import (legacy — kept for compatibility)
    * ----------------------------------------- */
   finalizeImport(): void {
     if (!this.previewCards.length) {
@@ -328,6 +366,7 @@ export class ExtractCardsFromUrlComponent implements OnInit, OnDestroy {
     this.selectedCards = [];
     this.connectionStatus = undefined;
     this.connectionError = "";
+    this.saved = false;
     this.stateService.clearTokenHash();
   }
 

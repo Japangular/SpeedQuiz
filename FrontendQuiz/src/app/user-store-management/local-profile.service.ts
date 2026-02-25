@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {BehaviorSubject, catchError, Observable, of} from 'rxjs';
-import {map, tap} from 'rxjs/operators';
+import {BehaviorSubject, catchError, from, Observable, of} from 'rxjs';
+import {map, switchMap, tap} from 'rxjs/operators';
 import {environment} from '../environments/environment';
 
 export interface LocalProfile {
@@ -11,6 +11,11 @@ export interface LocalProfile {
   wkProvider?: string;
   wkClaimedName?: string;
   exportedAt?: string;
+}
+
+export interface SignedProfile {
+  profile: LocalProfile;
+  signature: string;  // HMAC-SHA256 hex digest
 }
 
 interface ProvisionResponse {
@@ -28,30 +33,43 @@ export class LocalProfileService {
   private profileSubject = new BehaviorSubject<LocalProfile | null>(null);
   profile$ = this.profileSubject.asObservable();
 
-  /** Starts false — becomes true once initialize() has finished (success or failure). */
   private initializedSubject = new BehaviorSubject<boolean>(false);
   initialized$ = this.initializedSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
+  // ══════════════════════════════════════════
+  //  Bootstrap
+  // ══════════════════════════════════════════
+
   initialize(): Observable<boolean> {
     const stored = this.loadFromStorage();
 
     if (stored?.token){
+      // Trust localStorage immediately → UI renders the sidenav right away.
+      // No blank screen, no flicker.
+            this.profileSubject.next(stored);
+          this.initializedSubject.next(true);
+
+      // Validate in the background — if the token is dead, kick back to provision.
       return this.validate(stored.token).pipe(
         tap(valid => {
-          if (valid) {
-            this.profileSubject.next(stored);
+          if (!valid) {
+            console.warn('Stored token is no longer valid, clearing profile');
+            this.clearProfile();
           }
-          this.initializedSubject.next(true);
         })
       );
     }
 
-    // No stored token — mark as initialized immediately
+    // No stored token → mark initialized, show provision
     this.initializedSubject.next(true);
     return of(false);
   }
+
+  // ══════════════════════════════════════════
+  //  Provisioning
+  // ══════════════════════════════════════════
 
   provision(displayName: string): Observable<LocalProfile | null> {
     return this.http.post<ProvisionResponse>(`${this.apiUrl}/provision`, {displayName}).pipe(
@@ -70,6 +88,10 @@ export class LocalProfileService {
       })
     )
   }
+
+  // ══════════════════════════════════════════
+  //  Token access
+  // ══════════════════════════════════════════
 
   getToken(): string | null {
     return this.profileSubject.value?.token ?? null;
@@ -92,33 +114,110 @@ export class LocalProfileService {
     this.profileSubject.next(updated);
   }
 
-  exportProfile(): string {
-    const profile = this.profileSubject.value;
-    if(!profile) return '{}';
+  // ══════════════════════════════════════════
+  //  Signed export / import
+  // ══════════════════════════════════════════
 
-    return JSON.stringify({...profile, exportedAt: new Date().toISOString()}, null, 2);
+  exportProfile(): Observable<string> {
+    const profile = this.profileSubject.value;
+    if (!profile) return of('{}');
+
+    const exportedProfile: LocalProfile = {
+      ...profile,
+      exportedAt: new Date().toISOString()
+    };
+
+    return from(this.sign(exportedProfile, profile.token)).pipe(
+      map(signature => {
+        const signed: SignedProfile = {profile: exportedProfile, signature};
+        return JSON.stringify(signed, null, 2);
+      })
+    );
   }
 
   importProfile(json: string): Observable<boolean>{
     try {
-      const imported = JSON.parse(json) as LocalProfile;
+      const parsed = JSON.parse(json);
 
-      if (!imported) return of(false);
+      let profile: LocalProfile;
+      let signature: string | null = null;
 
-      return this.validate(imported.token).pipe(
-        tap(valid => {
-          if (valid) {
-            this.saveToStorage(imported);
-            this.profileSubject.next(imported);
+      if (parsed.profile && parsed.signature) {
+        profile = parsed.profile as LocalProfile;
+        signature = parsed.signature;
+      } else if (parsed.token) {
+        profile = parsed as LocalProfile;
+      } else {
+        return of(false);
+      }
+
+      if (!profile.token) return of(false);
+
+      if (signature) {
+        return from(this.verify(profile, profile.token, signature)).pipe(
+          switchMap(valid => {
+            if (!valid) {
+              console.warn('Save file signature verification failed — file may have been tampered with');
+              return of(false);
           }
-        })
-      );
-    } catch {return of(false)}
+            return this.validateAndAccept(profile);
+          })
+        );
+      }
+
+      return this.validateAndAccept(profile);
+    } catch {
+      return of(false);
+    }
   }
 
   clearProfile(): void {
     localStorage.removeItem(PROFILE_STORAGE_KEY);
     this.profileSubject.next(null);
+  }
+
+  // ══════════════════════════════════════════
+  //  HMAC helpers
+  // ══════════════════════════════════════════
+
+  private async sign(profile: LocalProfile, secret: string): Promise<string> {
+    const key = await this.deriveKey(secret);
+    const data = new TextEncoder().encode(JSON.stringify(profile));
+    const sig = await crypto.subtle.sign('HMAC', key, data);
+    return Array.from(new Uint8Array(sig))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  private async verify(profile: LocalProfile, secret: string, expectedSignature: string): Promise<boolean> {
+    const actualSignature = await this.sign(profile, secret);
+    return actualSignature === expectedSignature;
+  }
+
+  private async deriveKey(secret: string): Promise<CryptoKey> {
+    const keyData = new TextEncoder().encode(secret);
+    return crypto.subtle.importKey(
+      'raw',
+      keyData,
+      {name: 'HMAC', hash: 'SHA-256'},
+      false,
+      ['sign']
+    );
+  }
+
+  // ══════════════════════════════════════════
+  //  Private helpers
+  // ══════════════════════════════════════════
+
+  private validateAndAccept(profile: LocalProfile): Observable<boolean> {
+    return this.validate(profile.token).pipe(
+      tap(valid => {
+        if (valid) {
+          this.saveToStorage(profile);
+          this.profileSubject.next(profile);
+        }
+      })
+    );
   }
 
   private validate(token: string): Observable<boolean> {

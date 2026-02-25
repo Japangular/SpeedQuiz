@@ -1,37 +1,248 @@
-<mat-card style="margin: 0; padding: 0">
-  <mat-card-title>About SpeedQuiz</mat-card-title>
-  <mat-card-content>
-    <p>
-      SpeedQuiz is a kanji-based quiz application designed to help users learn Japanese characters through interactive exercises.
-    </p>
+<div class="about-container">
 
-    <h3>Kanji Stroke Order Data</h3>
-    <p>
-      This application uses Kanji stroke order diagrams from
-      <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener noreferrer">KanjiVG</a>,
-      a project by Ulrich Apel.
-    </p>
-    <p>
-      The SVG files are licensed under the
-      <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">
-        Creative Commons Attribution-Share Alike 3.0 License (CC BY-SA 3.0)
-      </a>.
-    </p>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PORTFOLIO MODE                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <ng-container *ngIf="siteModeService.isPortfolio">
 
-    <p>
-      You are free to copy, distribute, transmit, and adapt the SVG diagrams as long as you:
-    </p>
-    <ul>
-      <li>Provide proper attribution</li>
-      <li>Use a compatible license when sharing modifications</li>
-    </ul>
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">person</mat-icon>
+        About the Developer
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          Hi, I'm <strong>Japangular</strong> — a fullstack developer with a background
+          in the automotive industry, now looking for my next role in Java/Angular development.
+        </p>
+        <p>
+          I built Speedquiz as a personal tool to support my Japanese studies and as a
+          way to deepen my skills with technologies I use professionally. Every feature
+          started from a real need I had while learning.
+        </p>
+      </mat-card-content>
+    </mat-card>
 
-    <h3>Credits</h3>
-    <ul>
-      <li>SVG Stroke Order Diagrams: <a href="https://kanjivg.tagaini.net/" target="_blank">KanjiVG</a></li>
-      <li>Font (optional): KanjiStrokeOrders.ttf – also part of the KanjiVG project</li>
-      <li>Frontend: Angular, Angular Material</li>
-      <li>Backend: Spring Boot</li>
-    </ul>
-  </mat-card-content>
-</mat-card>
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">architecture</mat-icon>
+        Tech Stack & Architecture
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          The application runs as a multi-container Docker Compose setup with five services:
+          an Angular SPA served via nginx, a Spring Boot backend, a PostgreSQL database,
+          a read-only SQLite mount for Anki imports, and a Python FastAPI microservice
+          for Japanese text segmentation via MeCab.
+        </p>
+
+        <h3>Frontend</h3>
+        <p>
+          Angular 19 with Angular Material. State is managed via RxJS BehaviorSubjects
+          in injectable services. The API client is auto-generated from an OpenAPI 3.0
+          contract to keep frontend and backend in sync.
+        </p>
+
+        <h3>Backend</h3>
+        <p>
+          Spring Boot 3.4 on Java 21. Uses Spring Data JPA with a multi-datasource
+          configuration — PostgreSQL for application data and SQLite for read-only
+          Anki deck imports. Database migrations are handled via Flyway.
+          Session management is lightweight and passwordless, using UUID tokens.
+        </p>
+
+        <h3>NLP Service</h3>
+        <p>
+          A Python FastAPI service wrapping MeCab for morphological analysis of Japanese
+          text. Called server-to-server from the Spring Boot backend. Containerized
+          separately to keep the Java build lean.
+        </p>
+
+        <h3>Infrastructure</h3>
+        <p>
+          Docker Compose orchestrates all services. nginx acts as reverse proxy, serving
+          the SPA and routing <code>/api/*</code> requests to the backend. Static assets
+          like KanjiVG stroke order SVGs are served directly from nginx.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">featured_play_list</mat-icon>
+        Notable Engineering Decisions
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          <strong>OpenAPI code generation</strong> — The API contract lives in a single
+          <code>api.yaml</code> file. The Angular API client is generated from it,
+          eliminating manual DTO maintenance and catching contract mismatches at build time.
+        </p>
+        <p>
+          <strong>Multi-datasource configuration</strong> — PostgreSQL handles application
+          state while Anki's SQLite database is mounted read-only. Spring's qualifier-based
+          injection keeps the two datasources cleanly separated.
+        </p>
+        <p>
+          <strong>Fuzzy answer validation</strong> — Quiz answers are validated using
+          Levenshtein distance for typo tolerance, combined with a custom romaji-to-hiragana
+          converter so users can type in either script.
+        </p>
+        <p>
+          <strong>Polyglot architecture</strong> — MeCab (the Japanese tokenizer) only has
+          mature bindings for Python and C. Rather than fighting with JNI, I run it as a
+          separate microservice — a pragmatic tradeoff between language ecosystem strengths.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">link</mat-icon>
+        Links
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          <mat-icon class="inline-icon">code</mat-icon>
+          <a href="https://github.com/Japangular" target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Impressum — only in portfolio mode -->
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">gavel</mat-icon>
+        Impressum
+      </mat-card-title>
+      <mat-card-content>
+        <p>Angaben gemäß § 5 DDG</p>
+        <!-- TODO -->
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- VTUBER FAN MODE                             -->
+  <!-- ═══════════════════════════════════════════ -->
+  <ng-container *ngIf="siteModeService.isVtuberFan">
+
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">auto_stories</mat-icon>
+        About JapanGular
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          JapanGular is a Japanese learning tool built by a fan who wanted a better way
+          to study vocabulary and kanji encountered in streams. Instead of relying on
+          generic apps, this one is tailored to the content we actually watch.
+        </p>
+        <p>
+          Everything here is a personal project — not affiliated with any vtuber or agency.
+          Emotes and assets are used with permission for non-commercial purposes.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">help_outline</mat-icon>
+        How to Use
+      </mat-card-title>
+      <mat-card-content>
+        <h3>Quiz</h3>
+        <p>
+          Pick a deck and test yourself. Answers are checked with some typo tolerance,
+          and you can type in either romaji or hiragana. Cards you get wrong will come
+          back more often.
+        </p>
+
+        <h3>Dictionary</h3>
+        <p>
+          Paste any Japanese text and it gets broken down into individual words with
+          dictionary lookups. Useful when you catch a word in a stream and want to
+          look it up quickly.
+        </p>
+
+        <h3>Kanji Wall</h3>
+        <p>
+          A visual grid of kanji. Click any character to see its readings, meanings,
+          and animated stroke order.
+        </p>
+
+        <h3>Transcripts</h3>
+        <p>
+          Upload stream transcripts and turn them into study material. The app parses
+          the Japanese text and makes it searchable.
+        </p>
+
+        <h3>Anki Table</h3>
+        <p>
+          If you use Anki, you can browse your existing decks here. Rows you already
+          know can be marked as ignored.
+        </p>
+
+        <h3>Deck Creator</h3>
+        <p>
+          Build your own flashcard decks with custom properties — questions, answers,
+          hints, images, audio, whatever you need.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="about-card">
+      <mat-card-title>
+        <mat-icon color="primary">favorite</mat-icon>
+        Acknowledgements
+      </mat-card-title>
+      <mat-card-content>
+        <p>
+          <!-- TODO: shoutout here -->
+          This project was inspired ... Thank you for making Japanese learning fun.
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SHARED: Credits & Licenses (both modes)     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <mat-card class="about-card">
+    <mat-card-title>
+      <mat-icon color="primary">copyright</mat-icon>
+      Credits & Licenses
+    </mat-card-title>
+    <mat-card-content>
+      <h3>KanjiVG</h3>
+      <p>
+        This application uses kanji stroke order diagrams from
+        <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener noreferrer">KanjiVG</a>,
+        a project by Ulrich Apel, licensed under the
+        <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">
+          Creative Commons Attribution-Share Alike 3.0 License</a>.
+      </p>
+
+      <h3>KanjiStrokeOrders Font</h3>
+      <p>
+        The KanjiStrokeOrders font is licensed under a BSD-style license. Stroke order
+        diagrams are copyrighted by Ulrich Apel and the Wadoku and AAAA projects.
+        See the
+        <a href="http://sites.google.com/site/nihilistorguk/" target="_blank" rel="noopener noreferrer">
+          KanjiStrokeOrders font page</a> for details.
+      </p>
+
+      <h3>JMDict</h3>
+      <p>
+        Dictionary data sourced from the
+        <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project" target="_blank" rel="noopener noreferrer">
+          JMdict/EDICT project</a> by the Electronic Dictionary Research and Development Group.
+      </p>
+    </mat-card-content>
+  </mat-card>
+
+</div>

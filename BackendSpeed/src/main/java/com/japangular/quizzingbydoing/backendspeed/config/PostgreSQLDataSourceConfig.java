@@ -2,6 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,14 +33,23 @@ import java.util.Map;
 )
 public class PostgreSQLDataSourceConfig {
 
+    @Value("${spring.datasource.postgresql.url}")
+    private String url;
+
+    @Value("${spring.datasource.postgresql.username}")
+    private String username;
+
+    @Value("${spring.datasource.postgresql.password}")
+    private String password;
+
     @Primary
     @Bean(name = "postgresqlDataSource")
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl("jdbc:postgresql://db:5432/speedquizdb");
-        dataSource.setUsername("speedquiz");
-        dataSource.setPassword("changeMe");
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
         return dataSource;
     }
 

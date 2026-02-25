@@ -12,11 +12,11 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   standalone: true,
   imports: [
     NgIf,
+    AsyncPipe,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    AsyncPipe,
   ],
   templateUrl: './profile-actions.component.html',
   styleUrl: './profile-actions.component.css'
@@ -26,8 +26,7 @@ export class ProfileActionsComponent {
   private snackBar = inject(MatSnackBar);
 
   localSave() {
-    const json = this.profileService.exportProfile();
-
+    this.profileService.exportProfile().subscribe(json => {
     const blob = new Blob([json], {type: 'application/json'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -41,10 +40,10 @@ export class ProfileActionsComponent {
       'OK',
       {duration: 5000}
     );
+    });
   }
 
   clearSession(): void {
-    // Could add a confirmation dialog here, but for now just clear
     this.profileService.clearProfile();
     this.snackBar.open('Session cleared. Refresh to start over.', 'OK', {duration: 3000});
   }
