@@ -1,14 +1,20 @@
 import {Component, inject} from '@angular/core';
-import {AsyncPipe} from "@angular/common";
+import {AsyncPipe, NgForOf, NgIf} from "@angular/common";
 import {MatIcon} from "@angular/material/icon";
 import {MatAnchor, MatIconButton} from "@angular/material/button";
 import {MatListItem, MatNavList} from "@angular/material/list";
 import {MatSidenav, MatSidenavContainer, MatSidenavContent} from "@angular/material/sidenav";
 import {MatToolbar} from "@angular/material/toolbar";
 import {BreakpointObserver, Breakpoints} from '@angular/cdk/layout';
-import {Observable} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, Route, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
+import {MatLabel} from '@angular/material/input';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {LocalProfileService} from '../../user-store-management/local-profile.service';
+import {ProvisionComponent} from '../../user-store-management/provision/provision.component';
+import {ProfileActionsComponent} from '../../user-store-management/profile-actions/profile-actions.component';
+import {SiteModeService} from '../../site-mode/site-mode.service';
+import {AccessGateComponent} from '../../site-mode/access-gate/access-gate.component';
 
 @Component({
   selector: 'app-side-nav',
@@ -24,31 +30,38 @@ import {RouterLink, RouterOutlet} from '@angular/router';
     MatToolbar,
     RouterOutlet,
     RouterLink,
-    MatAnchor
+    MatAnchor,
+    RouterLinkActive,
+    NgForOf,
+    NgIf,
+    MatProgressBarModule,
+    ProvisionComponent,
+    ProfileActionsComponent,
+    AccessGateComponent,
   ],
   templateUrl: './side-nav.component.html',
   standalone: true,
   styleUrl: './side-nav.component.scss'
 })
 export class SideNavComponent {
-  private breakpointObserver = inject(BreakpointObserver);
+  navItems: Route[] = [];
 
-  isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
+  private breakpointObserver = inject(BreakpointObserver);
+  private route = inject(ActivatedRoute);
+  profileService = inject(LocalProfileService);
+  siteModeService = inject(SiteModeService);
+
+  isHandset$ = this.breakpointObserver
+    .observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
       shareReplay()
     );
 
-  // This will control the open/close state of the left sidenav
-  leftDrawerOpened = true;
+  constructor() {
+    this.navItems =
+      this.route.routeConfig?.children?.filter(r => r.data?.['label']) ?? [];
 
-  // Toggle function for the left sidenav
-  toggleLeftDrawer() {
-    this.leftDrawerOpened = !this.leftDrawerOpened;
-  }
-
-  rightDrawerOpened = true;
-  toggleRightDrawer() {
-    this.rightDrawerOpened = !this.rightDrawerOpened;
+    console.log(this.navItems);
   }
 }

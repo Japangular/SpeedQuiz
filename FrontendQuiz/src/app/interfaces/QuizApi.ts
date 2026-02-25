@@ -1,6 +1,6 @@
 import {Observable} from 'rxjs';
 import {InjectionToken} from '@angular/core';
-import {DeckMetadata, DefaultService, SubmissionDeck} from '../../generated/api';
+import {DeckMetadata, SubmissionDeck} from '../../generated/api';
 import {QuizBackendApiService} from '../services/quiz-backend-api.service';
 
 export interface QuizBackendApi {

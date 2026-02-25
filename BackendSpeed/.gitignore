@@ -33,3 +33,5 @@ build/
 .vscode/
 
 src/main/resources/static/kanji_svgs/*.svg
+**/src/main/**/MainForTest.java
+dev-cache/

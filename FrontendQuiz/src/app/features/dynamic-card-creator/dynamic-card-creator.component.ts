@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatStep, MatStepper} from '@angular/material/stepper';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
@@ -21,6 +21,8 @@ import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {CardStoreService} from '../../services/card-store.service';
 import {PropertyType} from './submission-deck.model';
+import {DeckPropertyService, DynamicDeck} from './deck-property.service';
+import {take} from 'rxjs';
 
 @Component({
   selector: 'app-dynamic-card-creator',
@@ -56,42 +58,57 @@ import {PropertyType} from './submission-deck.model';
   standalone: true,
 })
 export class DynamicCardCreatorComponent implements OnInit {
-  deckForm!: FormGroup;
-  displayedColumns: string[] = [];  // Columns for the table (based on properties)
-  currentStep: number = 0;
-  cards: { name: PropertyType; value: string }[] = [];
-  propertyTypes: { [key: string]: PropertyType } = {};  // Track property types
-  username = "app initializer";
+  dynamicDeck!: DynamicDeck;
+  @ViewChild('propertyInput') propertyInput!: ElementRef;
 
-  constructor(private fb: FormBuilder, private submissionService: CardStoreService) {
+  constructor(private fb: FormBuilder, private submissionService: CardStoreService, private deckProperty: DeckPropertyService) {
   }
 
   ngOnInit(): void {
-    this.deckForm = this.fb.group({
-      deckName: ['', Validators.required],
-      properties: this.fb.array([]),  // Holds the properties like "question", "answer"
-      cards: this.fb.array([]),       // Will store actual cards
+    this.deckProperty.currentDynamicDeck$.pipe(take(1)).subscribe(dynamicDeck => {
+      this.dynamicDeck = dynamicDeck;
     });
   }
 
   get properties(): FormArray {
-    return (this.deckForm.get('properties') as FormArray);
+    return (this.dynamicDeck.deckForm.get('properties') as FormArray);
   }
 
   addProperty(propertyName: string): void {
     if (propertyName && !this.properties.value.includes(propertyName)) {
-      this.properties.push(this.fb.control(propertyName));  // Push property name as a form control
-      this.displayedColumns.push(propertyName);  // Add property name to table headers
-      (this.deckForm as FormGroup).addControl(propertyName, this.fb.control(''));  // Create form control for property
+      this.properties.push(this.fb.control(propertyName));
+      this.dynamicDeck.displayedColumns.push(propertyName);
+      (this.dynamicDeck.deckForm as FormGroup).addControl(propertyName, this.fb.control(''));
+      this.deckProperty.nextDynamicDeck(this.dynamicDeck);
     }
   }
 
+  deleteProperty(index: number): void {
+    const propertyName = this.properties.at(index).value;
+
+    // Remove from FormArray
+    this.properties.removeAt(index);
+
+    // Remove from displayedColumns (for the table or UI display)
+    const columnIndex = this.dynamicDeck.displayedColumns.indexOf(propertyName);
+    if (columnIndex !== -1) {
+      this.dynamicDeck.displayedColumns.splice(columnIndex, 1);
+    }
+
+    // Remove from deckForm (remove the form control for the property)
+    (this.dynamicDeck.deckForm as FormGroup).removeControl(propertyName);
+
+    // Notify the dynamic deck of the updated columns
+    this.deckProperty.nextDynamicDeck(this.dynamicDeck);
+  }
+
   setPropertyType(propertyName: string, type: PropertyType): void {
-    this.propertyTypes[propertyName] = type;
+    this.dynamicDeck.propertyTypes[propertyName] = type;
+    this.deckProperty.nextDynamicDeck(this.dynamicDeck);
   }
 
   addCard(): void {
-    if (this.deckForm.invalid) {
+    if (this.dynamicDeck.deckForm.invalid) {
       return;
     }
 
@@ -99,35 +116,72 @@ export class DynamicCardCreatorComponent implements OnInit {
 
     this.properties.controls.forEach((propertyControl) => {
       const propertyName = propertyControl.value;
-      cardData[propertyName] = this.deckForm.get(propertyName)?.value || '';
+      cardData[propertyName] = this.dynamicDeck.deckForm.get(propertyName)?.value || '';
     });
 
-    this.cards.push(cardData);
-    this.cards = [...this.cards];
+    this.dynamicDeck.cards.push(cardData);
+    this.dynamicDeck.cards = [...this.dynamicDeck.cards];
+    this.deckProperty.nextDynamicDeck(this.dynamicDeck);
     this.resetCardForm();
   }
 
   resetCardForm(): void {
     this.properties.controls.forEach((propertyControl) => {
       const propertyName = propertyControl.value;
-      this.deckForm.get(propertyName)?.reset('');  // Reset the value for each property
+      this.dynamicDeck.deckForm.get(propertyName)?.reset('');
+      this.deckProperty.nextDynamicDeck(this.dynamicDeck)
     });
   }
 
   onCardSubmit(): void {
-    console.log('Deck Data:', this.deckForm.value);
-    console.log('Cards Data:', this.cards);
-
     this.submissionService.sendUserGeneratedDeck({
-      deckName: this.deckForm.get('deckName')?.value,
-      username: this.username,
-      properties: this.propertyTypes,
-      cards: this.cards
+      deckName: this.dynamicDeck.deckForm.get('deckName')?.value,
+      username: this.dynamicDeck.username,
+      properties: this.dynamicDeck.propertyTypes,
+      cards: this.dynamicDeck.cards
     });
   }
 
-  // Navigate between steps
+  clearPropertyInput(): void {
+    // Reset the specific property input field when the label is clicked
+    const propertyInputControl = this.dynamicDeck.deckForm.get('propertyName'); // adjust to the actual form control name
+    if (propertyInputControl) {
+      propertyInputControl.setValue('');
+    }
+  }
+
+  clearInput(inputField: HTMLInputElement): void {
+    inputField.value = ''; // Reset the value of the field directly
+  }
+
   nextStep(step: number): void {
-    this.currentStep = step;
+    this.dynamicDeck.currentStep = step;
+  }
+
+  get currentStep(): number {
+    return this.dynamicDeck?.currentStep || 0;
+  }
+
+  set currentStep(value: number) {
+    if (this.dynamicDeck) {
+      this.dynamicDeck.currentStep = value;
+      this.deckProperty.nextDynamicDeck(this.dynamicDeck);
+    }
+  }
+
+  deckForm(): FormGroup{
+    return this.dynamicDeck.deckForm;
+  }
+
+  displayedColumns(): string[]{
+    return this.dynamicDeck.displayedColumns
+  }
+
+  propertyTypes(): { [key: string]: PropertyType } {
+    return this.dynamicDeck.propertyTypes;
+  }
+
+  cards(){
+    return this.dynamicDeck.cards;
   }
 }

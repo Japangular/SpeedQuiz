@@ -5,7 +5,7 @@ info:
   version: 1.0.1
 
 paths:
-  /submission-deck:
+  /quizApi/submission-deck:
     get:
       summary: Retrieve a submission deck by username and deck name
       parameters:
@@ -42,7 +42,7 @@ paths:
         '200':
           description: Deck submitted successfully
 
-  /available-decks:
+  /quizApi/available-decks:
     get:
       summary: Get all deck metadata for a given user
       parameters:
@@ -103,4 +103,7 @@ components:
         - image
         - svg
         - audio
+        - hiragana
+        - answer_list
+        - info
         - unknown

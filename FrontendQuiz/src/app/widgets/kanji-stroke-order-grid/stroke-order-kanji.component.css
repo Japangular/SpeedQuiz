@@ -1,0 +1,41 @@
+
+.grid {
+  --main-line-color: #FF8C00; /* default orange */
+  width: 102px;
+  height: 102px;
+  background:
+    repeating-linear-gradient(90deg, var(--main-line-color), var(--main-line-color) 2px, transparent 2px, transparent 50px),
+    repeating-linear-gradient(0deg, var(--main-line-color), var(--main-line-color) 2px, transparent 2px, transparent 50px),
+    repeating-linear-gradient(90deg, #e0e0e0, #e0e0e0 1px, transparent 1px, transparent 10px),
+    repeating-linear-gradient(0deg, #e0e0e0, #e0e0e0 1px, transparent 1px, transparent 10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+  color: #333;
+  position: relative;
+}
+
+.kanji {
+  font-family: KanjiStrokeOrders, monospace;
+  font-size: 102px;
+  text-align: center;
+  position: relative;
+  bottom: 0px;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.horizontal {
+  flex-direction: row;
+}
+
+.grid-true {
+  --main-line-color: green;
+}
+
+.grid-false {
+  --main-line-color: red;
+}

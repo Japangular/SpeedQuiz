@@ -1,66 +1,48 @@
-/* Ensure the container takes the full height */
-.sidenav-container {
-  height: calc(100vh - 3rem);
-}
-
-/* Set width for both sidebars (left and right) */
-.sidenav {
-  width: 200px;
-}
-
-/* Left sidebar (target using #leftDrawer) */
+/* Ensure the sidenav container takes up full height */
 #leftDrawer {
-  background-color: #f0f0f0; /* Example color */
+  height: 100%;
+  padding: 0;
 }
 
-/* Right sidebar (target using #rightDrawer) */
-#rightDrawer {
-  background-color: #e0e0e0; /* Example color */
+/* Wrapper for the toolbar + nav list */
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-#rightDrawer .mat-toolbar {
-  justify-content: flex-end; /* Align toolbar content to the right */
+/* The nav list fills the remaining space below the toolbar */
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: auto;
 }
 
-#rightDrawer .mat-nav-list {
-  text-align: right; /* Align the list text to the right */
+/* Spacer to push the bottom item down */
+.spacer {
+  flex-grow: 1;
 }
 
-#rightDrawer .mat-nav-list a {
-  text-align: right; /* Ensures the links are aligned right */
+.bottom-item {
+  margin-top: 16px; /* keep vertical spacing */
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 
-
-/* Make the toolbar inside the sidebar inherit the background of the sidebar */
-.sidenav .mat-toolbar {
-  background: inherit;
+.mat-list-item {
+  padding-left: 0;
+  padding-right: 0;
 }
 
-/* Sticky toolbar at the top of the content */
-.mat-toolbar.mat-primary {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+.mat-toolbar {
+  padding-left: 0;
+  padding-right: 0;
 }
 
-/* Media query for responsiveness */
-@media (max-width: 600px) {
-  /* Reduce width of both sidebars on smaller screens */
-  .sidenav {
-    width: 150px;
-  }
-
-  /* Make side navs overlay on smaller screens */
-  .mat-sidenav.mat-drawer-over {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-  }
-
-  /* Adjust main content when side nav is in overlay mode */
-  .mat-sidenav-content {
-    margin-left: 0;
-  }
+.sidenav {
+  width: 200px; /* or any value you want */
+  max-width: 100%; /* prevent overflow on small screens */
 }

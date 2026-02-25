@@ -1,0 +1,48 @@
+.about-container {
+  max-width: 800px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.about-card {
+  margin-bottom: 16px;
+}
+
+.about-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.about-card h3 {
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+
+.about-card p {
+  line-height: 1.6;
+}
+
+.about-card a {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.about-card a:hover {
+  text-decoration: underline;
+}
+
+.inline-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.9em;
+}

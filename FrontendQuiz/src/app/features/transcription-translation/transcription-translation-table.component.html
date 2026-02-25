@@ -1,0 +1,24 @@
+<mat-card>
+  <h2 class="mat-headline">{{ getTitle() }}</h2>
+  <h3 class="mat-subheading-2">{{ subtitle }}</h3>
+  <mat-card-content>
+    <div class="mat-elevation-z2 ankiPage2">
+
+      <table mat-table [dataSource]="dataSource" class="full-width-table" matSort aria-label="Deck Table">
+
+        <!-- Dynamic Column Definitions -->
+        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column">
+          <th mat-header-cell *matHeaderCellDef>{{ column }}</th>
+          <td mat-cell *matCellDef="let element"> {{ element[column] }}</td>
+        </ng-container>
+
+        <!-- Header and Row Definitions -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      </table>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<app-transcript-upload (transcriptLoaded)=handleTranscriptionUpload($event)></app-transcript-upload>

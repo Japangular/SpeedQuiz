@@ -1,6 +1,8 @@
 .app-footer {
   justify-content: center;
   font-size: 0.75rem;
+  padding: 0;
+  margin: 0;
 
   a.footer-link {
     color: #ffeb3b;

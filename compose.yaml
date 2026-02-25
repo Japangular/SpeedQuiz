@@ -1,12 +1,19 @@
 version: '3.8'
 
+networks:
+  custom_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16  # avoid 192.168.x.x
+
 services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: speedquizdb
-      POSTGRES_USER: speedquiz
-      POSTGRES_PASSWORD: changeMe
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
@@ -16,46 +23,48 @@ services:
     build:
       context: .
       dockerfile: BackendSpeed/Dockerfile.backend
-    command: java -version
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
       OPENAPI_SPEC_PATH: /app/api.yaml
+      APP_WANIKANI_USE_DEV_CACHE: "true"
     depends_on:
       - db
+      - python_dict
     ports:
       - "8080:8080"
     volumes:
       - ./api.yaml:/app/api.yaml
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
+      - ./JMdict_e.xml:/app/jmdict_e.xml
+      - ./anki/collection.db:/app/anki/collection.db
 
   frontend:
     build:
       context: .
       dockerfile: FrontendQuiz/Dockerfile.frontend
     ports:
-      - "4200:80"  # You may not need to expose this port as Nginx will serve the content
+      - "4200:80"
     volumes:
       - ./api.yaml:/app/api.yaml
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4200" ]
-      interval: 30s
-      retries: 5
-      start_period: 10s
-      timeout: 10s
 
   nginx:
     build:
       context: .
-      dockerfile: FrontendQuiz/Dockerfile.frontend  # Build from the frontend Dockerfile
+      dockerfile: FrontendQuiz/Dockerfile.frontend
     ports:
       - "80:80"
     depends_on:
       - frontend
+    volumes:
+      - ./KanjiVG:/usr/share/nginx/html/kanjivg:ro
+
+  python_dict:
+    build:
+      context: .
+      dockerfile: PythonDict/Dockerfile.python_dict
+    ports:
+      - "8000:8000"
 
 volumes:
   db-data:

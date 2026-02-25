@@ -1,7 +1,0 @@
-<div style="display: flex; background-color: white; width: 102px; height: 102px;"
-     [style.flex-wrap]="isWrapContent ? 'wrap' : 'nowrap'"
-     *ngIf="japanese">
-  <div class=grid *ngFor="let c of japanese.split('')">
-    <app-kanji-display [kanji]=c (strokeOrderComplete)=handleStrokeOrderComplete($event)></app-kanji-display>
-  </div>
-</div>

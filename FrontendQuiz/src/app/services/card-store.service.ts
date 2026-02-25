@@ -1,13 +1,10 @@
 import {Inject, Injectable} from '@angular/core';
 import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {DeckItem} from '../features/deck/deck-datasource';
-import {
-  UserGeneratedDeck,
-  UserGeneratedDeckSubmissionService
-} from '../features/dynamic-card-creator/submission-deck.model';
+import {UserGeneratedDeck, UserGeneratedDeckSubmissionService} from '../features/dynamic-card-creator/submission-deck.model';
 import {PropertyType, SubmissionDeck} from '../../generated/api';
 import {map} from 'rxjs/operators';
+import {DeckItem} from '../features/deck-table/deck/deck-table.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +15,11 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   _currentDeck$: Observable<SubmissionDeck> = this._currentDeck.asObservable();
 
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
+
   }
 
   sendCurrentDeck(){
-    this.quizApi.submissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
+    this.quizApi.quizApiSubmissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
   }
 
   setCurrentDeck(deck: SubmissionDeck | DeckItem[]) {
@@ -48,7 +46,7 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   }
 
   switchDeck(deckName: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
-    return this.quizApi.submissionDeckGet(this.currentDeck.username, deckName).pipe(
+    return this.quizApi.quizApiSubmissionDeckGet(this.currentDeck.username, deckName).pipe(
       map(deck => mapSubmissionDeckToDeckItem(deck))
     );
   }

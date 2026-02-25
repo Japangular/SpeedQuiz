@@ -1,0 +1,19 @@
+.gate-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #1a1a2e;
+}
+
+.gate-card {
+  max-width: 400px;
+  text-align: center;
+  padding: 32px;
+}
+
+.hint {
+  color: rgba(0, 0, 0, 0.54);
+  font-size: 0.9em;
+  margin-top: 16px;
+}

@@ -1,37 +1,95 @@
-<mat-sidenav-container class="sidenav-container">
+<app-access-gate *ngIf="!siteModeService.hasAccess"></app-access-gate>
 
-  <!-- Left Sidebar -->
-  <mat-sidenav id=leftDrawer #leftDrawer class="sidenav" fixedInViewport
-               [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-               [mode]="(isHandset$ | async) ? 'over' : 'side'"
-               [opened]="(isHandset$ | async) === false"
-               position="start">
-    <mat-toolbar>Left Menu</mat-toolbar>
-    <mat-nav-list>
-      <a mat-button (click)="toggleLeftDrawer()">Hide</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['table'] }}]">Table</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['cardCreator'] }}]">Deck Stepper</a>
-      <a mat-list-item [routerLink]="[{ outlets: { leftOutlet: ['quiz'] }}]">Open the Quiz</a>
-    </mat-nav-list>
-  </mat-sidenav>
+<ng-container *ngIf="siteModeService.hasAccess">
+  <!-- Wait for initialization to complete before deciding what to show -->
+  <ng-container *ngIf="profileService.initialized$ | async; else loading">
 
-  <!-- Main content area -->
-  <mat-sidenav-content>
-    <!-- Header: Top bar with title and actions -->
-    <mat-toolbar color="primary" class="toolbar">
-      <button
-        type="button"
-        aria-label="Toggle left sidenav"
-        mat-icon-button
-        (click)="leftDrawer.toggle()">
-        <mat-icon aria-label="Left side nav toggle icon">menu</mat-icon>
-      </button>
-      <span class="toolbar-title">SpeedQuiz</span>
-    </mat-toolbar>
+    <!-- No session → show provisioning screen -->
+    <app-provision *ngIf="!(profileService.profile$ | async)"></app-provision>
 
+    <!-- Has session → show normal app -->
+    <mat-sidenav-container *ngIf="profileService.profile$ | async" class="sidenav-container">
 
-    <!-- Router outlet for left side navigation -->
-    <router-outlet name="leftOutlet"></router-outlet>
-  </mat-sidenav-content>
+      <!-- Left Sidebar -->
+      <mat-sidenav
+        #leftDrawer
+        class="sidenav"
+        fixedInViewport
+        [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+        [mode]="(isHandset$ | async) ? 'over' : 'side'"
+        [opened]="(isHandset$ | async) === false"
+        position="start"
+      >
+        <div class="sidebar-container">
+          <mat-toolbar color="accent" class="toolbar">
+            <button
+              mat-icon-button
+              aria-label="Toggle sidenav"
+              (click)="leftDrawer.toggle()"
+            >
+              <mat-icon>menu</mat-icon>
+            </button>
+          </mat-toolbar>
 
-</mat-sidenav-container>
+          <mat-nav-list class="nav-list">
+
+            <!-- Top utility -->
+            <a mat-button color="primary" (click)="leftDrawer.toggle()">Hide</a>
+
+            <!-- Main navigation -->
+            <a
+              mat-list-item
+              *ngFor="let item of navItems"
+              [routerLink]="item.path"
+              routerLinkActive="active"
+              [class.bottom-item]="item.data?.['bottom']"
+            >
+              <mat-icon
+                *ngIf="item.data?.['icon']"
+                matListItemIcon
+                color="primary"
+              >
+                {{ item.data?.['icon'] }}
+              </mat-icon>
+
+              <span matListItemTitle>
+              {{ item.data?.['label'] }}
+            </span>
+            </a>
+
+          </mat-nav-list>
+
+          <!-- Profile actions at the bottom of the sidenav -->
+          <app-profile-actions></app-profile-actions>
+        </div>
+      </mat-sidenav>
+
+      <!-- Main Content -->
+      <mat-sidenav-content>
+
+        <mat-toolbar color="accent" class="toolbar">
+          <button
+            *ngIf=!leftDrawer.opened
+            mat-icon-button
+            aria-label="Toggle sidenav"
+            (click)="leftDrawer.toggle()"
+          >
+            <mat-icon>menu</mat-icon>
+          </button>
+
+          <span class="toolbar-title">SpeedQuiz</span>
+        </mat-toolbar>
+
+        <!-- Routed views -->
+        <router-outlet></router-outlet>
+
+      </mat-sidenav-content>
+    </mat-sidenav-container>
+
+  </ng-container>
+
+  <!-- Shown while initialize() is still in-flight -->
+  <ng-template #loading>
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </ng-template>
+</ng-container>
