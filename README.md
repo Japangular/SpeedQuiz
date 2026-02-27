@@ -25,7 +25,7 @@ Anki exports, WaniKani API, JMDict dictionary, stream transcripts) into a unifie
 
 ```
 ┌──────────┐     ┌───────────────┐     ┌──────────────┐
-│  Browser  │────▶│  nginx (:80)  │────▶│  Angular SPA │
+│  Browser │────▶│  nginx (:80)  │────▶│  Angular SPA │
 └──────────┘     └───────┬───────┘     └──────────────┘
                          │ /api/*
                          ▼
