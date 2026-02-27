@@ -1,8 +1,6 @@
 # SpeedQuiz — Japanese Learning Platform
 
-A **Fullstack Web Application** designed for efficient Japanese language study. Originally built as a personal learning tool to master Kanji, this
-project serves as a technical showcase for modern web technologies and complex UI logic.
-
+A **Fullstack Web Application** designed for efficient Japanese language study.
 I developed this to bridge the gap between my professional experience in the **Automotive Industry** and modern web development patterns, focusing on
 high-performance data handling and interactive canvas elements.
 
