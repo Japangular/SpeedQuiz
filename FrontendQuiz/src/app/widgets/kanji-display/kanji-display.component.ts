@@ -55,12 +55,11 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     this.observeSVGInsertion();
     this.loadSvg();
-    this.toggleStrokeNumbers(false);
   }
 
   ngOnDestroy() {
     if (this.observer) {
-      this.observer.disconnect(); // Clean up the observer when the component is destroyed
+      this.observer.disconnect();
     }
   }
 
@@ -68,13 +67,16 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
     this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList' && mutation.addedNodes.length) {
-          this.extractStrokeOrder(); // Call this when children are added to the container
+          this.extractStrokeOrder();
+          this.initializeStrokes();
+          this.updateStrokeNumbersId();
+          this.toggleStrokeNumbers(false);
         }
       });
     });
 
     this.observer.observe(this.kanjiContainer.nativeElement, {
-      childList: true, // Observe direct children additions or removals
+      childList: true,
     });
   }
 
@@ -92,7 +94,7 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
     console.log(ids);
     this.correctOrder = ids;
 
-    console.log("Extracted Strokes:", ids.length);  // Should now accurately reflect the stroke count
+    console.log("Extracted Strokes:", ids.length);
   }
 
   private safeParse(id: string): number {
@@ -107,23 +109,19 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
       .subscribe(svg => {
         svg = svg.replace("]>", "");
         this.svgContent = this.sanitizer.bypassSecurityTrustHtml(svg);
-        setTimeout(() => {
-          this.initializeStrokes();
-          this.extractStrokeOrder();
-          this.updateStrokeNumbersId();
-          this.toggleStrokeNumbers(false)
-        }, 0); // Ensure SVG is fully loaded
+        // No setTimeout — the MutationObserver handles initialization
+        // once Angular renders the SVG into the DOM
       });
   }
 
 
   initializeStrokes(): void {
     const container: HTMLElement = this.kanjiContainer.nativeElement;
-    console.log(`Correct Order: ${this.correctOrder}`); // Verify correct order is set
+    console.log(`Correct Order: ${this.correctOrder}`);
     this.correctOrder.forEach(id => {
       const stroke = container.querySelector(`#${id.replace(':', '\\:')}`);
 
-      console.log(`Binding to: ${id}`, stroke); // Check if strokes are being selected
+      console.log(`Binding to: ${id}`, stroke);
       if (stroke) {
         this.renderer.listen(stroke, 'click', () => {
           this.checkStrokeOrder(stroke, id);
@@ -136,7 +134,7 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
     const container: HTMLElement = this.kanjiContainer.nativeElement;
     const strokeNumbersGroup = container.querySelector('g[id^="kvg:StrokeNumbers"]');
     if (strokeNumbersGroup) {
-      this.strokeNumbersId = strokeNumbersGroup.id; // Store the ID for later use
+      this.strokeNumbersId = strokeNumbersGroup.id;
     }
   }
 
@@ -149,7 +147,6 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
       this.currentIndex++;
       if (this.currentIndex >= this.correctOrder.length) {
         this.strokeOrderComplete.emit(true);
-        // setTimeout(() => {this.currentIndex = 0; this.resetStrokes();}, 1500);
       }
     } else {
       this.renderer.setStyle(stroke, 'stroke', 'red');
@@ -157,7 +154,6 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.renderer.setStyle(stroke, 'stroke', 'black');
       }, 800);
-      //  this.resetStrokes(); // Uncomment if you want to reset strokes on incorrect guess
     }
   }
 
@@ -169,16 +165,13 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
         this.renderer.setStyle(stroke, 'stroke', 'black');
       }
     });
-    this.currentIndex = 0; // Reset the index to start checking from the first stroke
+    this.currentIndex = 0;
   }
 
   toggleStrokeNumbers(b: boolean): void {
-    const strokes = document.querySelector('[id^="kvg:StrokePaths"]');
-
-    this.extractStrokeOrder()
     if (this.strokeNumbersId) {
       const container = this.kanjiContainer.nativeElement;
-      const selector = `#${this.strokeNumbersId.replace(/:/g, '\\:')}`; // Correctly escape colon for CSS selector
+      const selector = `#${this.strokeNumbersId.replace(/:/g, '\\:')}`;
       const strokeNumbers = container.querySelector(selector);
       if (strokeNumbers) {
         this.strokeNumbersVisible = !this.strokeNumbersVisible;

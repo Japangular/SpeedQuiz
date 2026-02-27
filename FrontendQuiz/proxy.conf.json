@@ -1,0 +1,6 @@
+{
+  "/kanjivg": {
+    "target": "http://localhost",
+    "changeOrigin": true
+  }
+}

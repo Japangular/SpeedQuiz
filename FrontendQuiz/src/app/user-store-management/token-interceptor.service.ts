@@ -8,9 +8,14 @@ import {Observable} from 'rxjs';
 })
 export class TokenInterceptorService implements HttpInterceptor {
 
-  constructor(private profileService: LocalProfileService) {}
+  constructor(private profileService: LocalProfileService) {
+  }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>{
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (req.url.includes('/kanjivg/')) {
+      return next.handle(req);
+    }
+
     const token = this.profileService.getToken();
 
     if (token) {

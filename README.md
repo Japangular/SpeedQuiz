@@ -7,8 +7,7 @@ Anki exports, WaniKani API, JMDict dictionary, stream transcripts) into a unifie
 
 ## Screenshot
 
-<!-- TODO: Add a screenshot of the quiz board or kanji wall here -->
-<!-- ![Quiz Board](docs/screenshot-quiz.png) -->
+![Project Demo](media/demo.gif)
 
 ## Tech Stack
 

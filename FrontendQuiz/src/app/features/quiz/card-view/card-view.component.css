@@ -4,7 +4,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: auto; /* change from hidden to auto so it scrolls */
+  overscroll-behavior: contain; /* prevents scroll from propagating to parent */
   position: relative;
 }
 
