@@ -82,7 +82,7 @@ Copy the environment file: `cp .env.example .env`
 Run `docker compose up --build`
 ```
 
-The app will be available at `http://localhost`. The backend runs on `:8080`, but nginx handles the routing so you shouldn't need to access it
+The app will be available at `http://localhost:4200?token=portfolio`. The backend runs on `:8080`, but nginx handles the routing so you shouldn't need to access it
 directly.
 
 **Local development (without Docker):**

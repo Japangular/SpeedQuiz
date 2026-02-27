@@ -21,7 +21,7 @@
             mat-raised-button
             color="primary"
             (click)="startLearning()"
-            [disabled]="!displayName?.trim() || loading"
+            [disabled]="!displayName.trim() || loading"
           >
             Start learning
           </button>
@@ -51,7 +51,7 @@
             mat-raised-button
             color="primary"
             (click)="restoreProfile()"
-            [disabled]="!importJson?.trim() || loading"
+            [disabled]="!importJson.trim() || loading"
           >
             Restore
           </button>
