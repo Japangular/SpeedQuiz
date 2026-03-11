@@ -23,7 +23,9 @@ import {CardStoreService} from '../../services/card-store.service';
 import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
 import {CardViewComponent} from '../quiz/card-view/card-view.component';
 import {LocalProfileService} from '../../user-store-management/local-profile.service';
-import {PropertyType, SubmissionDeck} from '../../../generated/api';
+import {PropertyType} from '../../../generated/api';
+import {SubmissionDeck} from '../../models/deck.model';
+
 
 async function hashToken(token: string): Promise<string> {
   const encoder = new TextEncoder();

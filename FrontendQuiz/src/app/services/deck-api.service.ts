@@ -1,7 +1,8 @@
 import {Inject, Injectable} from '@angular/core';
 import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
-import {Observable} from 'rxjs';
-import {DeckMetadata} from '../../generated/api';
+import {Observable, of} from 'rxjs';
+import {DeckInfo, DeckMetadata} from '../models/deck.model';
+import {PropertyType} from '../features/dynamic-card-creator/submission-deck.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,13 @@ export class DeckApiService implements DeckApi {
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
   }
 
+  decks: DeckMetadata[] = [
+    {deckName: 'First Deck', properties: {Frage: PropertyType.Question, Antwort: PropertyType.Answer}, username: this.username},
+    {deckName: 'Second Deck', properties: {Term: PropertyType.Question, Definition: PropertyType.Answer}, username: this.username}
+  ];
+
   availableDecksGet(): Observable<DeckMetadata[]> {
-    return this.quizApi.quizApiAvailableDecksGet(this.username);
+    return of(this.decks);
   }
 }
 

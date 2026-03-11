@@ -3,8 +3,8 @@ import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {NgForOf} from '@angular/common';
 import {DeckApiService} from '../../../services/deck-api.service';
-import {DeckMetadata} from '../../../../generated/api';
 import {PropertyType} from '../../dynamic-card-creator/submission-deck.model';
+import {DeckMetadata} from '../../../models/deck.model';
 
 @Component({
   selector: 'app-deck-chooser',

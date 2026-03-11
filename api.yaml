@@ -2,97 +2,266 @@ openapi: 3.0.1
 info:
   title: SpeedQuiz API
   description: API for managing quiz decks and cards
-  version: 1.0.1
+  version: 2.0.0
 
 paths:
-  /quizApi/submission-deck:
+  /quizApi/decks:
     get:
-      summary: Retrieve a submission deck by username and deck name
+      summary: List all available decks
       parameters:
-        - name: username
+        - name: ownerId
           in: query
           required: true
           schema:
             type: string
-          description: The username who owns the deck
-        - name: deckName
+            format: uuid
+        - name: wkClaimedName
           in: query
-          required: true
+          required: false
           schema:
             type: string
-          description: The name of the deck to retrieve
-      responses:
-        '200':
-          description: Submission deck retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SubmissionDeck'
-        '404':
-          description: Submission deck not found
-    post:
-      summary: Submit a new deck
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SubmissionDeck'
-      responses:
-        '200':
-          description: Deck submitted successfully
-
-  /quizApi/available-decks:
-    get:
-      summary: Get all deck metadata for a given user
-      parameters:
-        - name: username
+        - name: wkTokenHash
           in: query
-          required: true
+          required: false
           schema:
             type: string
-          description: The username whose decks you want to fetch
       responses:
         '200':
-          description: A list of deck metadata
+          description: A list of available decks
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DeckMetadata'
+                  $ref: '#/components/schemas/DeckInfo'
+
+    post:
+      summary: Create a new deck
+      parameters:
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: deckName
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckContent'
+      responses:
+        '201':
+          description: Deck created successfully
+
+  /quizApi/decks/{deckId}:
+    get:
+      summary: Load a full deck
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: wkClaimedName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: wkApiToken
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: wkTokenHash
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full deck content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckContent'
+
+  /quizApi/decks/{deckId}/page:
+    get:
+      summary: Browse a deck with pagination and filtering
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: wkClaimedName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: wkApiToken
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: wkTokenHash
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of cards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckPage'
+
+  /quizApi/decks/{deckId}/state:
+    get:
+      summary: Get card states for a deck
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Card states
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeckCardState'
+
+    post:
+      summary: Update card states
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ownerId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeckCardState'
+      responses:
+        '200':
+          description: States updated
 
 components:
   schemas:
-    DeckMetadata:
+    DeckInfo:
       type: object
       properties:
-        deckName:
+        id:
           type: string
-        username:
+        name:
           type: string
+        description:
+          type: string
+        attribution:
+          type: string
+      required:
+        - id
+        - name
+
+    DeckContent:
+      type: object
+      properties:
         properties:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/PropertyType'
+        cards:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
       required:
-        - deckName
-        - username
         - properties
+        - cards
 
-    SubmissionDeck:
-      allOf:
-        - $ref: '#/components/schemas/DeckMetadata'
-        - type: object
-          properties:
-            cards:
-              type: array
-              items:
-                type: object
-                additionalProperties:
-                  type: string
-          required:
-            - cards
+    DeckPage:
+      type: object
+      properties:
+        cards:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+        totalCards:
+          type: integer
+        offset:
+          type: integer
+        limit:
+          type: integer
+
+    DeckCardState:
+      type: object
+      properties:
+        deckId:
+          type: string
+        cardId:
+          type: string
+        state:
+          type: string
 
     PropertyType:
       type: string

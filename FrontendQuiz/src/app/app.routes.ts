@@ -8,13 +8,13 @@ import {JapaneseDictComponent} from './features/dict/japanese-dict/japanese-dict
 import {AnkiTableComponent} from './features/anki-table/anki-table.component';
 import {KanjiWallComponent} from './features/kanji-wall/kanji-wall.component';
 import {TestComponent} from './features/test/test.component';
-import {OverviewComponent} from './features/overview/overview.component';
 import {KanjiDetailComponent} from './features/kanji-details/kanji-details.component';
 import {TranscriptionTranslationTableComponent} from './features/transcription-translation/transcription-translation-table.component';
 import {ExtractCardsFromUrlComponent} from './features/extract-cards-from-url/extract-cards-from-url.component';
 import {AnkiSourceService} from './features/anki-table/anki-source.service';
 import {BackendSourceService} from './features/anki-table/backend-source.service';
 import {AnkiTableService} from './features/anki-table/anki-table.service';
+import {DeckShelfComponent} from './features/deck-shelf/deck-shelf.component';
 
 export const routes: Routes = [
   {
@@ -59,12 +59,6 @@ export const routes: Routes = [
         data: {label: 'Kanji Wall', icon: 'grid_view'}
       },
       {
-        path: 'overview',
-        component: OverviewComponent,
-        title: 'Overview',
-        data: {label: 'Overview', icon: 'dashboard'}
-      },
-      {
         path: 'transcriptTable',
         component: TranscriptionTranslationTableComponent,
         data: {label: 'Transcripts', icon: 'translate'}
@@ -72,7 +66,6 @@ export const routes: Routes = [
       {
         path: 'testing',
         component: TestComponent,
-        data: {label: 'Testing', icon: 'build'}
       },
       {
         path: 'extract from url',
@@ -84,6 +77,12 @@ export const routes: Routes = [
       {
         path: 'kanjiDetails/:kanji',
         component: KanjiDetailComponent
+      },
+
+      {
+        path: 'deckShelf',
+        component: DeckShelfComponent,
+        data: {label: 'DeckShelf', icon: 'view_quilt'}
       },
 
       // pinned to bottom

@@ -4,12 +4,15 @@ import {AnkiPage, AnkiPageInfo, DEV_DECK_NAME, UserTableStates} from './anki-tab
 import {environment} from '../../environments/environment';
 import {Observable} from 'rxjs';
 import {AnkiSourceService} from './anki-source.service';
+import {map} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
-export class BackendSourceService extends AnkiSourceService{
+export class BackendSourceService extends AnkiSourceService {
   private apiUrl = `${environment.apiBaseUrl}`;
+  private deckId = 'anki-local';
+  private ownerId = crypto.randomUUID(); // temporary — replace with real session later
 
   constructor(private http: HttpClient) {
     super();
@@ -19,22 +22,63 @@ export class BackendSourceService extends AnkiSourceService{
     const params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
-      .set('questionFilter', questionFilter.toString())
-    ;
+      .set('filter', questionFilter)
+      .set('ownerId', this.ownerId);
 
-    return this.http.get<AnkiPage>(`${this.apiUrl}/anki/questionReadingMeaning`, {params})
+    return this.http.get<DeckPage>(`${this.apiUrl}/quizApi/decks/${this.deckId}/page`, {params})
+      .pipe(map(deckPage => this.toAnkiPage(deckPage)));
   }
 
   getTotal(): Observable<AnkiPageInfo> {
-    return this.http.get<AnkiPageInfo>(`${this.apiUrl}/anki/tableInformation`);
+    // Total comes from the page response now — fetch one page to get it
+    return this.getPage(1, 0).pipe(
+      map(page => page.info)
+    );
   }
 
   persistIgnoredAnkiRows(rowIds: string[]): Observable<string> {
-    console.log(rowIds);
-    return this.http.post<string>(`${this.apiUrl}/anki/persistIgnoredAnkiRows`, {deckname: DEV_DECK_NAME, rowIds: rowIds});
+    const params = new HttpParams().set('ownerId', this.ownerId);
+    const states = rowIds.map(id => ({deckId: this.deckId, cardId: id, state: 'ignored'}));
+
+    return this.http.post(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`, states, {params})
+      .pipe(map(() => `Persisted ${rowIds.length} rows.`));
   }
 
   getIgnoredAnkiRows(): Observable<UserTableStates> {
-    return this.http.get<UserTableStates>(`${this.apiUrl}/anki/getIgnoredAnkiRows`);
+    const params = new HttpParams().set('ownerId', this.ownerId);
+
+    return this.http.get<DeckCardState[]>(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`, {params})
+      .pipe(map(states => ({
+        rowIds: states.map(s => s.cardId),
+        deckname: this.deckId
+      })));
   }
+
+  private toAnkiPage(deckPage: DeckPage): AnkiPage {
+    return {
+      data: deckPage.cards.map((card, index) => ({
+        index: (deckPage.offset + index + 1).toString(),
+        question: card['question'] || '',
+        reading: card['reading'] || '',
+        meaning: card['meaning'] || ''
+      })),
+      info: {
+        totalAvailableRows: deckPage.totalCards,
+        columnNames: ['index', 'Question', 'Reading', 'Meaning']
+      }
+    };
+  }
+}
+
+interface DeckPage {
+  cards: Record<string, string>[];
+  totalCards: number;
+  offset: number;
+  limit: number;
+}
+
+interface DeckCardState {
+  deckId: string;
+  cardId: string;
+  state: string;
 }

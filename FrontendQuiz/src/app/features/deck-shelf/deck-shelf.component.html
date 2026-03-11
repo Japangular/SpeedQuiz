@@ -1,0 +1,51 @@
+<div class="deck-shelf-container">
+
+  <!-- Loading state -->
+  <mat-progress-bar *ngIf="!(deckGroups$ | async) && !error" mode="indeterminate"></mat-progress-bar>
+
+  <!-- Error state -->
+  <mat-card *ngIf="error" class="error-card">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </mat-card>
+
+  <!-- Empty state -->
+  <mat-card *ngIf="(deckGroups$ | async)?.length === 0" class="empty-card">
+    <mat-icon color="primary">inbox</mat-icon>
+    <p>No decks found. Create one to get started!</p>
+  </mat-card>
+
+  <!-- Deck groups -->
+  <mat-accordion *ngIf="deckGroups$ | async as groups" multi>
+    <mat-expansion-panel *ngFor="let group of groups" [expanded]="true">
+
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>folder</mat-icon>
+          {{ group.attribution }}
+        </mat-panel-title>
+        <mat-panel-description>
+          {{ group.decks.length }} {{ group.decks.length === 1 ? 'deck' : 'decks' }}
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <mat-nav-list>
+        <mat-list-item *ngFor="let deck of group.decks" (click)="loadDeck(deck)">
+          <mat-icon matListItemIcon color="primary">style</mat-icon>
+          <span matListItemTitle>{{ deck.name }}</span>
+          <span matListItemLine *ngIf="deck.description">{{ deck.description }}</span>
+          <button mat-icon-button matListItemMeta
+                  (click)="loadDeck(deck); $event.stopPropagation()"
+                  [disabled]="loadingDeckId === deck.id">
+            <mat-icon>play_arrow</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-nav-list>
+
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <!-- Loading overlay for individual deck -->
+  <mat-progress-bar *ngIf="loadingDeckId" mode="indeterminate"></mat-progress-bar>
+
+</div>

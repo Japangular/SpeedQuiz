@@ -1,7 +1,7 @@
 import {Observable} from 'rxjs';
 import {InjectionToken} from '@angular/core';
-import {DeckMetadata, SubmissionDeck} from '../../generated/api';
 import {QuizBackendApiService} from '../services/quiz-backend-api.service';
+import {DeckMetadata, SubmissionDeck} from '../models/deck.model';
 
 export interface QuizBackendApi {
   submissionDeckGet(username: string, deckName: string): Observable<SubmissionDeck>;

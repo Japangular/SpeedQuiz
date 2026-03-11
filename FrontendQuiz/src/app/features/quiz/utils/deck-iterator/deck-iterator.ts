@@ -1,8 +1,8 @@
 import {Card, mapDeck} from '../../answer-slots/quiz.model';
 import {Observable, ReplaySubject} from 'rxjs';
-import {SubmissionDeck} from '../../../../../generated/api';
 import {ModalService} from '../../../../widgets/modal/modal.service';
 import {DECK_ITERATOR_EXAMPLE_CARDS, DeckCommand} from './deck-iterator.model';
+import {SubmissionDeck} from '../../../../models/deck.model';
 
 export class DeckIterator implements DeckCommand {
   private cardSubject: ReplaySubject<Card> = new ReplaySubject<Card>(1);

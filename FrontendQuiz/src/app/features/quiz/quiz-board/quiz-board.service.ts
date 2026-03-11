@@ -4,9 +4,10 @@ import {Card} from '../answer-slots/quiz.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {CardStoreService} from '../../../services/card-store.service';
 import {AnkiCard} from '../../anki-table/anki-table.model';
-import {PropertyType, SubmissionDeck} from '../../../../generated/api';
+import {PropertyType} from '../../../../generated/api';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
+import {SubmissionDeck} from '../../../models/deck.model';
 
 @Injectable({
   providedIn: 'root'

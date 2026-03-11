@@ -3,7 +3,7 @@ import {Observable, of} from 'rxjs';
 import {ImportedCard} from './extract-cards-from-url.component';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {SubmissionDeck} from '../../../generated/api';
+import {SubmissionDeck} from '../../models/deck.model';
 
 @Injectable({
   providedIn: 'root'

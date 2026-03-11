@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class SubmissionDeckRepository {
@@ -127,6 +128,22 @@ public class SubmissionDeckRepository {
     }
 
     return deck;
+  }
+
+  public List<SubmissionDeck> getSubmissionDecksByOwnerId(UUID ownerId) {
+    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE owner_id = ?";
+    return jdbcTemplate.query(sql, new Object[]{ownerId}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+  }
+
+  public Optional<SubmissionDeck> findByOwnerIdAndDeckName(UUID ownerId, String deckName) {
+    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE owner_id = ? AND deckName = ?";
+    List<SubmissionDeck> decks = jdbcTemplate.query(sql, new Object[]{ownerId, deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+    return decks.isEmpty() ? Optional.empty() : Optional.of(decks.getFirst());
+  }
+
+  public int insertDeck(String deckName, UUID ownerId, String propertiesJson, String cardsJson) {
+    String sql = "INSERT INTO submission_deck (deckName, owner_id, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
+    return jdbcTemplate.update(sql, deckName, ownerId, propertiesJson, cardsJson);
   }
 
 

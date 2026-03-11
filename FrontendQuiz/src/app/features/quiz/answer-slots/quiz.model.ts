@@ -1,6 +1,6 @@
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from '../utils/ValidationStrategy';
-import {SubmissionDeck} from '../../../../generated/api';
 import {PropertyType} from '../../dynamic-card-creator/submission-deck.model';
+import {SubmissionDeck} from '../../../models/deck.model';
 
 export interface Card {
   index: number;

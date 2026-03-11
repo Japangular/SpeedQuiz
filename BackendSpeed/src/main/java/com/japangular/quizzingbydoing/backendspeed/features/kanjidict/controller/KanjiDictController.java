@@ -41,7 +41,7 @@ public class KanjiDictController {
   @GetMapping("/jouyou")
   public ResponseEntity<List<KanjiDTO>> jouyou() throws IOException {
     logger.info("Progressing Jouyou Kanji request");
-    if (!kanjiImportService.hasImported() && checkFirst()) {
+    if (checkFirst()) {
       logger.info("jouyou request: Kanji dict needs to be imported, starting now");
       this.kanjiImportService.importJson();
     }

@@ -1,79 +1,73 @@
 import {Inject, Injectable} from '@angular/core';
-import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
+import {QUIZ_API_TOKEN} from '../interfaces/QuizApi';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {UserGeneratedDeck, UserGeneratedDeckSubmissionService} from '../features/dynamic-card-creator/submission-deck.model';
-import {PropertyType, SubmissionDeck} from '../../generated/api';
+import {PropertyType, DeckContent} from '../models/deck.model';
 import {map} from 'rxjs/operators';
 import {DeckItem} from '../features/deck-table/deck/deck-table.model';
+import {QuizApi} from '../interfaces/SubmissionDeckApi';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CardStoreService implements UserGeneratedDeckSubmissionService {
-  currentDeck = {deckName: "initial Deck", username: "app initializer", properties: {}, cards: []} as SubmissionDeck;
-  _currentDeck: BehaviorSubject<SubmissionDeck> = new BehaviorSubject(this.currentDeck);
-  _currentDeck$: Observable<SubmissionDeck> = this._currentDeck.asObservable();
+  currentDeckName = "initial Deck";
+  currentDeck: DeckContent = {properties: {}, cards: []};
+  _currentDeck: BehaviorSubject<DeckContent> = new BehaviorSubject(this.currentDeck);
+  _currentDeck$: Observable<DeckContent> = this._currentDeck.asObservable();
 
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
-
   }
 
-  sendCurrentDeck(){
-    this.quizApi.quizApiSubmissionDeckPost(this.currentDeck).subscribe(a => console.log(a));
+  sendCurrentDeck() {
+    this.quizApi.createDeck(this.currentDeckName, this.currentDeck).subscribe(a => console.log(a));
   }
 
-  setCurrentDeck(deck: SubmissionDeck | DeckItem[]) {
+  setCurrentDeck(deck: DeckContent | DeckItem[], deckName?: string) {
     if (Array.isArray(deck)) {
-      const current = this.currentDeck;
-      current.deckName = "DeckDataSource";
-      current.properties = {position: PropertyType.Question, name: PropertyType.Answer};
-      current.cards = deck.map(item => ({
-        position: item['id'],
-        name: item['name']
-      }));
+      this.currentDeckName = deckName ?? "DeckDataSource";
+      this.currentDeck = {
+        properties: {position: PropertyType.Question, name: PropertyType.Answer},
+        cards: deck.map(item => ({
+          position: item['id'],
+          name: item['name']
+        }))
+      };
     } else {
+      this.currentDeckName = deckName ?? this.currentDeckName;
       this.currentDeck = deck;
     }
 
-    console.log(JSON.stringify(deck))
-
+    console.log(JSON.stringify(deck));
     this._currentDeck.next(this.currentDeck);
   }
 
   sendUserGeneratedDeck(deck: UserGeneratedDeck): void {
-    this.setCurrentDeck(deck);
+    this.currentDeckName = deck.deckName ?? "no-name";
+    this.setCurrentDeck({properties: deck.properties, cards: deck.cards});
     this.sendCurrentDeck();
   }
 
-  switchDeck(deckName: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
-    return this.quizApi.quizApiSubmissionDeckGet(this.currentDeck.username, deckName).pipe(
-      map(deck => mapSubmissionDeckToDeckItem(deck))
+  switchDeck(deckId: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
+    return this.quizApi.loadDeck(deckId).pipe(
+      map(deck => mapDeckContentToDeckItem(deck))
     );
   }
 }
 
-export function mapSubmissionDeckToDeckItem(submissionDeck: SubmissionDeck): {
+export function mapDeckContentToDeckItem(deckContent: DeckContent): {
   deckItems: DeckItem[],
   displayedColumns: string[]
 } {
-  console.log("goal map submissionDeck: " + JSON.stringify(submissionDeck));
-  const displayedColumns = Object.keys(submissionDeck.properties);
-  const deckItems: DeckItem[] = submissionDeck.cards.map(card => {
+  console.log("goal map deckContent: " + JSON.stringify(deckContent));
+  const displayedColumns = Object.keys(deckContent.properties);
+  const deckItems: DeckItem[] = deckContent.cards.map((card: Record<string, string>) => {
     const item: DeckItem = {};
     displayedColumns.forEach(key => {
-      item[key] = card[key] ?? ''; // fallback to empty string
+      item[key] = card[key] ?? '';
     });
     return item;
   });
 
   return {deckItems, displayedColumns};
-}
-
-export function mapUserGeneratedDeckToSubmissionDeck(deck: UserGeneratedDeck, username: string): SubmissionDeck {
-  return {
-    deckName: deck.deckName,
-    username: deck.username ?? username,
-    properties: deck.properties,
-    cards: deck.cards
-  };
 }

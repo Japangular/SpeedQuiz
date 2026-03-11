@@ -1,0 +1,22 @@
+.deck-shelf-container {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.error-card,
+.empty-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+mat-expansion-panel-header mat-icon {
+  margin-right: 8px;
+}
+
+mat-panel-description {
+  justify-content: flex-end;
+}

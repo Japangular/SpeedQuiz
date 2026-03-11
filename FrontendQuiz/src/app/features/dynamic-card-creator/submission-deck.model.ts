@@ -1,4 +1,5 @@
-import {DeckMetadata, PropertyType as ApiPropertyType} from '../../../generated/api';
+import {PropertyType as ApiPropertyType} from '../../../generated/api';
+import {DeckMetadata} from '../../models/deck.model';
 
 export const PropertyType = ApiPropertyType;
 export type PropertyType = typeof PropertyType[keyof typeof PropertyType];
