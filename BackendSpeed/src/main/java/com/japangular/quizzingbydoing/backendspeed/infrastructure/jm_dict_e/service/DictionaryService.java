@@ -13,16 +13,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class DictionaryService {
 
   private final List<Entry> entries = new ArrayList<>();
+  private final Map<String, List<Entry>> kebIndex = new HashMap<>();
+  private final Map<String, List<Entry>> rebIndex = new HashMap<>();
+
   private static final Logger logger = LoggerFactory.getLogger(DictionaryService.class);
   String filename = "/app/jmdict_e.xml";
 
@@ -50,9 +50,8 @@ public class DictionaryService {
           StringReader sr = new StringReader(cleanedXml);
           try {
             Entry entry = (Entry) unmarshaller.unmarshal(sr);
-            entries.add(entry); // Add unmarshalled entry to the list
+            entries.add(entry);
           } catch (JAXBException e) {
-            // Catch and log the exception, then continue processing
             System.err.println("Error parsing entry XML: " + e.getMessage());
             System.err.println("Problematic XML: " + cleanedXml);
             throw e;
@@ -62,23 +61,40 @@ public class DictionaryService {
       }
       logger.info("Dictionary loaded successfully. Loaded " + entries.size() + " entries");
     }
+
+    buildIndex();
+  }
+
+  private void buildIndex() {
+    long start = System.nanoTime();
+
+    for (Entry entry : entries) {
+      if (entry.getKEle() != null) {
+        for (Entry.KElement k : entry.getKEle()) {
+          if (k.getKeb() != null) {
+            kebIndex.computeIfAbsent(k.getKeb(), x -> new ArrayList<>()).add(entry);
+          }
+        }
+      }
+      if (entry.getREle() != null) {
+        for (Entry.RElement r : entry.getREle()) {
+          if (r.getReb() != null) {
+            rebIndex.computeIfAbsent(r.getReb(), x -> new ArrayList<>()).add(entry);
+          }
+        }
+      }
+    }
+
+    long elapsed = System.nanoTime() - start;
+    logger.info("Dictionary index built in {}ms — {} keb keys, {} reb keys",
+        elapsed / 1_000_000, kebIndex.size(), rebIndex.size());
   }
 
   public List<Entry> searchEquals(String keyword) {
-    return entries.stream()
-        .filter(e ->
-            Optional.ofNullable(e.getKEle())
-                .orElse(Collections.emptyList())
-                .stream()
-                .anyMatch(k -> k.getKeb() != null && k.getKeb().equals(keyword)) ||
-
-                Optional.ofNullable(e.getREle())
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .anyMatch(r -> r.getReb() != null && r.getReb().equals(keyword))
-        )
-        .limit(20)
-        .collect(Collectors.toList());
+    Set<Entry> results = new LinkedHashSet<>();
+    results.addAll(kebIndex.getOrDefault(keyword, List.of()));
+    results.addAll(rebIndex.getOrDefault(keyword, List.of()));
+    return results.stream().limit(20).toList();
   }
 
   public List<Entry> searchContains(String keyword) {
