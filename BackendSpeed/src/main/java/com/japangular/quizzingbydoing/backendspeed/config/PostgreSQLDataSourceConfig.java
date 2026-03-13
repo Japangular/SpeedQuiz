@@ -23,10 +23,10 @@ import java.util.Map;
 @EnableTransactionManagement
 @EnableJpaRepositories(
     basePackages = {
-        "com.japangular.quizzingbydoing.backendspeed.features.quizFrontend.repository",
-        "com.japangular.quizzingbydoing.backendspeed.features.kanjidict.repository",
-        "com.japangular.quizzingbydoing.backendspeed.features.ankiSqliteToCsvParsing.repository",
-        "com.japangular.quizzingbydoing.backendspeed.features.transcriptCards.repositories",
+        "com.japangular.quizzingbydoing.backendspeed.persistence",
+        "com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.repository",
+        "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.repository",
+        "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.repositories",
     },
     entityManagerFactoryRef = "postgresqlEntityManagerFactory",
     transactionManagerRef = "postgresqlTransactionManager"
@@ -55,23 +55,19 @@ public class PostgreSQLDataSourceConfig {
 
     @Primary
     @Bean(name = "postgresqlTransactionManager")
-    public PlatformTransactionManager transactionManager(
-            @Qualifier("postgresqlEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    public PlatformTransactionManager transactionManager(@Qualifier("postgresqlEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
     @Primary
     @Bean(name = "postgresqlEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean postgresqlEntityManagerFactory(
-        EntityManagerFactoryBuilder builder,
-        @Qualifier("postgresqlDataSource") DataSource dataSource
-    ) {
+    public LocalContainerEntityManagerFactoryBean postgresqlEntityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("postgresqlDataSource") DataSource dataSource) {
         return builder
             .dataSource(dataSource)
             .packages(
-                "com.japangular.quizzingbydoing.backendspeed.features.kanjidict.entity",
-                "com.japangular.quizzingbydoing.backendspeed.features.ankiSqliteToCsvParsing.entity",
-                "com.japangular.quizzingbydoing.backendspeed.features.transcriptCards.entities"
+                "com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.entity",
+                "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.entity",
+                "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.entities"
             ) // Package where your PostgreSQL entities are located
             .persistenceUnit("postgresql")
             .properties(hibernateProperties())

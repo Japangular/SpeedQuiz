@@ -2,12 +2,19 @@ openapi: 3.0.1
 info:
   title: SpeedQuiz API
   description: API for managing quiz decks and cards
-  version: 2.0.0
+  version: 2.1.0
+
+tags:
+  - name: deck
+    description: Deck listing, loading, browsing, creation, and card state management
 
 paths:
   /quizApi/decks:
     get:
+      tags:
+        - deck
       summary: List all available decks
+      operationId: listDecks
       parameters:
         - name: ownerId
           in: query
@@ -36,7 +43,10 @@ paths:
                   $ref: '#/components/schemas/DeckInfo'
 
     post:
+      tags:
+        - deck
       summary: Create a new deck
+      operationId: createDeck
       parameters:
         - name: ownerId
           in: query
@@ -61,7 +71,10 @@ paths:
 
   /quizApi/decks/{deckId}:
     get:
+      tags:
+        - deck
       summary: Load a full deck
+      operationId: loadDeck
       parameters:
         - name: deckId
           in: path
@@ -99,7 +112,10 @@ paths:
 
   /quizApi/decks/{deckId}/page:
     get:
+      tags:
+        - deck
       summary: Browse a deck with pagination and filtering
+      operationId: browseDeck
       parameters:
         - name: deckId
           in: path
@@ -154,7 +170,10 @@ paths:
 
   /quizApi/decks/{deckId}/state:
     get:
+      tags:
+        - deck
       summary: Get card states for a deck
+      operationId: getCardStates
       parameters:
         - name: deckId
           in: path
@@ -178,7 +197,10 @@ paths:
                   $ref: '#/components/schemas/DeckCardState'
 
     post:
+      tags:
+        - deck
       summary: Update card states
+      operationId: updateCardStates
       parameters:
         - name: deckId
           in: path
