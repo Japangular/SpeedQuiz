@@ -3,6 +3,7 @@ package com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.cli
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class MecabClient {
   private static final Logger logger = LoggerFactory.getLogger(MecabClient.class);
-  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper;
+  private final RestTemplate restTemplate;
 
   public List<Map<String, Object>> parseJapanese(String input) {
     String url = "http://python_dict:8000/parse";
@@ -29,7 +32,6 @@ public class MecabClient {
     String body = String.format("{\"text\":\"%s\"}", input);
     HttpEntity<String> request = new HttpEntity<>(body, headers);
 
-    RestTemplate restTemplate = new RestTemplate();
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     logger.info("MeCab response received");

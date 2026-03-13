@@ -30,6 +30,7 @@ public class DeckController implements DeckApi {
   private final DeckBrowsingService deckBrowsingService;
   private final CardProgressService cardProgressService;
   private final UserDeckSource userDeckSource;
+  private final ObjectMapper objectMapper;
 
   private UUID resolveOwner(UUID ownerId) {
     return ownerId != null ? ownerId : DEV_OWNER;
@@ -90,10 +91,8 @@ public class DeckController implements DeckApi {
   }
 
     @Override
-    public ResponseEntity<Void> createDeck(
-            UUID ownerId, String deckName, DeckContent deckContent) {
+    public ResponseEntity<Void> createDeck(UUID ownerId, String deckName, DeckContent deckContent) {
     try {
-      ObjectMapper objectMapper = new ObjectMapper();
       String propertiesJson = objectMapper.writeValueAsString(deckContent.getProperties());
       String cardsJson = objectMapper.writeValueAsString(deckContent.getCards());
             userDeckSource.insertDeck(deckName, resolveOwner(ownerId), propertiesJson, cardsJson);

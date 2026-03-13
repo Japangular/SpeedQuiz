@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.model.PropertyType;
+import lombok.RequiredArgsConstructor;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,16 +22,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class DeckRepository {
-
   private final JdbcTemplate jdbcTemplate;
   private static final Logger logger = LoggerFactory.getLogger(DeckRepository.class);
-  private final ObjectMapper objectMapper = new ObjectMapper();
-
-  @Autowired
-  public DeckRepository(@Qualifier("postgresqlJdbcTemplate") JdbcTemplate postgresJdbcTemplate) {
-    this.jdbcTemplate = postgresJdbcTemplate;
-  }
+  private final ObjectMapper objectMapper;
 
   public int insertSubmissionDeck(DeckModel deckModel) {
     String propertiesJson;
