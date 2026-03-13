@@ -16,6 +16,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KanjiImportService {
     private final KanjiRepository kanjiRepo;
+    private volatile boolean imported = false;
+
+    public void ensureImported() throws IOException {
+        if (!imported && kanjiRepo.count() < 1) {
+            importJson();
+            imported = true;
+        }
+    }
 
     public Long getKanjiRepoCount() {
         return kanjiRepo.count();

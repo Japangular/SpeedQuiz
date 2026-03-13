@@ -23,47 +23,27 @@ public class KanjiDictController {
   private final KanjiSearchService kanjiSearchService;
   private final MecabService mecabService;
 
-  static boolean firstTime = true;
   private static final Logger logger = LoggerFactory.getLogger(KanjiDictController.class);
 
   @GetMapping("/search")
   public ResponseEntity<List<KanjiDTO>> search(@RequestParam String k) throws IOException {
     logger.info("Kanji dict search started: {}", k);
-    if(kanjiImportService.getKanjiRepoCount() < 1) {
-      logger.info("search request: Kanji dict needs to be imported, starting now");
-      this.kanjiImportService.importJson();
-    }
-    logger.info("Searching out of " + kanjiImportService.getKanjiRepoCount());
+    kanjiImportService.ensureImported();
     return ResponseEntity.ok(kanjiSearchService.getByKanji(k));
   }
 
   @GetMapping("/jouyou")
   public ResponseEntity<List<KanjiDTO>> jouyou() throws IOException {
     logger.info("Progressing Jouyou Kanji request");
-    if (checkFirst()) {
-      logger.info("jouyou request: Kanji dict needs to be imported, starting now");
-      this.kanjiImportService.importJson();
-    }
-    logger.info("Searching out of " + kanjiImportService.getKanjiRepoCount());
-    logger.info("Finished: returning jouyou Kanji");
+    kanjiImportService.ensureImported();
     return ResponseEntity.ok(kanjiSearchService.getJouyou());
   }
 
   @GetMapping("/parseMecab")
-  public ResponseEntity<List<Map<String, Object>>> parseMecab(@RequestParam String k) throws IOException {
+  public ResponseEntity<List<Map<String, Object>>> parseMecab(@RequestParam String k) {
     logger.info("Kanji dict parseMecab started: {}", k);
-
-    // Get the parsed data
     List<Map<String, Object>> parsedData = mecabService.parseJapaneseToJson(k);
-
-    // Return parsed data as JSON response
     return ResponseEntity.ok(parsedData);
-  }
-
-  private static Boolean checkFirst(){
-    boolean result = firstTime;
-    firstTime = false;
-    return result;
   }
 
 }
