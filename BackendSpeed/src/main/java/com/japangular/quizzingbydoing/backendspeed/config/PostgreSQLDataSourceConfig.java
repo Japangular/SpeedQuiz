@@ -76,7 +76,7 @@ public class PostgreSQLDataSourceConfig {
 
     public Map<String, Object> hibernateProperties() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "validate");
+        properties.put("hibernate.hbm2ddl.auto", "none");
         return properties;
     }
 

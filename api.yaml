@@ -241,6 +241,8 @@ components:
       required:
         - id
         - name
+        - description
+        - attribution
 
     DeckContent:
       type: object

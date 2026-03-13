@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Observable, catchError, of } from 'rxjs';
 import { filter, take, switchMap, map, shareReplay } from 'rxjs/operators';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
-import {DeckInfo, DeckShelfService} from './deck-shelf.service';
+import {DeckShelfService} from './deck-shelf.service';
 import {LocalProfile, LocalProfileService} from '../../user-store-management/local-profile.service';
 import { Router } from '@angular/router';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -12,6 +12,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import {DeckInfo} from '../../../generated/api';
 
 @Component({
   selector: 'app-deck-shelf',
@@ -46,7 +47,7 @@ export class DeckShelfComponent implements OnInit {
       take(1),
       switchMap(profile =>
         this.deckShelfService.getDeckOverview(
-          profile.displayName,
+          profile.token,
           profile.wkClaimedName,
           profile.wkTokenHash
         )
@@ -78,10 +79,9 @@ export class DeckShelfComponent implements OnInit {
   loadDeck(deck: DeckInfo): void {
     this.loadingDeckId = deck.id;
 
-    const profile = this.profileService;
-    const username = profile.getDisplayName() ?? '';
+    const ownerId = this.profileService.getToken() ?? '';
 
-    this.deckShelfService.loadDeck(deck.id, username).subscribe({
+    this.deckShelfService.loadDeck(deck.id, ownerId).subscribe({
       next: (submissionDeck) => {
         this.loadingDeckId = null;
         // TODO: feed submissionDeck into CardStoreService / navigate to quiz

@@ -46,10 +46,10 @@ public class DeckRepository {
       return 0;
     }
 
-    String sql = "INSERT INTO submission_deck (deckName, username, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
+    String sql = "INSERT INTO deck (deck_name, username, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
 
     try {
-      logger.info("Attempting to insert SubmissionDeck with deckName: {}, username: {}", deckModel.getDeckName(), deckModel.getUsername());
+      logger.info("Attempting to insert Deck with deckName: {}, username: {}", deckModel.getDeckName(), deckModel.getUsername());
 
       int rowsAffected = jdbcTemplate.update(sql,
           deckModel.getDeckName(),
@@ -57,7 +57,7 @@ public class DeckRepository {
           propertiesJson,
           cardsJson);
 
-      logger.info("Successfully inserted SubmissionDeck with deckName: {}", deckModel.getDeckName());
+      logger.info("Successfully inserted Deck with deckName: {}", deckModel.getDeckName());
       return rowsAffected;
 
     } catch (DuplicateKeyException e) {
@@ -73,27 +73,24 @@ public class DeckRepository {
       logger.error("Unexpected duplicate key error for deckName: {}", deckModel.getDeckName(), e);
       throw e;
     } catch (DataAccessException e) {
-      logger.error("Database error when inserting SubmissionDeck with deckName: {}", deckModel.getDeckName(), e);
+      logger.error("Database error when inserting Deck with deckName: {}", deckModel.getDeckName(), e);
       return 0;
     }
   }
 
   public List<DeckModel> getSubmissionDecksByUsername(String username) {
-    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE username = ?";
-
-    return jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+    String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE username = ?";
+    return jdbcTemplate.query(sql, new Object[]{username}, (rs, rowNum) -> mapRowToDeck(rs));
   }
 
   public List<DeckModel> getSubmissionDecksByDeckName(String deckName) {
-    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE deckName = ?";
-
-    return jdbcTemplate.query(sql, new Object[]{deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+    String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE deck_name = ?";
+    return jdbcTemplate.query(sql, new Object[]{deckName}, (rs, rowNum) -> mapRowToDeck(rs));
   }
 
   public List<DeckModel> getSubmissionDecksByUsernameAndDeckName(String username, String deckName) {
-    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE username = ? AND deckName = ?";
-
-    return jdbcTemplate.query(sql, new Object[]{username, deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
+    String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE username = ? AND deck_name = ?";
+    return jdbcTemplate.query(sql, new Object[]{username, deckName}, (rs, rowNum) -> mapRowToDeck(rs));
   }
 
   public Optional<DeckModel> findByUsernameAndDeckName(String username, String deckName) {
@@ -105,11 +102,25 @@ public class DeckRepository {
     }
   }
 
-  private DeckModel mapRowToSubmissionDeck(ResultSet rs) throws SQLException {
+  public List<DeckModel> getSubmissionDecksByOwnerId(UUID ownerId) {
+    String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE owner_id = ?";
+    return jdbcTemplate.query(sql, new Object[]{ownerId}, (rs, rowNum) -> mapRowToDeck(rs));
+  }
 
+  public Optional<DeckModel> findByOwnerIdAndDeckName(UUID ownerId, String deckName) {
+    String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE owner_id = ? AND deck_name = ?";
+    List<DeckModel> decks = jdbcTemplate.query(sql, new Object[]{ownerId, deckName}, (rs, rowNum) -> mapRowToDeck(rs));
+    return decks.isEmpty() ? Optional.empty() : Optional.of(decks.getFirst());
+  }
 
+  public int insertDeck(String deckName, UUID ownerId, String propertiesJson, String cardsJson) {
+    String sql = "INSERT INTO deck (deck_name, owner_id, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
+    return jdbcTemplate.update(sql, deckName, ownerId, propertiesJson, cardsJson);
+  }
+
+  private DeckModel mapRowToDeck(ResultSet rs) throws SQLException {
     DeckModel deck = new DeckModel();
-    deck.setDeckName(rs.getString("deckName"));
+    deck.setDeckName(rs.getString("deck_name"));
     deck.setUsername(rs.getString("username"));
 
     try {
@@ -122,28 +133,9 @@ public class DeckRepository {
       deck.setCards(cards);
 
     } catch (JsonProcessingException e) {
-      logger.error("Failed to deserialize properties or cards for deckName: {}", rs.getString("deckName"), e);
-      // Optionally rethrow or handle
+      logger.error("Failed to deserialize properties or cards for deck_name: {}", rs.getString("deck_name"), e);
     }
 
     return deck;
   }
-
-  public List<DeckModel> getSubmissionDecksByOwnerId(UUID ownerId) {
-    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE owner_id = ?";
-    return jdbcTemplate.query(sql, new Object[]{ownerId}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
   }
-
-  public Optional<DeckModel> findByOwnerIdAndDeckName(UUID ownerId, String deckName) {
-    String sql = "SELECT deckName, username, properties, cards FROM submission_deck WHERE owner_id = ? AND deckName = ?";
-    List<DeckModel> decks = jdbcTemplate.query(sql, new Object[]{ownerId, deckName}, (rs, rowNum) -> mapRowToSubmissionDeck(rs));
-    return decks.isEmpty() ? Optional.empty() : Optional.of(decks.getFirst());
-  }
-
-  public int insertDeck(String deckName, UUID ownerId, String propertiesJson, String cardsJson) {
-    String sql = "INSERT INTO submission_deck (deckName, owner_id, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
-    return jdbcTemplate.update(sql, deckName, ownerId, propertiesJson, cardsJson);
-  }
-
-
-}

@@ -15,7 +15,7 @@ public class TranscriptRow {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Integer id;
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "stream_id", nullable = false)
