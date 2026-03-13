@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/japaneseDict")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @AllArgsConstructor
 public class DictionaryController {
 

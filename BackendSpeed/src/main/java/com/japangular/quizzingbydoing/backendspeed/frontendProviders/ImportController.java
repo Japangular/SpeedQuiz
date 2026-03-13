@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cardsFromUrl")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @RequiredArgsConstructor
 public class ImportController {
   private static final Logger logger = LoggerFactory.getLogger(ImportController.class);

@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/session")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @RequiredArgsConstructor
 public class SessionController {
   private final SessionRepository sessionRepository;

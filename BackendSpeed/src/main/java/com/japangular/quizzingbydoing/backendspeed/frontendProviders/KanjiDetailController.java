@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/kanjiDetail")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @AllArgsConstructor
 public class KanjiDetailController {
   private final KanjiDetailService kanjiDetailService;

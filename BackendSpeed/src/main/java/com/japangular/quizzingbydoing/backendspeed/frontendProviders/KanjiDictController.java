@@ -17,7 +17,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/kanjiDict")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 @RequiredArgsConstructor
 public class KanjiDictController {
   private final KanjiImportService kanjiImportService;

@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/transcriptCards")
-@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:4300"})
 public class TranscriptCardController {
 
   private final TranscriptCardService transcriptCardService;
