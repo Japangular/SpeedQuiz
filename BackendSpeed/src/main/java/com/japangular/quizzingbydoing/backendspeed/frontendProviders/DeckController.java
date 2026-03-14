@@ -88,7 +88,7 @@ public class DeckController implements DeckApi {
       userDeckSource.insertDeck(deckName, resolveOwner(ownerId), propertiesJson, cardsJson);
       return ResponseEntity.status(HttpStatus.CREATED).build();
     } catch (JsonProcessingException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      throw new IllegalArgumentException("Invalid deck content: " + e.getOriginalMessage(), e);
     }
   }
 }
