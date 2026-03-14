@@ -2,6 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.frontendProviders;
 
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.extractCardsFromUrl.CardsFromUrlModel;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.extractCardsFromUrl.CardsFromUrlProvider;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ public class ImportController {
   private final List<CardsFromUrlProvider> cardsFromUrlProviders;
 
   @PostMapping("/setUpConnection")
-  public ResponseEntity<CardsFromUrlModel> setUpConnection(@RequestBody CardsFromUrlModel cardsFromUrlModel) {
+  public ResponseEntity<CardsFromUrlModel> setUpConnection(@Valid @RequestBody CardsFromUrlModel cardsFromUrlModel) {
 
     for (CardsFromUrlProvider provider : cardsFromUrlProviders) {
       if (provider.isProviderForFrontendRequest(cardsFromUrlModel)) {

@@ -8,8 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -48,6 +51,14 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleGeneric(Exception ex) {
     logger.error("Unhandled exception", ex);
     return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex) {
+    String message = ex.getBindingResult().getFieldErrors().stream()
+        .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+        .collect(Collectors.joining(", "));
+    return buildResponse(HttpStatus.BAD_REQUEST, message);
   }
 
   private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message) {

@@ -4,6 +4,7 @@ import com.japangular.quizzingbydoing.backendspeed.persistence.session.AppSessio
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.ProvisionRequest;
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.ProvisionResponse;
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.SessionRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,13 +31,8 @@ public class SessionController {
   private static final Pattern SAFE_NAME = Pattern.compile("^[\\w\\- ]{1,30}$");
 
   @PostMapping("/provision")
-  public ResponseEntity<ProvisionResponse> provision(@RequestBody ProvisionRequest request) {
-    String name = request.getDisplayName();
-    if (name == null || name.isBlank()) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    String sanitized = HtmlUtils.htmlEscape(name.trim());
+  public ResponseEntity<ProvisionResponse> provision(@Valid @RequestBody ProvisionRequest request) {
+    String sanitized = HtmlUtils.htmlEscape(request.getDisplayName().trim());
 
     if (!SAFE_NAME.matcher(sanitized).matches()) {
       logger.warn("Rejected display name with invalid characters (length: {})", sanitized.length());

@@ -2,6 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.frontendProviders;
 
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.apiModels.ApiStreamTranscript;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.services.TranscriptCardService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class TranscriptCardController {
   }
 
   @PostMapping("/persistStreamTranscripts")
-  public ResponseEntity<Boolean> persistStreamTranscripts(@RequestBody ApiStreamTranscript request) {
+  public ResponseEntity<Boolean> persistStreamTranscripts(@Valid @RequestBody ApiStreamTranscript request) {
     logger.info("persistStreamTranscripts called");
     Boolean returnValue = transcriptCardService.processUpload(request);
     return ResponseEntity.ok(returnValue);
