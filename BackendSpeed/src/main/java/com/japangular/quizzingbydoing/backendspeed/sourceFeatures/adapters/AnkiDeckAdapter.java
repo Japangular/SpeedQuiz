@@ -15,11 +15,11 @@ import java.util.Map;
 
 /**
  * GoF Adapter Pattern — Object Adapter variant.
- *
+ * <p>
  * Target:  DeckProvider (the interface DeckRegistryService expects)
  * Adaptee: FrontendCsvService (speaks in QuestionReadingMeaning)
  * Adapter: this class (translates QuestionReadingMeaning → SubmissionDeck)
- *
+ * <p>
  * The adaptee (FrontendCsvService) is injected via constructor — composition,
  * not inheritance. The adapter does NOT extend FrontendCsvService.
  * The adaptee does NOT implement DeckProvider.
@@ -28,37 +28,33 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class AnkiDeckAdapter implements DeckProvider {
+  private final FrontendCsvService csvService;
 
-    private final FrontendCsvService csvService;
+  @Override
+  public DeckInfo getDeckInfo() {
+    return new DeckInfo().id("anki-local").name("Anki Collection")
+        .description("Cards imported from local Anki SQLite database").attribution("Local Anki DB");
+  }
 
-    @Override
-    public DeckInfo getDeckInfo() {
-        return new DeckInfo()
-            .id("anki-local")
-            .name("Anki Collection")
-            .description("Cards imported from local Anki SQLite database")
-            .attribution("Local Anki DB");
-    }
+  @Override
+  public DeckContent getDeckContent() {
+    List<QuestionReadingMeaning> ankiCards = csvService.getFilteredQrmList(null);
 
-    @Override
-    public DeckContent getDeckContent() {
-        List<QuestionReadingMeaning> ankiCards = csvService.getFilteredQrmList(null);
+    Map<String, PropertyType> properties = new LinkedHashMap<>();
+    properties.put("question", PropertyType.QUESTION);
+    properties.put("reading", PropertyType.ANSWER);
+    properties.put("meaning", PropertyType.ANSWER);
 
-        Map<String, PropertyType> properties = new LinkedHashMap<>();
-        properties.put("question", PropertyType.QUESTION);
-        properties.put("reading", PropertyType.ANSWER);
-        properties.put("meaning", PropertyType.ANSWER);
+    List<Map<String, String>> cards = ankiCards.stream()
+        .map(qrm -> {
+          Map<String, String> card = new LinkedHashMap<>();
+          card.put("question", qrm.getQuestion());
+          card.put("reading", qrm.getReading());
+          card.put("meaning", qrm.getMeaning());
+          return card;
+        })
+        .toList();
 
-        List<Map<String, String>> cards = ankiCards.stream()
-            .map(qrm -> {
-                Map<String, String> card = new LinkedHashMap<>();
-                card.put("question", qrm.getQuestion());
-                card.put("reading", qrm.getReading());
-                card.put("meaning", qrm.getMeaning());
-                return card;
-            })
-            .toList();
-
-        return new DeckContent(properties, cards);
-    }
+    return new DeckContent(properties, cards);
+  }
 }

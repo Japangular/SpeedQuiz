@@ -32,7 +32,6 @@ public class SessionController {
   @PostMapping("/provision")
   public ResponseEntity<ProvisionResponse> provision(@RequestBody ProvisionRequest request) {
     String name = request.getDisplayName();
-
     if (name == null || name.isBlank()) {
       return ResponseEntity.badRequest().build();
     }
@@ -44,21 +43,15 @@ public class SessionController {
       return ResponseEntity.badRequest().build();
     }
 
-    // No uniqueness check — display name is cosmetic.
-    // The UUID token is the real identity. Multiple users can share a name.
-
     UUID token = sessionRepository.provision(sanitized);
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(new ProvisionResponse(token, sanitized));
+    return ResponseEntity.status(HttpStatus.CREATED).body(new ProvisionResponse(token, sanitized));
   }
 
   @GetMapping("/validate")
-  public ResponseEntity<ProvisionResponse> validate(
-      @RequestHeader(value = "X-Session-Token", required = false) String tokenHeader) {
-
+  public ResponseEntity<ProvisionResponse> validate(@RequestHeader(value = "X-Session-Token", required = false) String tokenHeader) {
     if (tokenHeader == null || tokenHeader.isBlank()) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-}
+    }
 
     UUID token;
     try {
@@ -69,8 +62,7 @@ public class SessionController {
 
     Optional<AppSession> session = sessionRepository.findByToken(token);
     return session
-        .map(s -> ResponseEntity.ok(
-            new ProvisionResponse(s.getToken(), HtmlUtils.htmlEscape(s.getDisplayName()))))
+        .map(s -> ResponseEntity.ok(new ProvisionResponse(s.getToken(), HtmlUtils.htmlEscape(s.getDisplayName()))))
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
 }

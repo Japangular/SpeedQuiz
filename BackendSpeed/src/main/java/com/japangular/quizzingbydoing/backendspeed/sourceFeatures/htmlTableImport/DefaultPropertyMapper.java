@@ -9,13 +9,10 @@ import java.util.Map;
 public class DefaultPropertyMapper {
 
   public Map<String, PropertyType> map(List<String> header) {
-
     Map<String, PropertyType> properties = new LinkedHashMap<>();
 
     for (int i = 0; i < header.size(); i++) {
-
       String column = header.get(i);
-
       if (i == 0) {
         properties.put(column, PropertyType.QUESTION);
       } else {

@@ -9,7 +9,6 @@ import java.util.*;
 
 @Service
 public class HtmlTableDeckImporter {
-
   private final HtmlTableExtractor extractor;
   private final DefaultPropertyMapper propertyMapper;
 

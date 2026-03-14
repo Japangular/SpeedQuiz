@@ -13,10 +13,8 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Repository
 public class SessionRepository {
-
   private final JdbcTemplate jdbcTemplate;
   private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
@@ -25,10 +23,6 @@ public class SessionRepository {
     this.jdbcTemplate = postgresJdbcTemplate;
   }
 
-  /**
-   * Creates a new session row. The DB generates the UUID via gen_random_uuid().
-   * Returns the generated token.
-   */
   public UUID provision(String displayName) {
     String sql = "INSERT INTO app_session (display_name) VALUES (?) RETURNING token";
     UUID token = jdbcTemplate.queryForObject(sql, UUID.class, displayName);
@@ -36,17 +30,10 @@ public class SessionRepository {
     return token;
   }
 
-  /**
-   * Looks up a session by token. Also bumps last_seen_at.
-   */
   public Optional<AppSession> findByToken(UUID token) {
     try {
       // Bump last_seen_at on every lookup (so we can prune ghosts later)
-      jdbcTemplate.update(
-          "UPDATE app_session SET last_seen_at = NOW() WHERE token = ?",
-          token
-      );
-
+      jdbcTemplate.update("UPDATE app_session SET last_seen_at = NOW() WHERE token = ?", token);
       String sql = "SELECT token, display_name, created_at, last_seen_at FROM app_session WHERE token = ?";
       AppSession session = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRow(rs), token);
       return Optional.ofNullable(session);
@@ -55,9 +42,6 @@ public class SessionRepository {
     }
   }
 
-  /**
-   * Checks if a display name is already taken by another session.
-   */
   public boolean isDisplayNameTaken(String displayName) {
     String sql = "SELECT COUNT(*) FROM app_session WHERE LOWER(display_name) = LOWER(?)";
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, displayName);

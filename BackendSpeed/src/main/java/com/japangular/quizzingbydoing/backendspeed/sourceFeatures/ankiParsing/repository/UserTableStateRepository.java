@@ -18,6 +18,4 @@ public interface UserTableStateRepository extends JpaRepository<UserTableState, 
   @Modifying
   @Transactional
   void deleteByDecknameAndRowidIn(String deckname, List<String> rowids);
-
-
 }

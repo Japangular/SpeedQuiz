@@ -10,17 +10,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CardProgressService {
 
-    private final CardProgressRepository repository;
+  private final CardProgressRepository repository;
 
-    public List<CardProgress> getStates(String deckId, UUID ownerId) {
-        return repository.getStates(deckId, ownerId);
-    }
+  public List<CardProgress> getStates(String deckId, UUID ownerId) {
+    return repository.getStates(deckId, ownerId);
+  }
 
-    public void updateStates(String deckId, UUID ownerId, List<CardProgress> states) {
-        repository.saveStates(deckId, ownerId, states);
-    }
+  public void updateStates(String deckId, UUID ownerId, List<CardProgress> states) {
+    repository.saveStates(deckId, ownerId, states);
+  }
 
-    public void removeStates(String deckId, UUID ownerId, List<String> cardIds) {
-        repository.deleteStates(deckId, ownerId, cardIds);
-    }
+  public void removeStates(String deckId, UUID ownerId, List<String> cardIds) {
+    repository.deleteStates(deckId, ownerId, cardIds);
+  }
 }

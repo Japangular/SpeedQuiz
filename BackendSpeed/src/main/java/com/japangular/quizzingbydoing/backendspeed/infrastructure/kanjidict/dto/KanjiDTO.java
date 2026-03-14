@@ -10,8 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class KanjiDTO {
-    private String kanji;
-    private List<String> onyomi;
-    private List<String> kunyomi;
-    private List<String> meanings;
+  private String kanji;
+  private List<String> onyomi;
+  private List<String> kunyomi;
+  private List<String> meanings;
 }

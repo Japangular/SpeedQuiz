@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/transcriptCards")
 public class TranscriptCardController {
-
   private final TranscriptCardService transcriptCardService;
   private static final Logger logger = LoggerFactory.getLogger(TranscriptCardController.class);
 

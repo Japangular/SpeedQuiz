@@ -12,18 +12,18 @@ import java.util.UUID;
 
 /**
  * GoF Adapter Pattern — but for a multi-deck source.
- *
+ * <p>
  * This adapter doesn't implement DeckProvider because the interface
  * assumes one provider = one deck. User-created decks are many-per-user.
- *
+ * <p>
  * Instead, DeckRegistryService calls this adapter directly.
  * This is still an adapter: it translates SubmissionDeckRepository's
  * query-based API into the listing/loading contract the registry needs.
- *
+ * <p>
  * Target:  DeckRegistryService's expectations (listDecks, loadDeck)
  * Adaptee: SubmissionDeckRepository (speaks in SQL queries and Optional)
  * Adapter: this class (translates repository calls → DeckInfo list + deck loading)
- *
+ * <p>
  * Why not implement DeckProvider?
  * Because DeckProvider assumes getDeckId() returns ONE id.
  * This source has N decks per user. Forcing it into DeckProvider
@@ -33,29 +33,27 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class UserDeckAdapter {
+  private final DeckRepository repository;
+  private static final String ID_PREFIX = "user:";
 
-    private final DeckRepository repository;
+  public List<DeckInfo> listDecks(UUID ownerId) {
+    return repository.getSubmissionDecksByOwnerId(ownerId).stream()
+        .map(deck -> new DeckInfo()
+            .id(ID_PREFIX + deck.getDeckName())
+            .name(deck.getDeckName())
+            .description("User-created deck")
+            .attribution("user"))
+        .toList();
+  }
 
-    private static final String ID_PREFIX = "user:";
+  public DeckContent loadDeck(String deckId, UUID ownerId) {
+    String deckName = deckId.substring(ID_PREFIX.length());
+    DeckModel deck =
+        repository.findByOwnerIdAndDeckName(ownerId, deckName).orElseThrow(() -> new RuntimeException("User deck not found: " + deckId));
+    return new DeckContent(deck.getProperties(), deck.getCards());
+  }
 
-    public List<DeckInfo> listDecks(UUID ownerId) {
-        return repository.getSubmissionDecksByOwnerId(ownerId).stream()
-            .map(deck -> new DeckInfo()
-                .id(ID_PREFIX + deck.getDeckName())
-                .name(deck.getDeckName())
-                .description("User-created deck")
-                .attribution("user"))
-            .toList();
-    }
-
-    public DeckContent loadDeck(String deckId, UUID ownerId) {
-        String deckName = deckId.substring(ID_PREFIX.length());
-        DeckModel deck = repository.findByOwnerIdAndDeckName(ownerId, deckName)
-            .orElseThrow(() -> new RuntimeException("User deck not found: " + deckId));
-        return new DeckContent(deck.getProperties(), deck.getCards());
-    }
-
-    public boolean handles(String deckId) {
-        return deckId != null && deckId.startsWith(ID_PREFIX);
-    }
+  public boolean handles(String deckId) {
+    return deckId != null && deckId.startsWith(ID_PREFIX);
+  }
 }

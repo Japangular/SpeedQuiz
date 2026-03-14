@@ -4,15 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(
-    name = "transcript_row"
-)
+@Table(name = "transcript_row")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TranscriptRow {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;

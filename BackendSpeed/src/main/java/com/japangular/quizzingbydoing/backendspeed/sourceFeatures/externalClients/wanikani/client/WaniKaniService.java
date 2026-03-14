@@ -27,7 +27,9 @@ public class WaniKaniService {
 
   private static final long CACHE_TTL_MINUTES = 15;
 
-  /** Simple wrapper that pairs a value with its cache timestamp. */
+  /**
+   * Simple wrapper that pairs a value with its cache timestamp.
+   */
   private record TimedEntry<T>(T value, java.time.Instant cachedAt) {
     boolean isExpired() {
       return java.time.Instant.now().isAfter(cachedAt.plus(java.time.Duration.ofMinutes(CACHE_TTL_MINUTES)));
@@ -46,7 +48,7 @@ public class WaniKaniService {
   private final WaniKaniMapper waniKaniMapper;
 
   public boolean getUser(CardsFromUrlModel cardsFromUrlModel) {
-    if(cardsFromUrlModel.getClaimedName() == null)
+    if (cardsFromUrlModel.getClaimedName() == null)
       return false;
 
     String cacheKey = cardsFromUrlModel.getTokenHash();
@@ -61,17 +63,17 @@ public class WaniKaniService {
       } else {
         WaniKaniUserResponse cached = entry.value();
 
-      // Still verify claimedName matches the cached user
-      if (cached.data.getUsername().equalsIgnoreCase(cardsFromUrlModel.getClaimedName().trim())) {
-        logger.info("User '{}' verified from cache (tokenHash match).", cardsFromUrlModel.getClaimedName());
-        cardsFromUrlModel.setConnectedUser(cached.data.getUsername());
-      return true;
-    } else {
-        logger.warn("Cache hit for tokenHash but claimedName '{}' doesn't match cached user '{}'.",
-            cardsFromUrlModel.getClaimedName(), cached.data.getUsername());
-        return false;
+        // Still verify claimedName matches the cached user
+        if (cached.data.getUsername().equalsIgnoreCase(cardsFromUrlModel.getClaimedName().trim())) {
+          logger.info("User '{}' verified from cache (tokenHash match).", cardsFromUrlModel.getClaimedName());
+          cardsFromUrlModel.setConnectedUser(cached.data.getUsername());
+          return true;
+        } else {
+          logger.warn("Cache hit for tokenHash but claimedName '{}' doesn't match cached user '{}'.",
+              cardsFromUrlModel.getClaimedName(), cached.data.getUsername());
+          return false;
+        }
       }
-    }
     }
 
     // 2. No cache hit → need the real token to call WaniKani
@@ -84,17 +86,17 @@ public class WaniKaniService {
     // 3. Call real WaniKani API
     WaniKaniUserResponse user;
     String json;
-      try {
-        json = waniKaniClient.getData(cardsFromUrlModel.getApiToken(), "user");
-      } catch(WaniKaniException e){
-        logger.error("Failed to fetch WaniKani user: {}", e.getMessage());
-        cardsFromUrlModel.setConnectedUser(null);
-        cardsFromUrlModel.setPayload(e);
-        return false;
-      }
+    try {
+      json = waniKaniClient.getData(cardsFromUrlModel.getApiToken(), "user");
+    } catch (WaniKaniException e) {
+      logger.error("Failed to fetch WaniKani user: {}", e.getMessage());
+      cardsFromUrlModel.setConnectedUser(null);
+      cardsFromUrlModel.setPayload(e);
+      return false;
+    }
 
     try {
-      if(json != null) {
+      if (json != null) {
         user = waniKaniMapper.mapUserResponse(json);
         logger.info("User '{}' loaded from real API.", cardsFromUrlModel.getClaimedName());
       } else {
@@ -131,10 +133,10 @@ public class WaniKaniService {
         logger.info("Assignments cache expired, removing.");
         assignmentsCache.remove(cacheKey);
       } else {
-      logger.info("Assignments loaded from cache (tokenHash match).");
+        logger.info("Assignments loaded from cache (tokenHash match).");
         cardsFromUrlModel.setPayload(entry.value());
-      return true;
-    }
+        return true;
+      }
     }
 
     // 2. No cache hit → need the real token
@@ -208,7 +210,7 @@ public class WaniKaniService {
         .filter(id -> !subjectCache.containsKey(id))
         .toList();
 
-    if (missing.isEmpty()){
+    if (missing.isEmpty()) {
       logger.info("All subject {} found in cache", subjectIds);
       return;
     }

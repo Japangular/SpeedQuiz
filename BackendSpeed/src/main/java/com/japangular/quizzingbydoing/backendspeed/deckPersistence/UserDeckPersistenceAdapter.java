@@ -16,5 +16,4 @@ public class UserDeckPersistenceAdapter implements UserDeckSource {
   public int insertDeck(String deckName, UUID uuid, String propertiesJson, String cardsJson) {
     return repository.insertDeck(deckName, uuid, propertiesJson, cardsJson);
   }
-  // ...
 }

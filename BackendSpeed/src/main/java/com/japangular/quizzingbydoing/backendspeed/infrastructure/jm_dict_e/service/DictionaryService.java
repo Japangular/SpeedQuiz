@@ -86,8 +86,7 @@ public class DictionaryService {
     }
 
     long elapsed = System.nanoTime() - start;
-    logger.info("Dictionary index built in {}ms — {} keb keys, {} reb keys",
-        elapsed / 1_000_000, kebIndex.size(), rebIndex.size());
+    logger.info("Dictionary index built in {}ms — {} keb keys, {} reb keys", elapsed / 1_000_000, kebIndex.size(), rebIndex.size());
   }
 
   public List<Entry> searchEquals(String keyword) {
@@ -98,20 +97,11 @@ public class DictionaryService {
   }
 
   public List<Entry> searchContains(String keyword) {
-    return entries.stream()
-        .filter(e ->
-            Optional.ofNullable(e.getKEle())
-                .orElse(Collections.emptyList())
-                .stream()
-                .anyMatch(k -> k.getKeb() != null && k.getKeb().contains(keyword)) ||
-
-                Optional.ofNullable(e.getREle())
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .anyMatch(r -> r.getReb() != null && r.getReb().contains(keyword))
-        )
-        .limit(20)
-        .collect(Collectors.toList());
+    return entries.stream().filter(e -> Optional
+        .ofNullable(e.getKEle()).orElse(Collections.emptyList()).stream()
+        .anyMatch(k -> k.getKeb() != null && k.getKeb().contains(keyword)) ||
+        Optional.ofNullable(e.getREle()).orElse(Collections.emptyList()).stream().anyMatch(r -> r.getReb() != null && r.getReb().contains(keyword))
+    ).limit(20).collect(Collectors.toList());
   }
 
 }

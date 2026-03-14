@@ -14,11 +14,11 @@ public class JsonBatchImporter {
 
   private static final int DEFAULT_BATCH_SIZE = 100;
 
-  public static <T> void importJson (
-    InputStream jsonStream,
-    Function<JsonNode, T> mapper,
-    Consumer<List<T>> consumer,
-    int batchSize
+  public static <T> void importJson(
+      InputStream jsonStream,
+      Function<JsonNode, T> mapper,
+      Consumer<List<T>> consumer,
+      int batchSize
   ) throws IOException {
 
     ObjectMapper objectMapper = new ObjectMapper();
@@ -27,18 +27,18 @@ public class JsonBatchImporter {
     List<T> batch = new ArrayList<>();
     int count = 0;
 
-    for(JsonNode node: root) {
+    for (JsonNode node : root) {
       T mapped = mapper.apply(node);
       batch.add(mapped);
       count++;
 
-      if(count % batchSize == 0) {
+      if (count % batchSize == 0) {
         consumer.accept(batch);
         batch.clear();
       }
     }
 
-    if(!batch.isEmpty()) {
+    if (!batch.isEmpty()) {
       consumer.accept(batch);
     }
   }

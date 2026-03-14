@@ -17,32 +17,31 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Kanji {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Column(unique = true, nullable = false, length = 1)
+  private String kanji;
 
-    @Column(unique = true, nullable = false, length = 1)
-    private String kanji;
+  @Column
+  @JdbcTypeCode(SqlTypes.ARRAY)
+  private List<String> onyomi;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> onyomi;
+  @Column
+  @JdbcTypeCode(SqlTypes.ARRAY)
+  private List<String> kunyomi;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> kunyomi;
+  @Column
+  @JdbcTypeCode(SqlTypes.ARRAY)
+  private List<String> meanings;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> meanings;
+  @Column
+  @JdbcTypeCode(SqlTypes.ARRAY)
+  private List<String> tags;
 
-    @Column
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    private List<String> tags;
-
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, Object> metadata;
+  @Column(columnDefinition = "jsonb")
+  @JdbcTypeCode(SqlTypes.JSON)
+  private Map<String, Object> metadata;
 }
 

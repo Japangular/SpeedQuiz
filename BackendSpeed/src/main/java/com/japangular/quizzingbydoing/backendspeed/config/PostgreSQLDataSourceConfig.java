@@ -33,56 +33,58 @@ import java.util.Map;
 )
 public class PostgreSQLDataSourceConfig {
 
-    @Value("${spring.datasource.postgresql.url}")
-    private String url;
+  @Value("${spring.datasource.postgresql.url}")
+  private String url;
 
-    @Value("${spring.datasource.postgresql.username}")
-    private String username;
+  @Value("${spring.datasource.postgresql.username}")
+  private String username;
 
-    @Value("${spring.datasource.postgresql.password}")
-    private String password;
+  @Value("${spring.datasource.postgresql.password}")
+  private String password;
 
-    @Primary
-    @Bean(name = "postgresqlDataSource")
-    public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName("org.postgresql.Driver");
-        dataSource.setUrl(url);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
-        return dataSource;
-    }
+  @Primary
+  @Bean(name = "postgresqlDataSource")
+  public DataSource dataSource() {
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName("org.postgresql.Driver");
+    dataSource.setUrl(url);
+    dataSource.setUsername(username);
+    dataSource.setPassword(password);
+    return dataSource;
+  }
 
-    @Primary
-    @Bean(name = "postgresqlTransactionManager")
-    public PlatformTransactionManager transactionManager(@Qualifier("postgresqlEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
-    }
+  @Primary
+  @Bean(name = "postgresqlTransactionManager")
+  public PlatformTransactionManager transactionManager(@Qualifier("postgresqlEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+    return new JpaTransactionManager(entityManagerFactory);
+  }
 
-    @Primary
-    @Bean(name = "postgresqlEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean postgresqlEntityManagerFactory(EntityManagerFactoryBuilder builder, @Qualifier("postgresqlDataSource") DataSource dataSource) {
-        return builder
-            .dataSource(dataSource)
-            .packages(
-                "com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.entity",
-                "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.entity",
-                "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.entities"
-            ) // Package where your PostgreSQL entities are located
-            .persistenceUnit("postgresql")
-            .properties(hibernateProperties())
-            .build();
-    }
+  @Primary
+  @Bean(name = "postgresqlEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean postgresqlEntityManagerFactory(
+      EntityManagerFactoryBuilder builder, @Qualifier("postgresqlDataSource") DataSource dataSource) {
+    return builder
+        .dataSource(dataSource)
+        .packages(
+            "com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.entity",
+            "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.entity",
+            "com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.entities"
+        ) // Package where your PostgreSQL entities are located
+        .persistenceUnit("postgresql")
+        .properties(hibernateProperties())
+        .build();
+  }
 
-    public Map<String, Object> hibernateProperties() {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "none");
-        return properties;
-    }
+  public Map<String, Object> hibernateProperties() {
+    Map<String, Object> properties = new HashMap<>();
+    properties.put("hibernate.hbm2ddl.auto", "none");
+    return properties;
+  }
 
-    @Bean(name = "postgresqlJdbcTemplate")
-    public JdbcTemplate postgresqlJdbcTemplate(@Qualifier("postgresqlDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
+  @Primary
+  @Bean(name = "postgresqlJdbcTemplate")
+  public JdbcTemplate postgresqlJdbcTemplate(@Qualifier("postgresqlDataSource") DataSource dataSource) {
+    return new JdbcTemplate(dataSource);
+  }
 
 }

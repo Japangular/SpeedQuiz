@@ -1,6 +1,5 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services;
 
-
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.config.Constants;
 import org.springframework.stereotype.Service;
 
@@ -9,12 +8,10 @@ import java.util.List;
 @Service
 public class FieldsToCsvService {
   private final SqliteToFieldsService sqliteToFieldsService;
-
   private boolean firstRowWasFaulty = false;
   private int numberOfFields = 0;
   private int currentStart = 0;
   private int current = 0;
-
   private int total = -1;
 
   public FieldsToCsvService(SqliteToFieldsService sqliteToFieldsService) {
@@ -65,7 +62,7 @@ public class FieldsToCsvService {
   }
 
   public int totalQuestions() {
-    if(total==-1){
+    if (total == -1) {
       total = sqliteToFieldsService.total();
     }
     return total;

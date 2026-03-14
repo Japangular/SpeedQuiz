@@ -1,28 +1,17 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.entities;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(
-    name = "transcript_stream",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"streamTitle", "vtuber"})
-    },
-    indexes = {
-        @Index(
-            name = "transcript_stream_filename_vtuber_unique",
-            columnList = "filename, vtuber"
-        )
-    }
-)
+    name = "transcript_stream", uniqueConstraints = {@UniqueConstraint(columnNames = {"streamTitle", "vtuber"})},
+    indexes = {@Index(name = "transcript_stream_filename_vtuber_unique", columnList = "filename, vtuber")})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class TranscriptStream {
-
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
@@ -34,5 +23,4 @@ public class TranscriptStream {
 
   @Column(nullable = false)
   private String vtuber;
-
 }

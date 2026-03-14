@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 public class DeckPackageConfig {
-    private String source;
-    private String attribution;
-    private boolean freeForAllUsersWithShoutout;
-    private List<DeckEntry> decks;
+  private String source;
+  private String attribution;
+  private boolean freeForAllUsersWithShoutout;
+  private List<DeckEntry> decks;
 }

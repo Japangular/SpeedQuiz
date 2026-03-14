@@ -30,23 +30,17 @@ public class TranscriptPersistenceService {
     String vtuber =  incomingStream.getVtuber();
 
     checkWithException(title, vtuber);
-
-    logger.info("Saving new transcript stream '{}' for vtuber '{}'",
-        incomingStream.getStreamTitle(), incomingStream.getVtuber());
+    logger.info("Saving new transcript stream '{}' for vtuber '{}'", incomingStream.getStreamTitle(), incomingStream.getVtuber());
 
     TranscriptStream savedStream = transcriptStreamRepository.save(incomingStream);
     container.setTranscriptStream(savedStream);
 
-    List<TranscriptRow> rows = container.getTranscriptRows().stream()
-        .peek(row -> row.setStream(savedStream))
-        .collect(Collectors.toList());
+    List<TranscriptRow> rows = container.getTranscriptRows().stream().peek(row -> row.setStream(savedStream)).collect(Collectors.toList());
 
     List<TranscriptRow> savedRows = transcriptRowRepository.saveAll(rows);
+
     container.setTranscriptRows(savedRows);
-
-    logger.info("Saved {} transcript rows for stream '{}'",
-        savedRows.size(), savedStream.getStreamTitle());
-
+    logger.info("Saved {} transcript rows for stream '{}'", savedRows.size(), savedStream.getStreamTitle());
     return container;
   }
 

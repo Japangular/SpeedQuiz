@@ -13,27 +13,27 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class HtmlResourceDeckProvider implements DeckProvider {
 
-    private final DeckEntry entry;
-    private final String attribution;
-    private final String fullPath;
-    private final HtmlTableDeckImporter importer;
+  private final DeckEntry entry;
+  private final String attribution;
+  private final String fullPath;
+  private final HtmlTableDeckImporter importer;
 
-    @Override
-    public DeckInfo getDeckInfo() {
-        return new DeckInfo()
-            .id(entry.getId())
-            .name(entry.getName())
-            .description(entry.getDescription())
-            .attribution(attribution);
-    }
+  @Override
+  public DeckInfo getDeckInfo() {
+    return new DeckInfo()
+        .id(entry.getId())
+        .name(entry.getName())
+        .description(entry.getDescription())
+        .attribution(attribution);
+  }
 
-    @Override
-    public DeckContent getDeckContent() {
-        try (InputStream in = new FileInputStream(fullPath)) {
-            DeckModel deck = importer.importHtml(in, entry.getName(), "system");
-            return new DeckContent(deck.getProperties(), deck.getCards());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load deck: " + entry.getId(), e);
-        }
+  @Override
+  public DeckContent getDeckContent() {
+    try (InputStream in = new FileInputStream(fullPath)) {
+      DeckModel deck = importer.importHtml(in, entry.getName(), "system");
+      return new DeckContent(deck.getProperties(), deck.getCards());
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to load deck: " + entry.getId(), e);
     }
+  }
 }

@@ -19,5 +19,4 @@ public class CardsFromUrlModel {
     this.apiToken = apiToken;
   }
 
-
 }

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 @Configuration
 public class JpaSqliteConfig {
-    private final Environment env;
+  private final Environment env;
 
   public JpaSqliteConfig(Environment env) {
     this.env = env;
@@ -23,15 +23,15 @@ public class JpaSqliteConfig {
   @Bean(name = "sqliteDataSource")
   @Qualifier("sqliteDataSource")
   public DataSource dataSource() {
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.sqlite.driverClassName")));
-        dataSource.setUrl(env.getProperty("spring.datasource.sqlite.url"));
-        dataSource.setUsername(env.getProperty("spring.datasource.sqlite.username", ""));
-        dataSource.setPassword(env.getProperty("spring.datasource.sqlite.password", ""));
+    dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.sqlite.driverClassName")));
+    dataSource.setUrl(env.getProperty("spring.datasource.sqlite.url"));
+    dataSource.setUsername(env.getProperty("spring.datasource.sqlite.username", ""));
+    dataSource.setPassword(env.getProperty("spring.datasource.sqlite.password", ""));
 
-        return dataSource;
-    }
+    return dataSource;
+  }
 
   @Bean(name = "sqliteJdbcTemplate")
   public JdbcTemplate sqliteJdbcTemplate(@Qualifier("sqliteDataSource") DataSource dataSource) {

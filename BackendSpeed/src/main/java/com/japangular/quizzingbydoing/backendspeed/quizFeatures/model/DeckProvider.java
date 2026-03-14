@@ -4,8 +4,7 @@ import com.japangular.quizzingbydoing.backendspeed.model.DeckContent;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckInfo;
 
 public interface DeckProvider {
-
   DeckInfo getDeckInfo();
-  DeckContent getDeckContent();
 
+  DeckContent getDeckContent();
 }

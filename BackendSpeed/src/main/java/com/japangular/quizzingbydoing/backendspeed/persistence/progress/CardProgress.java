@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CardProgress {
-    private String deckId;
-    private String cardId;
-    private String state;  // "ignored", "learned", "flagged"
+  private String deckId;
+  private String cardId;
+  private String state;  // "ignored", "learned", "flagged"
 }

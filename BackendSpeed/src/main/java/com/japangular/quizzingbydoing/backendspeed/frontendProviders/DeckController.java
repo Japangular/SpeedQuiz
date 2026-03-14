@@ -36,30 +36,21 @@ public class DeckController implements DeckApi {
     return ownerId != null ? ownerId : DEV_OWNER;
   }
 
-    @Override
-    public ResponseEntity<List<DeckInfo>> listDecks(
-            UUID ownerId, String wkClaimedName, String wkTokenHash) {
-        return ResponseEntity.ok(
-            deckRegistry.listDecks(resolveOwner(ownerId), wkClaimedName, wkTokenHash));
+  @Override
+  public ResponseEntity<List<DeckInfo>> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
+    return ResponseEntity.ok(deckRegistry.listDecks(resolveOwner(ownerId), wkClaimedName, wkTokenHash));
   }
 
-    @Override
-    public ResponseEntity<DeckContent> loadDeck(
-            String deckId, UUID ownerId, String wkClaimedName,
-            String wkApiToken, String wkTokenHash) {
-        return ResponseEntity.ok(
-            deckRegistry.loadDeck(deckId, resolveOwner(ownerId),
-                wkClaimedName, wkApiToken, wkTokenHash));
+  @Override
+  public ResponseEntity<DeckContent> loadDeck(String deckId, UUID ownerId, String wkClaimedName, String wkApiToken, String wkTokenHash) {
+    return ResponseEntity.ok(deckRegistry.loadDeck(deckId, resolveOwner(ownerId), wkClaimedName, wkApiToken, wkTokenHash));
   }
 
-    @Override
-    public ResponseEntity<DeckPage> browseDeck(
-            String deckId, UUID ownerId, Integer limit, Integer offset,
-            String filter, String wkClaimedName, String wkApiToken,
-            String wkTokenHash) {
+  @Override
+  public ResponseEntity<DeckPage> browseDeck(String deckId, UUID ownerId, Integer limit, Integer offset, String filter, String wkClaimedName,
+                                             String wkApiToken, String wkTokenHash) {
     DeckContent content = deckRegistry.loadDeck(deckId, resolveOwner(ownerId), wkClaimedName, wkApiToken, wkTokenHash);
-        return ResponseEntity.ok(
-            deckBrowsingService.getPage(content, limit, offset, filter));
+    return ResponseEntity.ok(deckBrowsingService.getPage(content, limit, offset, filter));
   }
 
   @Override
@@ -80,8 +71,7 @@ public class DeckController implements DeckApi {
   }
 
   @Override
-  public ResponseEntity<Void> updateCardStates(
-      String deckId, UUID ownerId, List<DeckCardState> states) {
+  public ResponseEntity<Void> updateCardStates(String deckId, UUID ownerId, List<DeckCardState> states) {
     List<CardProgress> entities = states.stream()
         .map(dto -> new CardProgress(dto.getDeckId(), dto.getCardId(), dto.getState()))
         .toList();
@@ -90,15 +80,15 @@ public class DeckController implements DeckApi {
     return ResponseEntity.ok().build();
   }
 
-    @Override
-    public ResponseEntity<Void> createDeck(UUID ownerId, String deckName, DeckContent deckContent) {
+  @Override
+  public ResponseEntity<Void> createDeck(UUID ownerId, String deckName, DeckContent deckContent) {
     try {
       String propertiesJson = objectMapper.writeValueAsString(deckContent.getProperties());
       String cardsJson = objectMapper.writeValueAsString(deckContent.getCards());
-            userDeckSource.insertDeck(deckName, resolveOwner(ownerId), propertiesJson, cardsJson);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+      userDeckSource.insertDeck(deckName, resolveOwner(ownerId), propertiesJson, cardsJson);
+      return ResponseEntity.status(HttpStatus.CREATED).build();
     } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
   }
 }

@@ -28,32 +28,22 @@ public class DeckRepository {
   private static final Logger logger = LoggerFactory.getLogger(DeckRepository.class);
   private final ObjectMapper objectMapper;
 
-  public int insertSubmissionDeck(DeckModel deckModel) {
+  public int insertDeck(DeckModel deckModel) {
     String propertiesJson;
     String cardsJson;
-
     try {
       propertiesJson = objectMapper.writeValueAsString(deckModel.getProperties());
       cardsJson = objectMapper.writeValueAsString(deckModel.getCards());
     } catch (JsonProcessingException e) {
-      logger.error("JSON serialization error for SubmissionDeck", e);
+      logger.error("JSON serialization error for Deck", e);
       return 0;
     }
-
     String sql = "INSERT INTO deck (deck_name, username, properties, cards) VALUES (?, ?, ?::jsonb, ?::jsonb)";
-
     try {
       logger.info("Attempting to insert Deck with deckName: {}, username: {}", deckModel.getDeckName(), deckModel.getUsername());
-
-      int rowsAffected = jdbcTemplate.update(sql,
-          deckModel.getDeckName(),
-          deckModel.getUsername(),
-          propertiesJson,
-          cardsJson);
-
+      int rowsAffected = jdbcTemplate.update(sql, deckModel.getDeckName(), deckModel.getUsername(), propertiesJson, cardsJson);
       logger.info("Successfully inserted Deck with deckName: {}", deckModel.getDeckName());
       return rowsAffected;
-
     } catch (DuplicateKeyException e) {
       Throwable cause = e.getCause();
       if (cause instanceof PSQLException) {
@@ -63,7 +53,6 @@ public class DeckRepository {
           return 2;
         }
       }
-
       logger.error("Unexpected duplicate key error for deckName: {}", deckModel.getDeckName(), e);
       throw e;
     } catch (DataAccessException e) {
@@ -132,4 +121,4 @@ public class DeckRepository {
 
     return deck;
   }
-  }
+}

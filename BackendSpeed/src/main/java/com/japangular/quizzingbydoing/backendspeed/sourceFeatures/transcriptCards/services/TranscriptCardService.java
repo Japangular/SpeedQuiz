@@ -18,9 +18,7 @@ public class TranscriptCardService {
 
   public boolean processUpload(ApiStreamTranscript apiStreamTranscript) {
     logger.info("Processing upload request: {}", apiStreamTranscript);
-
     transcriptPersistenceService.checkWithException(apiStreamTranscript.getStreamTitle(), apiStreamTranscript.getVtuber());
-
     TranscriptEntityContainer persistedEntitiesContainer = transcriptPersistenceService.save(transcriptMapper.map(apiStreamTranscript));
     return persistedEntitiesContainer.getTranscriptRows().size() == apiStreamTranscript.getTranscripts().size();
   }

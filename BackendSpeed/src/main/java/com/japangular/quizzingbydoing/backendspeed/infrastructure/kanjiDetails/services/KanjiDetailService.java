@@ -13,7 +13,7 @@ import java.util.List;
 public class KanjiDetailService {
   private final FrontendCsvService frontendCsvService;
 
-  public KanjiDetails getDetails(String kanji){
+  public KanjiDetails getDetails(String kanji) {
     List<QuestionReadingMeaning> matches = frontendCsvService.getFilteredQuestions(kanji);
     return new KanjiDetails();
   }

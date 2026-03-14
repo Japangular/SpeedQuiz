@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-
 @RestController
 @RequestMapping("/kanjiDict")
 @RequiredArgsConstructor
@@ -45,5 +44,4 @@ public class KanjiDictController {
     List<Map<String, Object>> parsedData = mecabService.parseJapaneseToJson(k);
     return ResponseEntity.ok(parsedData);
   }
-
 }

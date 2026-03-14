@@ -39,18 +39,18 @@ public class FrontendCsvService {
   }
 
   public List<QuestionReadingMeaning> getTablePage(int limit, int offset, String questionFilter) {
-    if(qrmList==null){
+    if (qrmList == null) {
       loadCsv();
     }
     List<QuestionReadingMeaning> questionReadingMeanings = qrmList;
     List<QuestionReadingMeaning> result;
-    if(questionFilter != null && !questionFilter.trim().isEmpty()){
+    if (questionFilter != null && !questionFilter.trim().isEmpty()) {
       questionReadingMeanings = qrmList.stream().filter(q -> q.getQuestion().contains(questionFilter)).toList();
     }
-    if(questionReadingMeanings.size() > offset + limit) {
+    if (questionReadingMeanings.size() > offset + limit) {
       result = questionReadingMeanings.subList(offset, offset + limit);
     } else {
-      if(questionReadingMeanings.size() > offset) {
+      if (questionReadingMeanings.size() > offset) {
         result = questionReadingMeanings.subList(offset, questionReadingMeanings.size());
       } else return new ArrayList<>();
     }
@@ -58,18 +58,18 @@ public class FrontendCsvService {
     return result;
   }
 
-  private void loadCsv(){
+  private void loadCsv() {
     if (qrmList == null) {
       List<String[]> csv = fieldsToCsvService.loadAll();
-      qrmList = csv.stream().map(a -> new QuestionReadingMeaning(getNextUniqueIndex()+"", a[1], a[2], a[3])).toList();
+      qrmList = csv.stream().map(a -> new QuestionReadingMeaning(getNextUniqueIndex() + "", a[1], a[2], a[3])).toList();
     }
   }
 
   public int totalQuestions() {
-    if(total==-1){
+    if (total == -1) {
       int t = fieldsToCsvService.totalQuestions();
 
-      if(t == 0){
+      if (t == 0) {
         total = 0;
         return total;
       }
@@ -80,11 +80,10 @@ public class FrontendCsvService {
       }
       total = t;
     }
-
     return total;
   }
 
-  public List<QuestionReadingMeaning> getFilteredQuestions(String kanji){
+  public List<QuestionReadingMeaning> getFilteredQuestions(String kanji) {
     return qrmList.stream().filter(qrm -> qrm.getQuestion().contains(kanji)).toList();
   }
 }

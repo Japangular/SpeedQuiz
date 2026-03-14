@@ -9,7 +9,6 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WaniKaniSubjectsResponse {
-
   List<SubjectData> data;
 
   @Data

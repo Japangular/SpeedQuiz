@@ -15,7 +15,7 @@ public class KanjiDetailController {
   private static final Logger logger = LoggerFactory.getLogger(KanjiDetailController.class);
 
   @GetMapping("/information/{kanji}")
-  public KanjiDetails getKanjiDetails(@PathVariable String kanji){
+  public KanjiDetails getKanjiDetails(@PathVariable String kanji) {
     logger.info(kanji);
     return kanjiDetailService.getDetails(kanji);
   }

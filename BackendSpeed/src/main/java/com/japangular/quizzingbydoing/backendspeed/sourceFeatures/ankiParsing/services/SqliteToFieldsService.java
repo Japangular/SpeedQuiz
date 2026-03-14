@@ -1,6 +1,5 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services;
 
-
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.config.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class SqliteToFieldsService {
-
   private final JdbcTemplate sqliteJdbcTemplate;
 
   @Autowired
@@ -23,10 +21,8 @@ public class SqliteToFieldsService {
   public List<String> toCsv(int limit, int offset) {
     // Use SQLite query
     String sql = "SELECT id, flds FROM notes LIMIT " + limit + " OFFSET " + offset + ";";
-    return sqliteJdbcTemplate.queryForList(sql)
-        .stream()
-        .map(row -> row.get("id") + Constants.CSV_LINE_SEPARATOR + row.get("flds"))
-        .collect(Collectors.toList());
+    return sqliteJdbcTemplate.queryForList(sql).stream()
+        .map(row -> row.get("id") + Constants.CSV_LINE_SEPARATOR + row.get("flds")).collect(Collectors.toList());
   }
 
   public int total() {

@@ -16,7 +16,7 @@ public class ApiStreamTranscript {
   @JsonProperty("transcripts")
   private List<ApiTranscriptRow> transcripts;
 
-  public String toString(){
+  public String toString() {
     return "Filename: " + filename + "\n" +
         "streamTitle: " + streamTitle + "\n" +
         "vtuber: " + vtuber + "\n" +

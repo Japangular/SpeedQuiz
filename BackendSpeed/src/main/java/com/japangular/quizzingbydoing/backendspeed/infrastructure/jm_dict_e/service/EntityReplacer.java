@@ -207,7 +207,8 @@ public class EntityReplacer {
   }
 
   static Set<String> entitiesFound = new HashSet<>();
-  public static void finder(String xml){
+
+  public static void finder(String xml) {
     Pattern pattern = Pattern.compile("&([a-zA-Z0-9-]+);");
     Matcher matcher = pattern.matcher(xml);
 

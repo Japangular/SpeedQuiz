@@ -15,69 +15,51 @@ import java.util.UUID;
 
 /**
  * Facade that unifies all deck sources behind one API.
- *
+ * <p>
  * Three types of sources, three integration strategies:
- *
+ * <p>
  * 1. DeckProvider beans (auto-discovered via ApplicationContext)
- *    → AnkiDeckAdapter, HtmlResourceDeckProvider
- *    → These implement DeckProvider, so they're found automatically
- *
+ * → AnkiDeckAdapter, HtmlResourceDeckProvider
+ * → These implement DeckProvider, so they're found automatically
+ * <p>
  * 2. UserDeckAdapter (injected directly)
- *    → Doesn't implement DeckProvider because it's multi-deck-per-user
- *    → Called explicitly with username context
- *
+ * → Doesn't implement DeckProvider because it's multi-deck-per-user
+ * → Called explicitly with username context
+ * <p>
  * 3. WaniKaniDeckAdapter (injected directly)
- *    → Doesn't implement DeckProvider because it needs auth context
- *    → Called explicitly with token/session context
+ * → Doesn't implement DeckProvider because it needs auth context
+ * → Called explicitly with token/session context
  */
 @Service
 @RequiredArgsConstructor
 public class DeckRegistryService {
 
   private final ApplicationContext context;
-    private final UserDeckAdapter userDeckAdapter;
-    private final WaniKaniDeckAdapter waniKaniDeckAdapter;
+  private final UserDeckAdapter userDeckAdapter;
+  private final WaniKaniDeckAdapter waniKaniDeckAdapter;
 
-    /**
-     * Auto-discovers all beans implementing DeckProvider.
-     * This finds AnkiDeckAdapter and all HtmlResourceDeckProviders
-     * without this class ever importing them.
-     */
-    private List<DeckProvider> getStaticProviders() {
-    return new ArrayList<>(
-        context.getBeansOfType(DeckProvider.class).values());
+  private List<DeckProvider> getStaticProviders() {
+    return new ArrayList<>(context.getBeansOfType(DeckProvider.class).values());
   }
 
-    /**
-     * List all available decks from all sources.
-     */
-    public List<DeckInfo> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
-      List<DeckInfo> result = new ArrayList<>();
+  public List<DeckInfo> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
+    List<DeckInfo> result = new ArrayList<>();
+    getStaticProviders().forEach(p -> result.add(p.getDeckInfo()));
+    result.addAll(userDeckAdapter.listDecks(ownerId));
+    result.addAll(waniKaniDeckAdapter.listDecks(wkClaimedName, wkTokenHash));
+    return result;
+  }
 
-      getStaticProviders().forEach(p -> result.add(p.getDeckInfo()));
-
-      result.addAll(userDeckAdapter.listDecks(ownerId));
-
-      result.addAll(waniKaniDeckAdapter.listDecks(wkClaimedName, wkTokenHash));
-
-      return result;
-    }
-
-  public DeckContent loadDeck(String deckId, UUID ownerId,
-                              String wkClaimedName, String wkApiToken, String wkTokenHash) {
-
+  public DeckContent loadDeck(String deckId, UUID ownerId, String wkClaimedName, String wkApiToken, String wkTokenHash) {
     if (userDeckAdapter.handles(deckId)) {
       return userDeckAdapter.loadDeck(deckId, ownerId);
     }
-
     if (waniKaniDeckAdapter.handles(deckId)) {
       return waniKaniDeckAdapter.loadDeck(wkClaimedName, wkApiToken, wkTokenHash);
     }
-
     return getStaticProviders().stream()
         .filter(p -> p.getDeckInfo().getId().equals(deckId))
-        .findFirst()
-        .orElseThrow(() -> new RuntimeException("Deck not found: " + deckId))
+        .findFirst().orElseThrow(() -> new RuntimeException("Deck not found: " + deckId))
         .getDeckContent();
   }
 }
