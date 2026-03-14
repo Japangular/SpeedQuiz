@@ -134,7 +134,6 @@ export class JapaneseDictComponent {
   selectedColumns: Set<string> = new Set();
 
   toggleColumnSelection(column: string) {
-    console.log(column + " header was clicked")
     if (this.dict.selectedOption() === this.searchModes.Combined) {
       if (this.selectedColumns.has(column)) {
         this.selectedColumns.delete(column);

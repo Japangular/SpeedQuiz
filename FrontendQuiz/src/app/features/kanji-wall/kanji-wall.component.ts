@@ -12,9 +12,6 @@ import {WallKanji} from './kanji-wall.model';
     StrokeOrderKanjiComponent,
     NgForOf,
     FormsModule,
-    StrokeOrderKanjiComponent,
-    StrokeOrderKanjiComponent,
-    StrokeOrderKanjiComponent
   ],
   templateUrl: './kanji-wall.component.html',
   styleUrl: './kanji-wall.component.css'

@@ -78,7 +78,7 @@ export class TranscriptUploadComponent {
     this.reset();
 
     if (!file.name.endsWith('.json')) {
-      alert('Only JSON files are supported!');
+      this.snackBar.open('Only JSON files are supported', 'Close', { duration: 4000 });
       return;
     }
 
@@ -104,7 +104,7 @@ export class TranscriptUploadComponent {
           }
         })
       } catch (err) {
-        alert('Invalid JSON file');
+        this.snackBar.open('Invalid JSON file', 'Close', { duration: 4000 });
       }
     };
     // prepares the above reader.onload

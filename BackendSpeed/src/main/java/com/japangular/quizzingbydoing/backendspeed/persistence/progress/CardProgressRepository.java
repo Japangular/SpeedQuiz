@@ -38,16 +38,14 @@ public class CardProgressRepository {
   public void deleteStates(String deckId, UUID ownerId, List<String> cardIds) {
     if (cardIds.isEmpty()) return;
 
-    String placeholders = String.join(",", cardIds.stream().map(id -> "?").toList());
-    String sql = "DELETE FROM deck_card_state WHERE deck_id = ? AND owner_id = ? AND card_id IN (" + placeholders + ")";
+    // PostgreSQL specific
+    String sql = """
+        DELETE FROM deck_card_state
+        WHERE deck_id = ?
+          AND owner_id = ?
+          AND card_id = ANY(?)
+        """;
 
-    Object[] params = new Object[2 + cardIds.size()];
-    params[0] = deckId;
-    params[1] = ownerId;
-    for (int i = 0; i < cardIds.size(); i++) {
-      params[i + 2] = cardIds.get(i);
-    }
-
-    jdbcTemplate.update(sql, params);
+    jdbcTemplate.update(sql, deckId, ownerId, cardIds.toArray(new String[0]));
   }
 }

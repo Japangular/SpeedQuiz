@@ -318,7 +318,6 @@ export class AnkiTableComponent implements AfterViewInit {
   _highlightQuestionColumn = false;
 
   set highlightQuestionColumn(b: boolean){
-    console.log(JSON.stringify(b));
     this._highlightQuestionColumn = b;
   }
 
@@ -332,7 +331,6 @@ export class AnkiTableComponent implements AfterViewInit {
     } else {
       return "All questions that contain " + this.questionFilterValue + " kanji";
     }
-    return "";
   }
 }
 

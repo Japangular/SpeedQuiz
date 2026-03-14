@@ -7,8 +7,6 @@ import {QuizBoardComponent} from './features/quiz/quiz-board/quiz-board.componen
 import {JapaneseDictComponent} from './features/dict/japanese-dict/japanese-dict.component';
 import {AnkiTableComponent} from './features/anki-table/anki-table.component';
 import {KanjiWallComponent} from './features/kanji-wall/kanji-wall.component';
-import {TestComponent} from './features/test/test.component';
-import {KanjiDetailComponent} from './features/kanji-details/kanji-details.component';
 import {TranscriptionTranslationTableComponent} from './features/transcription-translation/transcription-translation-table.component';
 import {ExtractCardsFromUrlComponent} from './features/extract-cards-from-url/extract-cards-from-url.component';
 import {AnkiSourceService} from './features/anki-table/anki-source.service';
@@ -64,19 +62,9 @@ export const routes: Routes = [
         data: {label: 'Transcripts', icon: 'translate'}
       },
       {
-        path: 'testing',
-        component: TestComponent,
-      },
-      {
         path: 'extract from url',
         component: ExtractCardsFromUrlComponent,
         data: {label: 'Extract Cards', icon: 'stadium'}
-      },
-
-      // ❌ not in sidenav (no label)
-      {
-        path: 'kanjiDetails/:kanji',
-        component: KanjiDetailComponent
       },
 
       {

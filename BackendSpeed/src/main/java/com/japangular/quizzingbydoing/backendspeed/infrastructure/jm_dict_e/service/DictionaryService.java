@@ -7,6 +7,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -24,11 +25,12 @@ public class DictionaryService {
   private final Map<String, List<Entry>> rebIndex = new HashMap<>();
 
   private static final Logger logger = LoggerFactory.getLogger(DictionaryService.class);
-  String filename = "/app/jmdict_e.xml";
+  @Value("${app.dictionary.path:/app/jmdict_e.xml}")
+  private String filename;
 
   @PostConstruct
   public void loadDictionary() throws Exception {
-    logger.info("Loading Dictionary by parsing XML from " + filename + "...");
+    logger.info("Loading Dictionary by parsing XML from {}...", filename);
     File file = new File(filename);
     JAXBContext context = JAXBContext.newInstance(Entry.class);
     Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -52,14 +54,14 @@ public class DictionaryService {
             Entry entry = (Entry) unmarshaller.unmarshal(sr);
             entries.add(entry);
           } catch (JAXBException e) {
-            System.err.println("Error parsing entry XML: " + e.getMessage());
-            System.err.println("Problematic XML: " + cleanedXml);
+            logger.error("Error parsing entry XML: {}", e.getMessage());
+            logger.debug("Problematic XML: {}", cleanedXml);
             throw e;
           }
 
         }
       }
-      logger.info("Dictionary loaded successfully. Loaded " + entries.size() + " entries");
+      logger.info("Dictionary loaded successfully. Loaded {} entries", entries.size());
     }
 
     buildIndex();

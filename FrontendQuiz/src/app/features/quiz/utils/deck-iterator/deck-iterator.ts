@@ -73,11 +73,11 @@ export class DeckIterator implements DeckCommand {
   }
 
   previousCard(): void {
-    throw new Error('Method not implemented.');
+    // TODO
   }
 
   toggleCardType(cardType?: string): void {
-    throw new Error('Method not implemented.');
+    // TODO
   }
 
   get current(): Card {

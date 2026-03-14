@@ -29,8 +29,8 @@ public class MecabClient {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 
-    String body = String.format("{\"text\":\"%s\"}", input);
-    HttpEntity<String> request = new HttpEntity<>(body, headers);
+    Map<String, String> body = Map.of("text", input);
+    HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 

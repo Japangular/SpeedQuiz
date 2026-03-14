@@ -16,19 +16,12 @@ public class WaniKaniClient {
     this.webClient = webClientBuilder.baseUrl("https://api.wanikani.com/v2").build();
   }
 
-  /**
-   * Fetch data from WaniKani API at the given endpoint
-   *
-   * @param token    WaniKani API token
-   * @param endpoint API endpoint (e.g., "assignments", "user")
-   * @return JSON string from API
-   */
   public String getData(String token, String endpoint) {
     try {
-      logger.info("Calling WaniKaniClient endpoint " + endpoint);
+      logger.info("Calling WaniKaniClient {} endpoint ", endpoint);
       String response = webClient.get()
           .uri("/" + endpoint)
-          .header("Authorization", "Bearer " + token)
+          .header("Authorization", "Bearer {}" + token)
           .retrieve()
           .bodyToMono(String.class)
           .block();

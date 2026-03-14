@@ -79,10 +79,10 @@ public class AnkiPersistenceService {
     // Delete stale entries
     deleteIgnoredAnkiRows(toBeDeleted.toArray(new String[0]));
 
-    logger.info("new ignored rows" + Arrays.asList(ignoredRowIds));
-    logger.info("already persistence: " + alreadyPresent);
-    logger.info("to be persisted: " + toBePersisted);
-    logger.info("to be deleted: " + toBeDeleted);
+    logger.info("new ignored rows {}", Arrays.asList(ignoredRowIds));
+    logger.info("already persisted: {}", alreadyPresent);
+    logger.info("to be persisted: {}", toBePersisted);
+    logger.info("to be deleted: {}", toBeDeleted);
 
   }
 

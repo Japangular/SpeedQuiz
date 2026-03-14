@@ -1,5 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.persistence.session;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@RequiredArgsConstructor
 public class SessionRepository {
+  @Qualifier("postgresqlJdbcTemplate")
   private final JdbcTemplate jdbcTemplate;
   private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
-
-  @Autowired
-  public SessionRepository(@Qualifier("postgresqlJdbcTemplate") JdbcTemplate postgresJdbcTemplate) {
-    this.jdbcTemplate = postgresJdbcTemplate;
-  }
 
   public UUID provision(String displayName) {
     String sql = "INSERT INTO app_session (display_name) VALUES (?) RETURNING token";

@@ -1,6 +1,5 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.config;
 
-
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +18,9 @@ public class JpaSqliteConfig {
     this.env = env;
   }
 
-
   @Bean(name = "sqliteDataSource")
   @Qualifier("sqliteDataSource")
-  public DataSource dataSource() {
+  public DataSource sqliteDataSource() {
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
     dataSource.setDriverClassName(Objects.requireNonNull(env.getProperty("spring.datasource.sqlite.driverClassName")));

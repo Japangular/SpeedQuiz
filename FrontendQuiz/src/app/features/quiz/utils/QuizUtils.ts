@@ -40,8 +40,7 @@ export abstract class QuizUtils implements AnswerHandler{
       // If all are correct, check if the card is solved
       this.checkSolved();
     } else {
-      // If not correct, don't change focus — possibly stay or give feedback
-      console.log("fertig");
+      // TODO If not correct, don't change focus — possibly stay or give feedback
     }
   }
 

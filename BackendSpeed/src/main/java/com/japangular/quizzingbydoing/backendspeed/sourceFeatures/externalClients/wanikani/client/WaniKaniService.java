@@ -177,7 +177,7 @@ public class WaniKaniService {
           })
           .toList();
 
-      logger.info("The deck of the assignments resulted in " + cards.size() + " cards");
+      logger.info("Assignment deck resulted in {} cards", cards.size());
 
       // 3. Cache by tokenHash
       String key = cacheKey != null ? cacheKey : cardsFromUrlModel.getClaimedName();

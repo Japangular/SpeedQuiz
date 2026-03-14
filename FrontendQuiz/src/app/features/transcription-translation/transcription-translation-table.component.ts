@@ -84,8 +84,10 @@ export class TranscriptionTranslationTableComponent implements OnInit {
     console.log(st.transcripts.length);
     this.information = {vtuber: st.vtuber, stream_title: st.stream_title, filename: st.filename};
     this.subtitle = this.information.stream_title + " from " + this.information.vtuber;
-    this.dataSource = st.transcripts.slice(0,42);
-    alert("exceeds 42");
+    this.dataSource = st.transcripts.slice(0, 42);
+    if (st.transcripts.length > 42) {
+      this.snackBar.open(`Showing 42 of ${st.transcripts.length} rows`, 'Close', { duration: 4000 });
+    }
     this.st = st;
     this.cd.markForCheck();
   }
