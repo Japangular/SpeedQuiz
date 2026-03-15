@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TranscriptUploadComponentComponent } from './transcript-upload.component';
+import { TranscriptUploadComponent } from './transcript-upload.component';
 
 describe('TranscriptUploadComponentComponent', () => {
-  let component: TranscriptUploadComponentComponent;
-  let fixture: ComponentFixture<TranscriptUploadComponentComponent>;
+  let component: TranscriptUploadComponent;
+  let fixture: ComponentFixture<TranscriptUploadComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TranscriptUploadComponentComponent]
+      imports: [TranscriptUploadComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TranscriptUploadComponentComponent);
+    fixture = TestBed.createComponent(TranscriptUploadComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

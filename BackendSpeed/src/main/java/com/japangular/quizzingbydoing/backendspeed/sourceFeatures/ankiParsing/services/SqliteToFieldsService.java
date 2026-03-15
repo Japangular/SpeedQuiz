@@ -1,7 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services;
 
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.config.Constants;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,10 +10,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class SqliteToFieldsService {
-  @Qualifier("sqliteJdbcTemplate")
+
   private final JdbcTemplate sqliteJdbcTemplate;
+
+  // Explicit constructor required since sqlite isn't primary:
+  // @RequiredArgsConstructor doesn't propagate @Qualifier to the generated constructor without a lombok.config entry
+  // lombok.copyableAnnotations += org.springframework.beans.factory.annotation.Qualifier
+  public SqliteToFieldsService(@Qualifier("sqliteJdbcTemplate") JdbcTemplate sqliteJdbcTemplate) {
+    this.sqliteJdbcTemplate = sqliteJdbcTemplate;
+  }
 
   public List<String> toCsv(int limit, int offset) {
     String sql = "SELECT id, flds FROM notes LIMIT ? OFFSET ?";

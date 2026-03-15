@@ -1,6 +1,7 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services;
 
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.model.QuestionReadingMeaning;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,16 @@ public class FrontendCsvService {
   private static final Logger logger = LoggerFactory.getLogger(FrontendCsvService.class);
 
   private final FieldsToCsvService fieldsToCsvService;
-  private final List<QuestionReadingMeaning> qrmList;
+  private List<QuestionReadingMeaning> qrmList;
 
   public FrontendCsvService(FieldsToCsvService fieldsToCsvService) {
     this.fieldsToCsvService = fieldsToCsvService;
+  }
+
+  @PostConstruct
+  void init() {
     this.qrmList = loadCsv();
+    logger.info("Loaded {} cards from Anki CSV", qrmList.size());
   }
 
   private List<QuestionReadingMeaning> loadCsv() {

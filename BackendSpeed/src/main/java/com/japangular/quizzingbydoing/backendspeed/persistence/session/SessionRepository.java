@@ -17,7 +17,6 @@ import java.util.UUID;
 @Repository
 @RequiredArgsConstructor
 public class SessionRepository {
-  @Qualifier("postgresqlJdbcTemplate")
   private final JdbcTemplate jdbcTemplate;
   private static final Logger logger = LoggerFactory.getLogger(SessionRepository.class);
 
