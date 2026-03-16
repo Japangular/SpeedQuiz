@@ -13,6 +13,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import {DeckInfo} from '../../../generated/api';
+import { CardStoreService } from '../../services/card-store.service';
+import {DeckBarComponent} from '../deck-bar/deck-bar.component';
 
 @Component({
   selector: 'app-deck-shelf',
@@ -26,6 +28,7 @@ import {DeckInfo} from '../../../generated/api';
     MatListModule,
     MatIconModule,
     MatButtonModule,
+    DeckBarComponent,
   ],
   templateUrl: './deck-shelf.component.html',
   styleUrl: './deck-shelf.component.css'
@@ -35,9 +38,12 @@ export class DeckShelfComponent implements OnInit {
   error: string | null = null;
   loadingDeckId: string | null = null;
 
+  private static readonly INITIAL_BATCH_SIZE = 30;
+
   constructor(
     private deckShelfService: DeckShelfService,
     private profileService: LocalProfileService,
+    private cardStore: CardStoreService,
     private router: Router
   ) {}
 
@@ -82,10 +88,18 @@ export class DeckShelfComponent implements OnInit {
     const ownerId = this.profileService.getToken() ?? '';
 
     this.deckShelfService.loadDeck(deck.id, ownerId).subscribe({
-      next: (submissionDeck) => {
+      next: (deckContent) => {
         this.loadingDeckId = null;
-        // TODO: feed submissionDeck into CardStoreService / navigate to quiz
-        console.log('Loaded deck:', submissionDeck);
+
+        // Naive slice — take first N cards so the quiz isn't overwhelmed.
+        // Step 3 replaces this with a proper session provisioner.
+        const sliced = {
+          properties: deckContent.properties,
+          cards: deckContent.cards.slice(0, DeckShelfComponent.INITIAL_BATCH_SIZE)
+        };
+
+        this.cardStore.setCurrentDeck(sliced, deck.name);
+        this.router.navigate(['/quiz']);
       },
       error: (err) => {
         this.loadingDeckId = null;

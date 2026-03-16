@@ -3,6 +3,7 @@ import {CardViewComponent} from '../card-view/card-view.component';
 import {FormsModule} from '@angular/forms';
 import {QuizActionBarComponent} from '../quiz-action-bar/quiz-action-bar.component';
 import {ModalService} from '../../../widgets/modal/modal.service';
+import {DeckBarComponent} from '../../deck-bar/deck-bar.component';
 
 @Component({
   selector: 'app-quiz-board',
@@ -11,6 +12,7 @@ import {ModalService} from '../../../widgets/modal/modal.service';
     CardViewComponent,
     FormsModule,
     QuizActionBarComponent,
+    DeckBarComponent,
   ],
   templateUrl: './quiz-board.component.html',
   styleUrl: './quiz-board.component.css'

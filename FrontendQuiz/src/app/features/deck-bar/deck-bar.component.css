@@ -1,0 +1,21 @@
+.deck-bar {
+  gap: 12px;
+  font-size: 14px;
+  height: 48px;
+}
+
+.deck-name {
+  font-weight: 500;
+}
+
+.deck-chips {
+  margin-left: 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.38);
+}

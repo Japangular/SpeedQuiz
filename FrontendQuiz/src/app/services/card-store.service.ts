@@ -7,6 +7,11 @@ import {map} from 'rxjs/operators';
 import {DeckItem} from '../features/deck-table/deck/deck-table.model';
 import {QuizApi} from '../interfaces/SubmissionDeckApi';
 
+export interface HeaderTable {
+  deckItems: DeckItem[],
+  displayedColumns: string[]
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,18 +53,14 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
     this.sendCurrentDeck();
   }
 
-  switchDeck(deckId: string): Observable<{ deckItems: DeckItem[], displayedColumns: string[] }> {
+  switchDeck(deckId: string): Observable<HeaderTable>  {
     return this.quizApi.loadDeck(deckId).pipe(
       map(deck => mapDeckContentToDeckItem(deck))
     );
   }
 }
 
-export function mapDeckContentToDeckItem(deckContent: DeckContent): {
-  deckItems: DeckItem[],
-  displayedColumns: string[]
-} {
-  console.log("goal map deckContent: " + JSON.stringify(deckContent));
+export function mapDeckContentToDeckItem(deckContent: DeckContent): HeaderTable {
   const displayedColumns = Object.keys(deckContent.properties);
   const deckItems: DeckItem[] = deckContent.cards.map((card: Record<string, string>) => {
     const item: DeckItem = {};
@@ -71,3 +72,5 @@ export function mapDeckContentToDeckItem(deckContent: DeckContent): {
 
   return {deckItems, displayedColumns};
 }
+
+

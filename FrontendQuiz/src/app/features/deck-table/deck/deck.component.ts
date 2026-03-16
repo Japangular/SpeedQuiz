@@ -46,7 +46,6 @@ export class DeckComponent implements AfterViewInit {
 
   switchDeck(deckName: string) {
     this.cardStore.switchDeck(deckName).subscribe(deck => {
-      console.log(JSON.stringify(deck));
       setTimeout(() => {
         this.displayedColumns = deck.displayedColumns;
         this.dataSource.data = deck.deckItems;

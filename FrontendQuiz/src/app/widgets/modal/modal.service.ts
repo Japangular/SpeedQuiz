@@ -16,8 +16,8 @@ export class ModalService {
     this.dialog.open(KanjiModalComponent, {data});
   }
 
-  openHintModal(card: Card) {
-    this.dialog.open(HintModalComponent, {data: {card}});
+  openHintModal(card: Card): Observable<string | undefined> {
+    return this.dialog.open(HintModalComponent, {data: { card },}).afterClosed();
   }
 
   openEditCardModal(card: Card){

@@ -1,0 +1,43 @@
+@if (deck$ | async; as deck) {
+
+
+  <mat-card appearance="outlined">
+    <mat-card-content>
+      <span style="display: flex; gap: 10px">
+      <mat-icon mat-card-avatar>style</mat-icon>
+      <mat-card-title>{{ deck.name }} </mat-card-title>
+
+        <button mat-icon-button [matBadge]="deck.cards.length" matBadgeColor="primary"></button>
+
+        @if (questions$ | async; as questions) {
+          <button mat-icon-button [matMenuTriggerFor]="questionMenu">
+          <mat-icon>quiz</mat-icon>
+        </button>
+          <mat-menu #questionMenu="matMenu">
+          <span class="question-summary">{{ questions.join(', ') }}</span>
+        </mat-menu>
+        }
+
+        @if (hints$ | async; as hints) {
+          <button mat-icon-button [matMenuTriggerFor]="questionMenu">
+          <mat-icon>quiz</mat-icon>
+        </button>
+          <mat-menu #questionMenu="matMenu">
+          <span class="question-summary">{{ hints.join(', ') }}</span>
+        </mat-menu>
+        }
+
+
+
+    </span>
+    </mat-card-content>
+
+  </mat-card>
+
+
+} @else {
+  <mat-toolbar class="deck-bar empty">
+    <mat-icon>inbox</mat-icon>
+    <span>No deck loaded</span>
+  </mat-toolbar>
+}

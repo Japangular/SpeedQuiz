@@ -1,12 +1,20 @@
 import {Component} from '@angular/core';
 import {FormsModule} from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import {QuizBoardService} from '../quiz-board/quiz-board.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 
 @Component({
   selector: 'app-quiz-action-bar',
   imports: [
-    FormsModule
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './quiz-action-bar.component.html',
   styleUrl: './quiz-action-bar.component.css'

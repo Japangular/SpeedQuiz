@@ -15,6 +15,7 @@ import {ProvisionComponent} from '../../user-store-management/provision/provisio
 import {ProfileActionsComponent} from '../../user-store-management/profile-actions/profile-actions.component';
 import {SiteModeService} from '../../site-mode/site-mode.service';
 import {AccessGateComponent} from '../../site-mode/access-gate/access-gate.component';
+import {DeckBarComponent} from '../../features/deck-bar/deck-bar.component';
 
 @Component({
   selector: 'app-side-nav',

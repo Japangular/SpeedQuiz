@@ -1,3 +1,23 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);   /* 64px = Material toolbar default height */
+}
+
 .quizBoard {
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+app-quiz-action-bar,
+app-deck-bar {
+  flex-shrink: 0;
+}
+
+app-card-view {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }

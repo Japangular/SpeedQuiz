@@ -39,7 +39,7 @@ export class DeckIterator implements DeckCommand {
   }
 
   useHint(): void {
-    this.index = this.startPos;
+    this.index = this.startPos - 1;
   }
 
   setAsStartPoint(): void {
@@ -51,7 +51,9 @@ export class DeckIterator implements DeckCommand {
   }
 
   nextCard(): void {
-    if (this.index < this.deck.length - 1){
+    if(this.index < 0){
+      this.index = 0;
+    } else if (this.index < this.deck.length - 1){
       this.index++;
     } else {
       this.modalService.openDeckCompletedModal(this.deck).subscribe(result => {

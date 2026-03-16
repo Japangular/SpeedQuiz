@@ -1,7 +1,18 @@
-<input
-  placeholder="Insert ID, reading, or meaning"
-  (keydown)="handleKeydown($event)"
-  [(ngModel)]="inputValue"
-/>
-<button (click)="nextCard()">next Card</button>
-<button (click)="useHint()">use hint</button>
+<div class="action-bar">
+  <mat-form-field appearance="outline" class="answer-field">
+    <mat-label>ID, reading, or meaning</mat-label>
+    <input matInput
+           [(ngModel)]="inputValue"
+           (keydown)="handleKeydown($event)" />
+  </mat-form-field>
+
+  <button mat-stroked-button (click)="nextCard()">
+    <mat-icon>skip_next</mat-icon>
+    Next
+  </button>
+
+  <button mat-stroked-button (click)="useHint()">
+    <mat-icon>lightbulb</mat-icon>
+    Hint
+  </button>
+</div>

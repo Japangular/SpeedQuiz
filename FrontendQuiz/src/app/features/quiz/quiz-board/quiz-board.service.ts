@@ -15,7 +15,7 @@ import {SubmissionDeck} from '../../../models/deck.model';
 export class QuizBoardService {
   card$: Observable<Card>;
 
-  private readonly deckIterator: DeckIterator ;
+  private readonly deckIterator: DeckIterator;
 
   constructor(private store: CardStoreService, private modal: ModalService) {
     this.deckIterator = new DeckIterator(store._currentDeck$, modal);
@@ -23,7 +23,12 @@ export class QuizBoardService {
   }
 
   openHintModal(card: Card){
-    this.modal.openHintModal(card);
+    this.modal.openHintModal(card).subscribe(result => {
+
+      if (result === 'reset') {
+        this.deckIterator.useHint();
+      }
+    });
   }
 
   getDeckCommand(): DeckCommand {
@@ -36,7 +41,7 @@ export class QuizBoardService {
 
   useHint() {
     this.deckIterator.useHint();
-    this.nextCard();
+    //this.nextCard();
   }
 
   setAsStartPoint() {

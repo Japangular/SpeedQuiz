@@ -99,7 +99,7 @@ export function mapDeck(deck: SubmissionDeck): Card[] {
 
   const firstQuestionKey = questionKeys[0];
 
-  const newCards: Card[] = deck.cards.map((c, index) => {
+  return deck.cards.map((c, index) => {
     const answers: Record<string, string> = {};
     for (const key of answerKeys) {
       if (c[key] !== undefined) {
@@ -108,7 +108,7 @@ export function mapDeck(deck: SubmissionDeck): Card[] {
     }
 
     const foundHintKey = hintKeys.find(key => c[key] !== undefined);
-    const hint = foundHintKey ? c[foundHintKey] : "hint unspecified";
+    const hint = foundHintKey ? c[foundHintKey] : `${c[firstQuestionKey]} → ${Object.values(answers).join(', ')}`;
 
     const usedKeys = new Set([...questionKeys, ...answerKeys, ...hintKeys]);
     const info = Object.entries(c)
@@ -127,9 +127,4 @@ export function mapDeck(deck: SubmissionDeck): Card[] {
       subjectId: index
     } as Card;
   });
-
-  console.log(JSON.stringify(newCards));
-  console.log(JSON.stringify("newCards done"));
-
-  return newCards;
 }

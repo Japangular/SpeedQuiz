@@ -10,15 +10,15 @@ import {Card} from '../../../features/quiz/answer-slots/quiz.model';
   standalone: true,
   imports: [MatDialogModule, MatButtonModule, CommonModule],
   template: `
-    <h1 mat-dialog-title>Hint</h1>
-    <div mat-dialog-content>
+    <h2 mat-dialog-title>Hint</h2>
+    <mat-dialog-content>
       <p>{{ data.card.hint }}</p>
-    </div>
-    <div mat-dialog-actions>
-      <button mat-button (click)="openDetails()">Open Details</button>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button mat-button [mat-dialog-close]="'reset'" cdkFocusInitial>Reset</button>
       <button mat-button (click)="openEdit()">Edit</button>
       <button mat-button mat-dialog-close>Close</button>
-    </div>
+    </mat-dialog-actions>
   `,
 })
 export class HintModalComponent {
@@ -29,7 +29,4 @@ export class HintModalComponent {
     this.dialog.open(EditCardModalComponent, {data: this.data});
   }
 
-  openDetails() {
-
-  }
 }
