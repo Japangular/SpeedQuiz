@@ -17,6 +17,7 @@ export interface HeaderTable {
 })
 export class CardStoreService implements UserGeneratedDeckSubmissionService {
   currentDeckName = "initial Deck";
+  currentDeckId: string | undefined;
   currentDeck: DeckContent = {properties: {}, cards: []};
   _currentDeck: BehaviorSubject<DeckContent> = new BehaviorSubject(this.currentDeck);
   _currentDeck$: Observable<DeckContent> = this._currentDeck.asObservable();
@@ -28,7 +29,9 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
     this.quizApi.createDeck(this.currentDeckName, this.currentDeck).subscribe(a => console.log(a));
   }
 
-  setCurrentDeck(deck: DeckContent | DeckItem[], deckName?: string) {
+  setCurrentDeck(deck: DeckContent | DeckItem[], deckName?: string, deckId?: string) {
+    this.currentDeckId = deckId;
+
     if (Array.isArray(deck)) {
       this.currentDeckName = deckName ?? "DeckDataSource";
       this.currentDeck = {

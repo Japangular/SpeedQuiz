@@ -1,28 +1,66 @@
-import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
-import {Card} from '../answer-slots/quiz.model';
-import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
+import {Injectable, OnDestroy} from '@angular/core';
+import {Observable, Subscription} from 'rxjs';
+import {Card, mapDeck} from '../answer-slots/quiz.model';
 import {CardStoreService} from '../../../services/card-store.service';
-import {AnkiCard} from '../../anki-table/anki-table.model';
-import {PropertyType} from '../../../../generated/api';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 import {SubmissionDeck} from '../../../models/deck.model';
+import {PropertyType} from '../../../../generated/api';
+import {AnkiCard} from '../../anki-table/anki-table.model';
+import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
+import {
+  BackToFirstStrategy,
+  ByIndexStrategy, createHintStrategy, createSortStrategy,
+  HintStrategy,
+  HintStrategyName, PersistedSessionState,
+  QuizSession,
+  SessionSyncService,
+  SortStrategy, SortStrategyName
+} from '../utils/quiz-session';
 
 @Injectable({
   providedIn: 'root'
 })
-export class QuizBoardService {
-  card$: Observable<Card>;
+@Injectable()
+export class QuizBoardService implements OnDestroy {
+  card$!: Observable<Card>;
 
-  private readonly deckIterator: DeckIterator;
+  private deckIterator!: DeckIterator;
+  private session!: QuizSession;
+  private deckSub?: Subscription;
 
-  constructor(private store: CardStoreService, private modal: ModalService) {
-    this.deckIterator = new DeckIterator(store._currentDeck$, modal);
+  private hintStrategy: HintStrategy = new BackToFirstStrategy();
+  private sortStrategy: SortStrategy = new ByIndexStrategy();
+  private currentDeckId?: string;
+
+  constructor(
+    private store: CardStoreService,
+    private modal: ModalService,
+    private sessionSync: SessionSyncService,
+  ) {
+    // Create a placeholder session so card$ is defined immediately
+    this.session = new QuizSession([]);
+    this.deckIterator = new DeckIterator(this.session, this.modal, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
+
+    // React to new decks pushed by DeckShelf / ExtractFromUrl / AnkiTable
+    this.deckSub = this.store._currentDeck$.subscribe(deck => {
+      if (!deck || deck.cards.length === 0) return;
+      this.initSession(deck);
+    });
   }
 
-  openHintModal(card: Card){
+  ngOnDestroy(): void {
+    this.deckSub?.unsubscribe();
+    this.saveBeforeLeave();
+    this.sessionSync.stopSync();
+  }
+
+  getDeckCommand(): DeckCommand {
+    return this.deckIterator;
+  }
+
+  openHintModal(card: Card): void {
     this.modal.openHintModal(card).subscribe(result => {
 
       if (result === 'reset') {
@@ -31,33 +69,23 @@ export class QuizBoardService {
     });
   }
 
-  getDeckCommand(): DeckCommand {
-    return this.deckIterator;
-  }
-
-  nextCard(withoutHelp?: boolean) {
+  nextCard(withoutHelp?: boolean): void {
     this.deckIterator.proceed(withoutHelp);
   }
 
-  useHint() {
+  useHint(): void {
     this.deckIterator.useHint();
-    //this.nextCard();
   }
 
-  setAsStartPoint() {
+  setAsStartPoint(): void {
     this.deckIterator.setAsStartPoint();
-    this.nextCard();
-  }
-
-  toggleCardType(cardType?: string) {
-    this.deckIterator.toggleCardType(cardType);
     this.deckIterator.nextCard();
   }
 
-  jumpTo(jumpKey: string) {
+  jumpTo(jumpKey: string): void {
     const type = detectJumpKeyType(jumpKey);
 
-    this.deckIterator.jumpTo(card  => {
+    this.deckIterator.jumpTo(card => {
       switch (type) {
         case 'index':
           return card.index === parseInt(jumpKey);
@@ -71,31 +99,81 @@ export class QuizBoardService {
     });
   }
 
-  learnSelected(ankiCards: AnkiCard[]){
-    if (!ankiCards || ankiCards.length == 0)
-      return;
+  learnSelected(ankiCards: AnkiCard[]): void {
+    if (!ankiCards || ankiCards.length === 0) return;
 
     const cards = ankiCards.map(card => ({
       index: card.index,
       question: card.question,
       reading: card.reading,
       meaning: card.meaning,
-      hint: [card.index, card.question, card.reading, card.meaning].join(" : "),
+      hint: [card.index, card.question, card.reading, card.meaning].join(' : '),
     }));
+
     const deck = {
-      deckName: "SelectedAnkiDeck",
-      username: "ankiUser",
+      deckName: 'SelectedAnkiDeck',
+      username: 'ankiUser',
       properties: {
         index: PropertyType.Info,
         question: PropertyType.Question,
         reading: PropertyType.Answer,
         meaning: PropertyType.Answer,
-        hint: PropertyType.Hint
+        hint: PropertyType.Hint,
       },
       cards: cards,
     } as SubmissionDeck;
 
     this.store.setCurrentDeck(deck);
+  }
+
+  setHintStrategy(name: HintStrategyName, params?: { n?: number }): void {
+    this.hintStrategy = createHintStrategy(name, params);
+    this.deckIterator.setHintStrategy(this.hintStrategy);
+  }
+
+  setSortStrategy(name: SortStrategyName): void {
+    this.sortStrategy = createSortStrategy(name);
+    // Re-sorting mid-session: resort and rebuild session, preserving stats
+    // For now, this only takes effect on next deck load.
+    // TODO: implement mid-session re-sort if needed
+  }
+
+  getSession(): QuizSession {
+    return this.session;
+  }
+
+  getCurrentIndex(): number {
+    return this.deckIterator.getCurrentIndex();
+  }
+
+  private async initSession(deck: SubmissionDeck): Promise<void> {
+    const deckId = this.store.currentDeckId ?? this.store.currentDeckName;
+    this.currentDeckId = deckId;
+    let cards = mapDeck(deck);
+    cards = this.sortStrategy.sort(cards);
+
+    let priorState: PersistedSessionState | undefined;
+    if (deckId) {
+      priorState = await this.sessionSync.loadPriorState(deckId);
+    }
+
+    this.session = new QuizSession(cards, priorState);
+    const resumeIndex = priorState?.currentIndex ?? 0;
+    this.deckIterator.replaceSession(this.session, resumeIndex);
+
+    if (deckId) {
+      this.sessionSync.startSync(deckId, this.session, () => this.deckIterator.getCurrentIndex(),);
+    }
+  }
+
+  private saveBeforeLeave(): void {
+    if (this.currentDeckId && this.session) {
+      this.sessionSync.saveNow(
+        this.currentDeckId,
+        this.session,
+        this.deckIterator.getCurrentIndex(),
+      );
+    }
   }
 }
 

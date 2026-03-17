@@ -15,6 +15,24 @@
     <p>No decks found. Create one to get started!</p>
   </mat-card>
 
+  <!-- Toolbar: multi-select toggle -->
+  <div *ngIf="(deckGroups$ | async)?.length" class="shelf-toolbar">
+    <button mat-stroked-button (click)="toggleMultiSelectMode()">
+      <mat-icon>{{ multiSelectMode ? 'close' : 'library_add' }}</mat-icon>
+      {{ multiSelectMode ? 'Cancel' : 'Mix decks' }}
+    </button>
+
+    <button *ngIf="multiSelectMode && selectionCount > 0"
+            mat-flat-button
+            color="primary"
+            [matBadge]="selectionCount"
+            matBadgeColor="accent"
+            (click)="loadSelectedDecks()">
+      <mat-icon>play_arrow</mat-icon>
+      Start mixed quiz
+    </button>
+  </div>
+
   <!-- Deck groups -->
   <mat-accordion *ngIf="deckGroups$ | async as groups" multi>
     <mat-expansion-panel *ngFor="let group of groups" [expanded]="true">
@@ -31,10 +49,22 @@
 
       <mat-nav-list>
         <mat-list-item *ngFor="let deck of group.decks" (click)="loadDeck(deck)">
-          <mat-icon matListItemIcon color="primary">style</mat-icon>
+
+          <!-- Checkbox only visible in multi-select mode -->
+          <mat-checkbox *ngIf="multiSelectMode"
+                        matListItemIcon
+                        [checked]="isSelected(deck.id)"
+                        (click)="$event.stopPropagation()"
+                        (change)="toggleSelection(deck)">
+          </mat-checkbox>
+
+          <mat-icon *ngIf="!multiSelectMode" matListItemIcon color="primary">style</mat-icon>
+
           <span matListItemTitle>{{ deck.name }}</span>
           <span matListItemLine *ngIf="deck.description">{{ deck.description }}</span>
-          <button mat-icon-button matListItemMeta
+
+          <button *ngIf="!multiSelectMode"
+                  mat-icon-button matListItemMeta
                   (click)="loadDeck(deck); $event.stopPropagation()"
                   [disabled]="loadingDeckId === deck.id">
             <mat-icon>play_arrow</mat-icon>
