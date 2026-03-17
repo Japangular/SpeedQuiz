@@ -32,16 +32,57 @@ export interface QuizAnswerSlot {
   onCorrectAnswer?: (correct: boolean) => void;
 }
 
-export function QUIZ_ANSWER_SLOTS(answers: Record<string, string>, answerHandler: AnswerHandler) {
-  return Object.entries(answers).map(([key, value], index) => ({
-    n: index,
-    name: key,
-    placeholder: `Enter ${key.toLowerCase()}`,
-    correctAnswer: value,
-    strategy: createStrategy(getStrategyForAnswerType(key)),
-    autofocus: index === 0,
-    onCorrectAnswer: (isCorrect: boolean) => answerHandler.handleAnswerCorrect(index, isCorrect),
-  }));
+export type AnswerSplitMode = 'any' | 'split';
+
+export function QUIZ_ANSWER_SLOTS(
+  answers: Record<string, string>,
+  answerHandler: AnswerHandler,
+  splitMode: AnswerSplitMode = 'any',
+): QuizAnswerSlot[] {
+  const slots: QuizAnswerSlot[] = [];
+  let slotIndex = 0;
+
+  for (const [key, value] of Object.entries(answers)) {
+    const strategy = getStrategyForAnswerType(key);
+
+    if (splitMode === 'split' && strategy === AnswerCheckStrategy.LEVENSHTEIN_DISTANCE) {
+      // Split comma-separated values into individual slots
+      const subAnswers = value
+        .replace(/\([^)]*\)/g, '')  // strip parenthetical notes
+        .split(/[,・/]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if (subAnswers.length > 1) {
+        // Create one slot per sub-answer
+        for (let i = 0; i < subAnswers.length; i++) {
+          const idx = slotIndex++;
+          slots.push({
+            name: `${key}_${i}`,
+            placeholder: `${key} (${i + 1}/${subAnswers.length})`,
+            correctAnswer: subAnswers[i],
+            strategy: createStrategy(strategy),
+            autofocus: idx === 0,
+            onCorrectAnswer: (isCorrect: boolean) => answerHandler.handleAnswerCorrect(idx, isCorrect),
+          });
+        }
+        continue;
+      }
+    }
+
+    // Default: single slot (accept-any for comma-separated)
+    const idx = slotIndex++;
+    slots.push({
+      name: key,
+      placeholder: `Enter ${key.toLowerCase()}`,
+      correctAnswer: value,
+      strategy: createStrategy(strategy),
+      autofocus: idx === 0,
+      onCorrectAnswer: (isCorrect: boolean) => answerHandler.handleAnswerCorrect(idx, isCorrect),
+    });
+  }
+
+  return slots;
 }
 
 function createStrategy(strategy: AnswerCheckStrategy): ValidationStrategy {
@@ -100,16 +141,38 @@ export function mapDeck(deck: SubmissionDeck): Card[] {
   const firstQuestionKey = questionKeys[0];
 
   return deck.cards.map((c, index) => {
+    // ── Answers ──────────────────────────────────────────────
     const answers: Record<string, string> = {};
     for (const key of answerKeys) {
-      if (c[key] !== undefined) {
+      if (c[key] !== undefined && c[key] !== '') {
         answers[key] = c[key];
       }
     }
 
-    const foundHintKey = hintKeys.find(key => c[key] !== undefined);
-    const hint = foundHintKey ? c[foundHintKey] : `${c[firstQuestionKey]} → ${Object.values(answers).join(', ')}`;
+    // ── Question resolution ─────────────────────────────────
+    // Primary: use the designated question field.
+    // Fallback: if empty (kana-only words like あさって have no kanji),
+    // promote the first non-empty answer to be the question and
+    // remove it from answers so the user isn't typing back the question.
+    let question = firstQuestionKey ? (c[firstQuestionKey] || '') : '';
 
+    if (!question.trim()) {
+      const fallbackEntry = Object.entries(answers).find(([_, v]) => v && v.trim());
+      if (fallbackEntry) {
+        question = fallbackEntry[1];
+        delete answers[fallbackEntry[0]];
+      } else {
+        question = 'No question';
+      }
+    }
+
+    // ── Hint ────────────────────────────────────────────────
+    const foundHintKey = hintKeys.find(key => c[key] !== undefined);
+    const hint = foundHintKey
+      ? c[foundHintKey]
+      : `${question} → ${Object.values(answers).join(', ')}`;
+
+    // ── Info (remaining fields) ─────────────────────────────
     const usedKeys = new Set([...questionKeys, ...answerKeys, ...hintKeys]);
     const info = Object.entries(c)
       .filter(([key]) => !usedKeys.has(key))
@@ -119,8 +182,8 @@ export function mapDeck(deck: SubmissionDeck): Card[] {
     return {
       index,
       level: index,
-      subjectType: "other",
-      question: firstQuestionKey ? c[firstQuestionKey] : 'No question',
+      subjectType: 'other',
+      question,
       answers,
       hint,
       info,

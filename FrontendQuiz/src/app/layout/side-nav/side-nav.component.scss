@@ -1,48 +1,30 @@
-/* Ensure the sidenav container takes up full height */
-#leftDrawer {
-  height: 100%;
-  padding: 0;
+.context-panel {
+  width: 280px;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Wrapper for the toolbar + nav list */
-.sidebar-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.context-panel-header {
+  gap: 8px;
 }
 
-/* The nav list fills the remaining space below the toolbar */
-.nav-list {
-  display: flex;
-  flex-direction: column;
+.context-panel-header span {
   flex: 1;
-  overflow: auto;
+  color: white;
 }
 
-/* Spacer to push the bottom item down */
-.spacer {
-  flex-grow: 1;
+.context-panel-body {
+  height: calc(100% - 64px);
+  overflow-y: auto;
 }
 
-.bottom-item {
-  margin-top: 16px; /* keep vertical spacing */
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+.context-toggle-btn {
+  margin-left: auto;
 }
 
-.mat-list-item {
-  padding-left: 0;
-  padding-right: 0;
+.context-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10;
 }
 
-.mat-toolbar {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.sidenav {
-  width: 200px; /* or any value you want */
-  max-width: 100%; /* prevent overflow on small screens */
-}

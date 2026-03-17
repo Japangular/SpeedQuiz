@@ -2,3 +2,8 @@
   <ng-container><app-quiz-action-bar></app-quiz-action-bar><app-deck-bar></app-deck-bar></ng-container>
   <app-card-view [enableZoom]="true"></app-card-view>
 </div>
+
+<!-- This template is NOT rendered here — it's picked up by SideNavComponent -->
+<ng-template #historyPanel>
+  <app-quiz-history-sidebar></app-quiz-history-sidebar>
+</ng-template>

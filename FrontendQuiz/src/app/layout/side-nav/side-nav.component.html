@@ -10,7 +10,7 @@
     <!-- Has session → show normal app -->
     <mat-sidenav-container *ngIf="profileService.profile$ | async" class="sidenav-container">
 
-      <!-- Left Sidebar -->
+      <!-- Left Sidebar (navigation) -->
       <mat-sidenav
         #leftDrawer
         class="sidenav"
@@ -64,6 +64,29 @@
         </div>
       </mat-sidenav>
 
+      <!-- Right Context Panel (desktop only) -->
+      <mat-sidenav
+        #rightDrawer
+        class="context-panel"
+        fixedInViewport
+        [mode]="'side'"
+        [opened]="!!(contextPanel$ | async)?.template && (isHandset$ | async) === false"
+        position="end"
+      >
+        <ng-container *ngIf="(contextPanel$ | async) as panel">
+          <mat-toolbar color="accent" class="context-panel-header">
+            <mat-icon>{{ panel.icon }}</mat-icon>
+            <span>{{ panel.label }}</span>
+            <button mat-icon-button (click)="rightDrawer.close()" aria-label="Close panel">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-toolbar>
+          <div class="context-panel-body">
+            <ng-container *ngTemplateOutlet="panel.template"></ng-container>
+          </div>
+        </ng-container>
+      </mat-sidenav>
+
       <!-- Main Content -->
       <mat-sidenav-content>
 
@@ -77,10 +100,33 @@
             <mat-icon>menu</mat-icon>
           </button>
           <span class="toolbar-title">SpeedQuiz</span>
+
+          <!-- Desktop: toggle right panel (if a feature registered one) -->
+          <button
+            *ngIf="(contextPanel$ | async)?.template && (isHandset$ | async) === false"
+            mat-icon-button
+            aria-label="Toggle context panel"
+            (click)="rightDrawer.toggle()"
+            class="context-toggle-btn"
+          >
+            <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
+          </button>
         </mat-toolbar>
 
         <!-- Routed views -->
         <router-outlet></router-outlet>
+
+        <!-- Mobile: FAB to open bottom sheet (if a feature registered a panel) -->
+        <button
+          *ngIf="(contextPanel$ | async)?.template && (isHandset$ | async) === true"
+          mat-fab
+          class="context-fab"
+          [matTooltip]="(contextPanel$ | async)?.label ?? ''"
+          (click)="openContextSheet()"
+          aria-label="Open context panel"
+        >
+          <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
+        </button>
 
       </mat-sidenav-content>
     </mat-sidenav-container>
