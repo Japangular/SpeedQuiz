@@ -15,3 +15,127 @@
   padding-bottom: 0;
   margin-bottom: 0;
 }
+.import-card {
+  max-width: 900px;
+  margin: 16px auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* ── Step 1: Paste & configure ───────────────────────────── */
+
+.parse-controls {
+  margin-top: 16px;
+}
+
+.detected-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.control-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.compact-field {
+  width: 160px;
+}
+
+.column-roles {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0 16px;
+}
+
+.role-chip .compact-field {
+  width: 140px;
+}
+
+/* Preview table */
+
+.preview-table {
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.preview {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.preview th,
+.preview td {
+  padding: 6px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.preview th {
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.preview .skipped {
+  opacity: 0.3;
+  text-decoration: line-through;
+}
+
+.preview-more {
+  font-size: 12px;
+  opacity: 0.6;
+  padding: 8px 12px;
+}
+
+/* ── Shared ──────────────────────────────────────────────── */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 14px;
+}
+
+.status.error {
+  color: indianred;
+}
+
+.step-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+}
+
+.quiz-step-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.finish-state {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.finish-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+.finish-state .step-actions {
+  justify-content: center;
+}

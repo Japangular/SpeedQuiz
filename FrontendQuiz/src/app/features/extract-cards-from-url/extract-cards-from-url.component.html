@@ -1,78 +1,117 @@
 <mat-card class="import-card">
   <mat-card-title>
-    <mat-icon color="primary">cloud_download</mat-icon>
+    <mat-icon color="primary">content_paste</mat-icon>
     Import cards
   </mat-card-title>
 
-  <mat-horizontal-stepper [linear]="true" color=primary animationDuration="0ms">
+  <mat-horizontal-stepper [linear]="true" color="primary" animationDuration="0ms">
 
-    <!-- STEP 1: Credentials -->
-    <mat-step [completed]="!!connectionStatus">
-      <form [formGroup]="credentialsForm">
-        <ng-template matStepLabel>API credentials</ng-template>
+    <!-- STEP 1: Paste & Configure -->
+    <mat-step [completed]="!!parseResult && parseResult.rows.length > 0">
+      <ng-template matStepLabel>Paste cards</ng-template>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Provider</mat-label>
-          <mat-select formControlName="provider">
-            <mat-option value="wanikani">WaniKani</mat-option>
-          </mat-select>
-        </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Paste your card data</mat-label>
+        <textarea
+          matInput
+          rows="8"
+          [value]="pastedText"
+          (input)="onPasteInput($any($event.target).value)"
+          placeholder="Paste tab-separated rows or newline-grouped cards&#10;&#10;Example:&#10;上&#10;じょう&#10;Above&#10;下&#10;か&#10;Below">
+        </textarea>
+        <mat-hint>Paste from WaniKani level pages, spreadsheets, or any structured text</mat-hint>
+      </mat-form-field>
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Username for Url</mat-label>
-          <input matInput type="password" formControlName=claimedName>
-          <mat-hint>Used to prevent sharing of token</mat-hint>
-        </mat-form-field>
+      <!-- Parse controls (shown after paste) -->
+      <div *ngIf="parseResult && parseResult.rows.length > 0" class="parse-controls">
 
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>API Token</mat-label>
-          <input matInput type="password" formControlName="token">
-          <mat-hint>Token is never stored</mat-hint>
-        </mat-form-field>
-
-        <div class="step-actions" *ngIf="!connectionStatus">
-          <button
-            mat-raised-button
-            color="accent"
-            (click)="testConnection()"
-            [disabled]="credentialsForm.invalid || loading"
-          >
-            Test connection
-          </button>
-        </div>
-
-        <mat-progress-bar
-          color="primary"
-          *ngIf="loading"
-          mode="indeterminate">
-        </mat-progress-bar>
-
-        <div *ngIf="connectionStatus" class="status success">
+        <div class="detected-info">
           <mat-icon color="primary">check_circle</mat-icon>
-          Connected as {{ connectionStatus.username! }}
+          <span>
+            Detected {{ parseResult.rows.length }} cards
+            ({{ parseResult.detectedDelimiter === 'tab' ? 'tab-separated' : parseResult.columnsPerCard + ' lines per card' }})
+          </span>
         </div>
 
-        <div *ngIf="connectionError" class="status error">
-          <mat-icon color="warn">error</mat-icon>
-          {{ connectionError }}
+        <!-- Adjust skip lines -->
+        <div class="control-row">
+          <mat-form-field appearance="outline" class="compact-field">
+            <mat-label>Skip first N lines</mat-label>
+            <input matInput type="number" min="0" [value]="parseResult.skipLines"
+                   (input)="reparse({ skipLines: +$any($event.target).value })">
+          </mat-form-field>
+
+          <!-- Columns per card (only for newline-group mode) -->
+          <mat-form-field *ngIf="parseResult.detectedDelimiter === 'newline-group'"
+                          appearance="outline" class="compact-field">
+            <mat-label>Lines per card</mat-label>
+            <input matInput type="number" min="1" max="8" [value]="parseResult.columnsPerCard"
+                   (input)="reparse({ columnsPerCard: +$any($event.target).value })">
+          </mat-form-field>
         </div>
 
-        <div class="step-actions">
-          <button
-            mat-button
-            color="accent"
-            matStepperNext
-            [disabled]="!payload"
-          >
-            Next
-          </button>
+        <!-- Column role assignment -->
+        <div class="column-roles">
+          <div *ngFor="let header of parseResult.columnHeaders; let i = index" class="role-chip">
+            <mat-form-field appearance="outline" class="compact-field">
+              <mat-label>Column {{ i + 1 }}</mat-label>
+              <mat-select [value]="columnRoles[i]" (selectionChange)="setColumnRole(i, $event.value)">
+                <mat-option value="question">Question</mat-option>
+                <mat-option value="answer">Answer</mat-option>
+                <mat-option value="skip">Skip</mat-option>
+              </mat-select>
+              <mat-hint>{{ header }}</mat-hint>
+            </mat-form-field>
+          </div>
         </div>
-      </form>
+
+        <!-- Preview table (first 5 rows) -->
+        <div class="preview-table">
+          <table class="preview">
+            <thead>
+            <tr>
+              <th *ngFor="let header of parseResult.columnHeaders; let i = index"
+                  [class.skipped]="columnRoles[i] === 'skip'">
+                {{ header }}
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let row of parseResult.rows | slice:0:5">
+              <td *ngFor="let cell of row; let i = index"
+                  [class.skipped]="columnRoles[i] === 'skip'">
+                {{ cell }}
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          <div *ngIf="parseResult.rows.length > 5" class="preview-more">
+            ... and {{ parseResult.rows.length - 5 }} more cards
+          </div>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div *ngIf="parseError" class="status error">
+        <mat-icon color="warn">error</mat-icon>
+        {{ parseError }}
+      </div>
+
+      <div class="step-actions">
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="buildDeck()"
+          [disabled]="!parseResult || parseResult.rows.length === 0"
+          matStepperNext>
+          Build deck ({{ parseResult?.rows?.length || 0 }} cards)
+        </button>
+      </div>
     </mat-step>
 
-    <!-- STEP 2: Preview & Select -->
+    <!-- STEP 2: Preview & Select (unchanged) -->
     <mat-step>
-      <ng-template matStepLabel>Preview homework</ng-template>
+      <ng-template matStepLabel>Preview cards</ng-template>
       <ng-template matStepContent>
         <app-anki-table [bottomBuffer]="72"></app-anki-table>
 
@@ -84,15 +123,14 @@
             mat-raised-button
             color="primary"
             (click)="onStartQuiz()"
-            [disabled]="!ankiTable.selectedRows.size"
-          >
+            [disabled]="!ankiTable?.selectedRows?.size">
             Practice selected
           </button>
         </span>
       </ng-template>
     </mat-step>
 
-    <!-- STEP 3: Quiz -->
+    <!-- STEP 3: Quiz (unchanged) -->
     <mat-step>
       <ng-template matStepLabel>Practice</ng-template>
       <ng-template matStepContent>
@@ -112,7 +150,7 @@
       </ng-template>
     </mat-step>
 
-    <!-- STEP 4: Persist / Finish -->
+    <!-- STEP 4: Save (unchanged) -->
     <mat-step>
       <ng-template matStepLabel>Finish</ng-template>
 
@@ -128,8 +166,7 @@
             mat-raised-button
             color="primary"
             (click)="saveCards()"
-            [disabled]="saving || saved || selectedCards.length === 0"
-          >
+            [disabled]="saving || saved || selectedCards.length === 0">
             <mat-icon>save</mat-icon>
             {{ saved ? 'Saved!' : 'Save to my decks' }}
           </button>
