@@ -1,3 +1,26 @@
+// ═══════════════════════════════════════════════════════════════
+//  Dictionary entry types — matches backend EntryDto.java
+// ═══════════════════════════════════════════════════════════════
+
+export interface EntryDto {
+  entSeq: number;
+  kanji: string[];
+  readings: string[];
+  senses: SenseDto[];
+}
+
+export interface SenseDto {
+  glosses: string[];
+  partsOfSpeech: string[];
+  crossReferences: string[];
+  antonyms: string[];
+  misc: string[];
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Kanji dictionary types — unchanged
+// ═══════════════════════════════════════════════════════════════
+
 export interface KanjiDTO {
   kanji: string;
   onyomi: string[];
@@ -13,47 +36,12 @@ export interface KanjiQuizData {
 }
 
 export function mapKanjiToQuizData(kanji: KanjiDTO): KanjiQuizData {
-  //const {id, tags, metadata, ...quizData} = kanji;
   return kanji;
 }
 
-export interface Entry {
-  entSeq: number;
-  kEle: KElement[];
-  rEle: RElement[];
-  sense: Sense[];
-}
-
-export interface KElement {
-  keb: string;
-  keInf: string[];
-  kePri: string[];
-}
-
-export interface RElement {
-  reb: string;
-  reInf: string[];
-  rePri: string[];
-}
-
-export interface Sense {
-  pos: string[];
-  xref: string[];
-  ant: string[];
-  field: string[];
-  misc: string[];
-  sInf: string[];
-  lsource: LSource[];
-  dial: string[];
-  gloss: string[];
-}
-
-export interface LSource {
-  value: string;
-  lang: string;
-  lsType: string;
-  wasei: string;
-}
+// ═══════════════════════════════════════════════════════════════
+//  MeCab tokenizer types — unchanged
+// ═══════════════════════════════════════════════════════════════
 
 export interface WordFeature {
   surface: string;
@@ -71,12 +59,18 @@ export interface WordFeature {
 }
 
 export const WORD_FEATURE_PROPERTIES = [
-  "surface", "partOfSpeech", "subClass1", "subClass2", "subClass3", "inflection", "conjugation", "rootForm", "reading", "pronunciation"
-]
+  "surface", "partOfSpeech", "subClass1", "subClass2", "subClass3",
+  "inflection", "conjugation", "rootForm", "reading", "pronunciation"
+];
 
 export const WORD_FEATURE_COLUMNS = [
-  "Surface", "Part of Speech", "Subclass 1", "Subclass 2", "Subclass 3", "Inflection", "Conjugation", "Root form", "Reading", "Pronunciation"
-]
+  "Surface", "Part of Speech", "Subclass 1", "Subclass 2", "Subclass 3",
+  "Inflection", "Conjugation", "Root form", "Reading", "Pronunciation"
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  Search mode enum — unchanged
+// ═══════════════════════════════════════════════════════════════
 
 export enum SearchMode {
   Kanji = 'kanji',
@@ -86,14 +80,28 @@ export enum SearchMode {
   Combined = 'CombinedRows',
 }
 
-export function mapEntryToQuizData(entry: any) {
-  const kanji = entry.kele?.map((k: any) => k.keb).join(", ") || "";
-  const readings = entry.rele?.map((r: any) => r.reb).join(", ") || "";
-  const meanings = entry.sense?.flatMap((s: any) => s.gloss) || [];
-  const pos = entry.sense?.flatMap((s: any) => s.pos || []) || [];
-  const xrefs = entry.sense?.flatMap((s: any) => s.xref || []) || [];
-  const ants = entry.sense?.flatMap((s: any) => s.ant || []) || [];
-  const misc = entry.sense?.flatMap((s: any) => s.misc || []) || [];
+// ═══════════════════════════════════════════════════════════════
+//  Entry → quiz data mapper — updated for EntryDto shape
+// ═══════════════════════════════════════════════════════════════
+//
+//  Old version used `any` types and accessed raw JAXB field names:
+//    entry.kele?.map((k: any) => k.keb)
+//    entry.rele?.map((r: any) => r.reb)
+//    entry.sense?.flatMap((s: any) => s.gloss)
+//
+//  New version is fully typed — the backend already flattened the
+//  nested KElement/RElement structures into string arrays, and
+//  renamed Sense fields to clean English names.
+
+export function mapEntryToQuizData(entry: EntryDto) {
+  const kanji = entry.kanji?.join(', ') ?? '';
+  const readings = entry.readings?.join(', ') ?? '';
+
+  const meanings  = entry.senses?.flatMap(s => s.glosses ?? []) ?? [];
+  const pos       = entry.senses?.flatMap(s => s.partsOfSpeech ?? []) ?? [];
+  const xrefs     = entry.senses?.flatMap(s => s.crossReferences ?? []) ?? [];
+  const ants      = entry.senses?.flatMap(s => s.antonyms ?? []) ?? [];
+  const misc      = entry.senses?.flatMap(s => s.misc ?? []) ?? [];
 
   return {
     kanji,
@@ -104,7 +112,7 @@ export function mapEntryToQuizData(entry: any) {
     antonyms: ants,
     miscTags: misc,
     question: `What does the word "${kanji}" (${readings}) mean?`,
-    info: pos.join(", ") + (misc.length ? " — " + misc.join(", ") : ""),
-    hints: xrefs.length ? "See also: " + xrefs.join(", ") : "",
+    info: pos.join(', ') + (misc.length ? ' — ' + misc.join(', ') : ''),
+    hints: xrefs.length ? 'See also: ' + xrefs.join(', ') : '',
   };
 }

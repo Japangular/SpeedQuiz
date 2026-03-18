@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserTableState {
+public class UserTableStateDto {
   String rowId;
   String deckname;
 }

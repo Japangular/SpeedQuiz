@@ -9,6 +9,7 @@ import {environment} from './environments/environment';
 import {BASE_PATH} from '../generated/api';
 import {INJECTED_QUIZ_BACKEND_API} from './interfaces/QuizApi';
 import {TokenInterceptorService} from './user-store-management/token-interceptor.service';
+import {ErrorInterceptor} from './interceptor/ErrorInterceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,6 +32,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: TokenInterceptorService,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
       multi: true
     },
   ]

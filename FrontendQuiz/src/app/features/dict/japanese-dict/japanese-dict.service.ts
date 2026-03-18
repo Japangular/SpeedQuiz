@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Entry, KanjiDTO, WordFeature} from './japanese-dict.model';
+import {EntryDto, KanjiDTO, WordFeature} from './japanese-dict.model';
 import {environment} from '../../../environments/environment';
 
 @Injectable({
@@ -22,9 +22,9 @@ export class JapaneseDictService {
     return this.http.get<KanjiDTO[]>(this.apiUrl+"/kanjiDict/jouyou");
   }
 
-  searchEntries(term: string): Observable<Entry[]> {
+  searchEntries(term: string): Observable<EntryDto[]> {
     const params = new HttpParams().set('q', term);
-    return this.http.get<Entry[]>(this.apiUrl + "/kanjiDict/search", {params});
+    return this.http.get<EntryDto[]>(this.apiUrl + "/japaneseDict/search", {params});
   }
 
   searchMecab(term: string): Observable<WordFeature[]> {
@@ -32,7 +32,3 @@ export class JapaneseDictService {
     return this.http.get<WordFeature[]>(this.apiUrl + "/kanjiDict/parseMecab", {params});
   }
 }
-
-
-
-

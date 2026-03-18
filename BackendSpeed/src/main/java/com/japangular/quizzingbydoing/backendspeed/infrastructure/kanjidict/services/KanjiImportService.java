@@ -11,19 +11,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @RequiredArgsConstructor
 public class KanjiImportService {
   private final KanjiRepository kanjiRepo;
-  private volatile boolean imported = false;
+  private final AtomicBoolean imported = new AtomicBoolean(false);
 
   public void ensureImported() throws IOException {
-    if (!imported && kanjiRepo.count() < 1) {
-      importJson();
-      imported = true;
+    if (imported.get()) return;
+    synchronized (this) {
+      if (!imported.get() && kanjiRepo.count() < 1) {
+        importJson();
+        imported.set(true);
+      }
     }
   }
+
+  /* TODO check if this is better
+  @PostConstruct
+public void init() throws IOException {
+    if (kanjiRepo.count() < 1) {
+        importJson();
+    }
+}
+   */
 
   public Long getKanjiRepoCount() {
     return kanjiRepo.count();

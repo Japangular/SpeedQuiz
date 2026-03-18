@@ -9,7 +9,7 @@
 
   <mat-form-field class="full-width" appearance="fill">
     <mat-label>Search Japanese word</mat-label>
-    <input matInput [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" (keyup.enter)="triggerSearch()" [disabled]="loading() || isJousou()"/>
+    <input matInput [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" (keyup.enter)="triggerSearch()" [disabled]="loading() || isJoujou()"/>
     <button mat-icon-button matSuffix (click)="triggerSearch()">
       <mat-icon>search</mat-icon>
     </button>

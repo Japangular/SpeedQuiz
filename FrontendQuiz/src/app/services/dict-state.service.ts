@@ -1,6 +1,6 @@
 import {Injectable, signal} from '@angular/core';
 import {JapaneseDictService} from '../features/dict/japanese-dict/japanese-dict.service';
-import {Entry, KanjiDTO, SearchMode} from '../features/dict/japanese-dict/japanese-dict.model';
+import {EntryDto, KanjiDTO, SearchMode} from '../features/dict/japanese-dict/japanese-dict.model';
 import {catchError, Observable, of} from 'rxjs';
 import {map, tap} from 'rxjs/operators';
 
@@ -71,7 +71,6 @@ export class DictStateService {
         }),
         map(() => true),
         catchError(() => {
-          // Optionally: set the flag to avoid infinite retries, or leave it false to allow retries
           this.jouyouKanjisLoaded = true;
           return of(false);
         })
@@ -89,7 +88,6 @@ export class DictStateService {
   searchKanji(searchTerm: string) {
     this.dictionaryService.searchKanji(searchTerm).subscribe({
       next: (data: KanjiDTO[]) => {
-        console.log("number of kanji received: " + data.length);
         this.kanjiResults.set(data);
       },
       error: (err) => {
@@ -99,11 +97,8 @@ export class DictStateService {
   }
 }
 
-export const initialDictState = {
-
-}
-
+// Changed: Entry → EntryDto
 export interface DictState {
-  entryResult: Entry[];
+  entryResult: EntryDto[];
   kanjiResults: any[];
 }

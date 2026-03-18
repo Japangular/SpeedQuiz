@@ -1,6 +1,7 @@
 package com.japangular.quizzingbydoing.backendspeed.infrastructure.jm_dict_e.service;
 
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.jm_dict_e.model.Entry;
+import com.japangular.quizzingbydoing.backendspeed.infrastructure.jm_dict_e.model.EntryDto;
 import jakarta.annotation.PostConstruct;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;

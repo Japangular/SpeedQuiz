@@ -65,8 +65,6 @@ export class JapaneseDictComponent {
   selectedOption: WritableSignal<SearchMode>;
   searchModes = SearchMode;
 
-  protected readonly mapEntryToQuizData = mapEntryToQuizData;
-
   constructor(protected dict: DictStateService) {
     this.selectedOption = dict.selectedOption;
     this.searchTerm = dict.searchTerm;
@@ -85,11 +83,9 @@ export class JapaneseDictComponent {
             this.displayedColumns.set(WORD_FEATURE_PROPERTIES);
             this.tableResults.set(results);
             return;
-            //return;
           } else {
             this.displayedColumns.set([]);
           }
-          console.log("tokenize");
           break;
         case SearchMode.JoujouKanjis:
           results = this.dict.jouyouKanjis();
@@ -110,7 +106,6 @@ export class JapaneseDictComponent {
 
   setLoading(value: boolean) {
     if (value && !this.loading()) {
-      console.log('loading on');
       this.loading.set(true);
 
       this._loadingTimeoutHandle = setTimeout(() => {
@@ -121,7 +116,6 @@ export class JapaneseDictComponent {
         }
       }, this.TIMEOUT_MS);
     } else if (!value && this.loading()) {
-      console.log('loading off');
       this.loading.set(false);
 
       if (this._loadingTimeoutHandle) {
@@ -147,7 +141,7 @@ export class JapaneseDictComponent {
     return this.selectedColumns.has(column);
   }
 
-  isJousou() {
-    return this.dict.selectedOption() == SearchMode.JoujouKanjis
+  isJoujou() {
+    return this.dict.selectedOption() == SearchMode.JoujouKanjis;
   }
 }

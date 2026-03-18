@@ -21,7 +21,7 @@ public class WaniKaniClient {
       logger.info("Calling WaniKaniClient {} endpoint ", endpoint);
       String response = webClient.get()
           .uri("/" + endpoint)
-          .header("Authorization", "Bearer {}" + token)
+          .header("Authorization", "Bearer " + token)
           .retrieve()
           .bodyToMono(String.class)
           .block();
