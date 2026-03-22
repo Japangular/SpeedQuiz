@@ -1,4 +1,4 @@
-import {Component, inject, TemplateRef, ViewChild} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 import {MatAnchor, MatFabButton, MatIconButton} from '@angular/material/button';
@@ -69,7 +69,6 @@ export class SideNavComponent {
       shareReplay()
     );
 
-  /** The current context panel state (template + icon + label). */
   contextPanel$: Observable<ContextPanelState> = this.contextPanelService.state$;
 
   constructor() {
@@ -77,10 +76,6 @@ export class SideNavComponent {
       this.route.routeConfig?.children?.filter(r => r.data?.['label']) ?? [];
   }
 
-  /**
-   * Mobile: open the feature's panel content in a bottom sheet.
-   * The sheet component receives the TemplateRef and renders it.
-   */
   openContextSheet(): void {
     const state = this.contextPanelService['_state$'].value;
     if (!state.template) return;

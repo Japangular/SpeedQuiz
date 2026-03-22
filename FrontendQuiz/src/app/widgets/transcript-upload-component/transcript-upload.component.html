@@ -1,10 +1,20 @@
-<div class="drop-zone" (drop)="onDrop($event)" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" [class.dragging]="isDragging">
+<div class="drop-zone" (drop)="onDrop($event)" (dragover)="onDragOver($event)"
+     (dragleave)="onDragLeave($event)" [class.dragging]="isDragging">
   <p *ngIf="!fileName">Drag & Drop transcript JSON here or click to upload</p>
   <p *ngIf="statusMessage">{{ statusMessage }}</p>
   <input type="file" accept=".json" (change)="onFileSelected($event)" hidden #fileInput/>
-  <button type="button" (click)="fileInput.click()">Browse</button>
+  <button mat-raised-button color="primary" type="button" (click)="fileInput.click()">
+    <mat-icon>upload_file</mat-icon>
+    Browse
+  </button>
   <span *ngIf="hasHoverText()">
-    <button (click)=persistStreamTranscripts() [disabled]="isDisabled()" [title]="hoverText">Persist on server</button>
-    <button (click)=reset()>Abort</button>
+    <button mat-raised-button color="accent"
+            (click)="persistStreamTranscripts()"
+            [disabled]="isDisabled()"
+            [title]="hoverText">
+      <mat-icon>cloud_upload</mat-icon>
+      Persist on server
+    </button>
+    <button mat-button color="warn" (click)="reset()">Abort</button>
   </span>
 </div>

@@ -1,11 +1,9 @@
-/* Outer container that holds everything */
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
+  min-height: 100vh;
 }
 
-/* Main content that should expand */
 .content-wrap {
   flex: 1;
   box-sizing: border-box;
@@ -28,7 +26,7 @@ html, body {
 .page-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Full viewport height */
+  min-height: 100vh;
   overflow: hidden;
   background: lightblue;
 }

@@ -6,7 +6,7 @@
 
   <mat-horizontal-stepper [linear]="true" color="primary" animationDuration="0ms">
 
-    <!-- STEP 1: Paste & Configure -->
+    <!-- ═══ STEP 1: Paste & Configure ═══ -->
     <mat-step [completed]="!!parseResult && parseResult.rows.length > 0">
       <ng-template matStepLabel>Paste cards</ng-template>
 
@@ -41,7 +41,6 @@
                    (input)="reparse({ skipLines: +$any($event.target).value })">
           </mat-form-field>
 
-          <!-- Columns per card (only for newline-group mode) -->
           <mat-form-field *ngIf="parseResult.detectedDelimiter === 'newline-group'"
                           appearance="outline" class="compact-field">
             <mat-label>Lines per card</mat-label>
@@ -65,14 +64,16 @@
           </div>
         </div>
 
-        <!-- Preview table (first 5 rows) -->
+        <!-- Inline preview (first 5 rows) -->
         <div class="preview-table">
           <table class="preview">
             <thead>
             <tr>
               <th *ngFor="let header of parseResult.columnHeaders; let i = index"
-                  [class.skipped]="columnRoles[i] === 'skip'">
+                    [class.skipped]="columnRoles[i] === 'skip'"
+                    [class.question-col]="columnRoles[i] === 'question'">
                 {{ header }}
+                  <span class="role-badge" *ngIf="columnRoles[i] === 'question'">Q</span>
               </th>
             </tr>
             </thead>
@@ -91,7 +92,6 @@
         </div>
       </div>
 
-      <!-- Error state -->
       <div *ngIf="parseError" class="status error">
         <mat-icon color="warn">error</mat-icon>
         {{ parseError }}
@@ -109,64 +109,80 @@
       </div>
     </mat-step>
 
-    <!-- STEP 2: Preview & Select (unchanged) -->
-    <mat-step>
-      <ng-template matStepLabel>Preview cards</ng-template>
+    <!-- ═══ STEP 2: Preview with delete ═══ -->
+    <mat-step [completed]="deckCards.length > 0">
+      <ng-template matStepLabel>Review deck</ng-template>
       <ng-template matStepContent>
-        <app-anki-table [bottomBuffer]="72"></app-anki-table>
 
-        <span class="step-actions">
-          <button mat-button color="accent" matStepperPrevious>
-            Back
-          </button>
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="onStartQuiz()"
-            [disabled]="!ankiTable?.selectedRows?.size">
-            Practice selected
-          </button>
-        </span>
-      </ng-template>
-    </mat-step>
-
-    <!-- STEP 3: Quiz (unchanged) -->
-    <mat-step>
-      <ng-template matStepLabel>Practice</ng-template>
-      <ng-template matStepContent>
-        <div class="quiz-step-layout">
-          <div class="quiz-content">
-            <app-card-view [enableZoom]="true"></app-card-view>
-          </div>
-          <div class="step-actions">
-            <button mat-button color="accent" matStepperPrevious>
-              Back to selection
-            </button>
-            <button mat-raised-button color="primary" matStepperNext>
-              Finish
-            </button>
-          </div>
+        <div class="deck-summary">
+          <mat-icon color="primary">style</mat-icon>
+          <span>{{ deckCards.length }} cards</span>
         </div>
-      </ng-template>
-    </mat-step>
 
-    <!-- STEP 4: Save (unchanged) -->
-    <mat-step>
-      <ng-template matStepLabel>Finish</ng-template>
+        <div class="review-table-wrapper">
+          <table class="review-table">
+            <thead>
+              <tr>
+                <th *ngFor="let col of deckColumnHeaders">{{ col }}</th>
+                <th class="action-col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let card of deckCards; let i = index">
+                <td *ngFor="let col of deckColumnKeys">{{ card[col] }}</td>
+                <td class="action-col">
+                  <button mat-icon-button color="warn" (click)="removeCard(i)"
+                          aria-label="Remove card">
+                    <mat-icon>close</mat-icon>
+          </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <div class="finish-state">
-        <mat-icon color="accent">done_all</mat-icon>
-
-        <p>
-          {{ selectedCards.length }} cards practiced.
-        </p>
+        <div *ngIf="deckCards.length === 0" class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>All cards removed. Go back to paste new data.</p>
+        </div>
 
         <div class="step-actions">
+          <button mat-button color="accent" matStepperPrevious>Back</button>
           <button
             mat-raised-button
             color="primary"
-            (click)="saveCards()"
-            [disabled]="saving || saved || selectedCards.length === 0">
+            [disabled]="deckCards.length === 0"
+            matStepperNext>
+            Continue
+          </button>
+        </div>
+
+      </ng-template>
+    </mat-step>
+
+    <!-- ═══ STEP 3: Choose — Practice now or Save ═══ -->
+    <mat-step>
+      <ng-template matStepLabel>Start</ng-template>
+      <ng-template matStepContent>
+
+        <div class="choose-state">
+          <mat-icon color="primary">school</mat-icon>
+          <p>Your deck has <strong>{{ deckCards.length }}</strong> cards and is ready.</p>
+
+          <div class="choose-actions">
+          <button
+            mat-raised-button
+            color="primary"
+              (click)="practiceNow()"
+              [disabled]="deckCards.length === 0">
+              <mat-icon>play_arrow</mat-icon>
+              Practice now
+            </button>
+
+            <button
+              mat-raised-button
+              (click)="saveDeck()"
+              [disabled]="deckCards.length === 0 || saving || saved">
             <mat-icon>save</mat-icon>
             {{ saved ? 'Saved!' : 'Save to my decks' }}
           </button>
@@ -174,15 +190,18 @@
 
         <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
 
+          <div *ngIf="saved" class="saved-info">
+            <mat-icon color="primary">check_circle</mat-icon>
+            <span>Deck saved. You can find it in the DeckShelf.</span>
+          </div>
+
         <div class="step-actions">
-          <button mat-button color="primary" (click)="goToDecks()">
-            Go to decks
-          </button>
-          <button mat-button color="accent" (click)="resetStepper()">
-            Import more
-          </button>
+            <button mat-button color="accent" matStepperPrevious>Back to review</button>
+            <button mat-button (click)="resetStepper()">Import another deck</button>
         </div>
       </div>
+
+      </ng-template>
     </mat-step>
 
   </mat-horizontal-stepper>

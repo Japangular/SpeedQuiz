@@ -22,7 +22,6 @@ export class DeckComponent implements AfterViewInit {
   @ViewChild(MatTable) table!: MatTable<DeckItem>;
   dataSource = new DeckDataSource();
 
-  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['id', 'name'];
 
   constructor(private cardStore: CardStoreService) {

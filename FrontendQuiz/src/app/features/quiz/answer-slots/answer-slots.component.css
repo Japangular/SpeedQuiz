@@ -1,10 +1,8 @@
 input.active {
-  /* Define styles or animations for the active state */
-  transition: all 0.3s ease; /* Example animation */
+  transition: all 0.3s ease;
 }
 
 input:not(.active) {
-  /* Disable or reset styles when not active */
   transition: none;
 }
 
@@ -14,8 +12,7 @@ input:not(.active) {
   gap: 4px;
 }
 
-.readingMeaning input {
+.readingMeaning mat-form-field {
   width: 300px;
-  padding: 6px 8px;
   font-size: 0.95rem;
 }

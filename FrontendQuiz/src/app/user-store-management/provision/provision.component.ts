@@ -42,9 +42,6 @@ export class ProvisionComponent {
     this.doProvision(name);
   }
 
-  /**
-   * Skips the name input — generates something like "Learner-a7x3"
-   */
   skipWithRandomName(): void {
     const suffix = Math.random().toString(36).substring(2, 6);
     this.doProvision(`Learner-${suffix}`);

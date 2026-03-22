@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);   /* 64px = Material toolbar default height */
+  height: calc(100vh - 64px);
 }
 
 .quizBoard {

@@ -1,15 +1,5 @@
-/**
- * Parses pasted text into rows of cards.
- *
- * Supports two formats:
- * 1. Tab-separated: each line is a card, columns separated by tabs
- * 2. Newline-grouped: every N lines is one card (e.g., kanji / reading / meaning)
- *
- * Auto-detects which format based on tab presence, then applies
- * user-adjustable skipLines and columnsPerCard.
- */
-
 export type DetectedDelimiter = 'tab' | 'newline-group';
+export type ColumnRole = 'question' | 'answer' | 'skip';
 
 export interface ParseResult {
   rows: string[][];
@@ -17,6 +7,8 @@ export interface ParseResult {
   columnsPerCard: number;
   skipLines: number;
   columnHeaders: string[];
+  columnTypes: LineType[];
+  suggestedRoles: ColumnRole[];
 }
 
 export interface ParseOptions {
@@ -28,7 +20,7 @@ export function parsePastedText(raw: string, options?: ParseOptions): ParseResul
   const lines = raw.split('\n').map(l => l.trimEnd()).filter(l => l.length > 0);
 
   if (lines.length === 0) {
-    return {rows: [], detectedDelimiter: 'tab', columnsPerCard: 0, skipLines: 0, columnHeaders: []};
+    return {rows: [], detectedDelimiter: 'tab', columnsPerCard: 0, skipLines: 0, columnHeaders: [], columnTypes: [], suggestedRoles: []};
   }
 
   const tabCount = lines.filter(l => l.includes('\t')).length;
@@ -47,18 +39,22 @@ function parseTabSeparated(lines: string[], options?: ParseOptions): ParseResult
   const rows = dataLines.map(l => l.split('\t').map(c => c.trim()));
   const maxCols = Math.max(...rows.map(r => r.length));
 
-  // Pad short rows
   const paddedRows = rows.map(r => {
     while (r.length < maxCols) r.push('');
     return r;
   });
+
+  const columnTypes = detectColumnTypes(maxCols, paddedRows);
+  const columnHeaders = buildHeaders(columnTypes);
 
   return {
     rows: paddedRows,
     detectedDelimiter: 'tab',
     columnsPerCard: maxCols,
     skipLines: skip,
-    columnHeaders: guessHeaders(maxCols, paddedRows),
+    columnHeaders,
+    columnTypes,
+    suggestedRoles: suggestRoles(columnTypes),
   };
 }
 
@@ -72,28 +68,109 @@ function parseNewlineGrouped(lines: string[], options?: ParseOptions): ParseResu
     rows.push(dataLines.slice(i, i + colsPerCard));
   }
 
+  const columnTypes = detectColumnTypes(colsPerCard, rows);
+  const columnHeaders = buildHeaders(columnTypes);
+
   return {
     rows,
     detectedDelimiter: 'newline-group',
     columnsPerCard: colsPerCard,
     skipLines: skip,
-    columnHeaders: guessHeaders(colsPerCard, rows),
+    columnHeaders,
+    columnTypes,
+    suggestedRoles: suggestRoles(columnTypes),
   };
 }
 
-/**
- * Tries to detect how many lines make up one card by looking for
- * repeating character-type patterns.
- *
- * E.g., [kanji, kana, latin, kanji, kana, latin, ...] → 3
- */
+export type LineType = 'cjk' | 'kana' | 'latin' | 'mixed' | 'short';
+
+function detectColumnTypes(columnCount: number, sampleRows: string[][]): LineType[] {
+  const types: LineType[] = [];
+
+  for (let col = 0; col < columnCount; col++) {
+    const samples = sampleRows.slice(0, 8).map(r => r[col] ?? '');
+    types.push(classifyColumn(samples));
+  }
+  return types;
+}
+
+function classifyColumn(samples: string[]): LineType {
+  const votes = samples.map(classifyLine);
+  const counts: Record<string, number> = {};
+  for (const v of votes) {
+    counts[v] = (counts[v] ?? 0) + 1;
+  }
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] as LineType ?? 'mixed';
+}
+
+function classifyLine(line: string): LineType {
+  if (line.length <= 2) return 'short';
+
+  const chars = [...line.replace(/\s/g, '')];
+  const total = chars.length || 1;
+
+  const cjk = chars.filter(c => c >= '\u4e00' && c <= '\u9fff').length;
+  const kana = chars.filter(c =>
+    (c >= '\u3040' && c <= '\u309f') || (c >= '\u30a0' && c <= '\u30ff')
+  ).length;
+  const latin = chars.filter(c => /[a-zA-Z]/.test(c)).length;
+
+  if (cjk / total > 0.4) return 'cjk';
+  if (kana / total > 0.4) return 'kana';
+  if (latin / total > 0.4) return 'latin';
+  return 'mixed';
+}
+
+function suggestRoles(types: LineType[]): ColumnRole[] {
+  const questionPriority: LineType[] = ['cjk', 'short', 'mixed', 'kana', 'latin'];
+
+  let questionIndex = -1;
+
+  for (const preferred of questionPriority) {
+    const idx = types.indexOf(preferred);
+    if (idx >= 0) {
+      questionIndex = idx;
+      break;
+    }
+  }
+
+  if (questionIndex < 0) questionIndex = 0;
+
+  return types.map((_, i) => i === questionIndex ? 'question' : 'answer');
+}
+
+function buildHeaders(types: LineType[]): string[] {
+  const usedNames = new Set<string>();
+
+  return types.map(type => {
+    let name: string;
+    switch (type) {
+      case 'cjk':
+        name = usedNames.has('Kanji') ? 'Kanji/Vocab' : 'Kanji';
+        break;
+      case 'kana':
+        name = usedNames.has('Reading') ? 'Kana' : 'Reading';
+        break;
+      case 'latin':
+        name = usedNames.has('Meaning') ? 'English' : 'Meaning';
+        break;
+      case 'short':
+        name = usedNames.has('Kanji') ? 'Short' : 'Kanji';
+        break;
+      default:
+        name = `Column ${usedNames.size + 1}`;
+    }
+    usedNames.add(name);
+    return name;
+  });
+}
+
 function detectColumnsPerCard(lines: string[]): number {
   const types = lines.map(classifyLine);
 
   for (const n of [3, 2, 4, 5]) {
     if (types.length < n * 2) continue;
 
-    // Check if the pattern of the first group repeats
     const pattern = types.slice(0, n);
     let matches = 0;
     const groupsToCheck = Math.min(5, Math.floor(types.length / n));
@@ -106,49 +183,23 @@ function detectColumnsPerCard(lines: string[]): number {
     if (matches >= groupsToCheck - 1) return n;
   }
 
-  return 3; // safe default for Japanese study cards
+  return 3;
 }
 
-type LineType = 'cjk' | 'kana' | 'latin' | 'mixed' | 'short';
-
-function classifyLine(line: string): LineType {
-  if (line.length <= 2) return 'short';
-
-  const cjk = [...line].filter(c => c >= '\u4e00' && c <= '\u9fff').length;
-  const kana = [...line].filter(c =>
-    (c >= '\u3040' && c <= '\u309f') || (c >= '\u30a0' && c <= '\u30ff')
-  ).length;
-  const latin = [...line].filter(c => /[a-zA-Z]/.test(c)).length;
-  const total = line.replace(/\s/g, '').length || 1;
-
-  if (cjk / total > 0.5) return 'cjk';
-  if (kana / total > 0.5) return 'kana';
-  if (latin / total > 0.5) return 'latin';
-  return 'mixed';
-}
-
-/**
- * Detects how many initial lines to skip (headers, section labels, etc.)
- */
 function detectSkipLines(lines: string[], delimiter: DetectedDelimiter, colsPerCard?: number): number {
   if (delimiter === 'tab') {
-    // For tab-separated, first line might be a header row
     if (lines.length < 2) return 0;
     const firstRowType = classifyLine(lines[0]);
     const secondRowType = classifyLine(lines[1]);
-    // If first line is all latin and second has CJK, first is probably a header
     if (firstRowType === 'latin' && secondRowType !== 'latin') return 1;
     return 0;
   }
 
-  // For newline-grouped, skip lines until the repeating pattern starts
   const n = colsPerCard ?? 3;
   const types = lines.map(classifyLine);
 
-  // Look for the first position where a consistent pattern starts
   for (let skip = 0; skip <= Math.min(5, lines.length - n); skip++) {
     const pattern = types.slice(skip, skip + n);
-    // Check next group matches
     if (skip + n * 2 <= types.length) {
       const nextGroup = types.slice(skip + n, skip + n * 2);
       if (nextGroup.every((t, i) => t === pattern[i])) {
@@ -158,30 +209,4 @@ function detectSkipLines(lines: string[], delimiter: DetectedDelimiter, colsPerC
   }
 
   return 0;
-}
-
-/**
- * Guesses column headers based on content patterns.
- */
-function guessHeaders(columnCount: number, sampleRows: string[][]): string[] {
-  if (sampleRows.length === 0 || columnCount === 0) return [];
-
-  const headers: string[] = [];
-
-  for (let col = 0; col < columnCount; col++) {
-    const samples = sampleRows.slice(0, 5).map(r => r[col] ?? '');
-    const type = classifyLine(samples.join(' '));
-
-    if (type === 'cjk' || type === 'mixed') {
-      headers.push(headers.some(h => h === 'Kanji') ? `Column ${col + 1}` : 'Kanji');
-    } else if (type === 'kana') {
-      headers.push('Reading');
-    } else if (type === 'latin') {
-      headers.push(headers.some(h => h === 'Meaning') ? `Column ${col + 1}` : 'Meaning');
-    } else {
-      headers.push(`Column ${col + 1}`);
-    }
-  }
-
-  return headers;
 }

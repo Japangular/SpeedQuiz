@@ -17,6 +17,8 @@ import {
   SessionSyncService,
   SortStrategy, SortStrategyName
 } from '../utils/quiz-session';
+import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
+import {LocalProfileService} from '../../../user-store-management/local-profile.service';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +39,8 @@ export class QuizBoardService implements OnDestroy {
     private store: CardStoreService,
     private modal: ModalService,
     private sessionSync: SessionSyncService,
+    private deckShelfService: DeckShelfService,
+    private localService: LocalProfileService,
   ) {
     // Create a placeholder session so card$ is defined immediately
     this.session = new QuizSession([]);
@@ -48,6 +52,16 @@ export class QuizBoardService implements OnDestroy {
       if (!deck || deck.cards.length === 0) return;
       this.initSession(deck);
     });
+
+    const last = localStorage.getItem('japangular_last_deck');
+    if (last && this.store.currentDeck.cards.length === 0) {
+      const { deckId, deckName } = JSON.parse(last);
+      const ownerId = localService.getToken();
+      if(ownerId)
+      this.deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
+        this.store.setCurrentDeck(content, deckName, deckId);
+      });
+    }
   }
 
   ngOnDestroy(): void {

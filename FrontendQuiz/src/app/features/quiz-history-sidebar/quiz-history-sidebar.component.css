@@ -36,7 +36,6 @@
   border-left: 3px solid #e8a017;
 }
 
-/* Disabled: greyed out after hint rewind */
 .history-entry.disabled {
   opacity: 0.4;
   pointer-events: none;
@@ -109,8 +108,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; max-height: 0; }
-  to { opacity: 1; max-height: 300px; }
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 300px;
+  }
 }
 
 .answer-row {
@@ -135,7 +140,6 @@
   cursor: text;
 }
 
-/* Question row inside expanded panel — slightly emphasized */
 .question-detail .answer-value {
   font-weight: 500;
   font-size: 14px;

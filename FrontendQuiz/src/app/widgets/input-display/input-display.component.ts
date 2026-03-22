@@ -2,12 +2,17 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import {debounceTime, distinctUntilChanged, Subscription} from 'rxjs';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {StrokeOrderKanjiComponent} from '../kanji-stroke-order-grid/stroke-order-kanji.component';
+import {MatFormField, MatInput} from '@angular/material/input';
 
 @Component({
   selector: 'app-input-display',
   imports: [
     ReactiveFormsModule,
-    StrokeOrderKanjiComponent
+    StrokeOrderKanjiComponent,
+    MatFormField,
+    MatFormField,
+    MatInput,
+    MatFormField
   ],
   templateUrl: './input-display.component.html',
   styleUrl: './input-display.component.css'

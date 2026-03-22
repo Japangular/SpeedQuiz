@@ -1,7 +1,8 @@
-<!-- Input field linked to FormControl -->
-<input type="text" [formControl]="kanjiControl" placeholder="Enter kanji"/>
+<mat-form-field appearance="outline">
+  <mat-label>Enter kanji</mat-label>
+  <input matInput type="text" [formControl]="kanjiControl" placeholder="Enter kanji"/>
+</mat-form-field>
 
-<!-- Stroke order component with debounced value -->
 <app-stroke-order-kanji
   [japanese]="debouncedKanji"
   [isWrapContent]="false"

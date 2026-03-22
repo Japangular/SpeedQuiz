@@ -1,4 +1,4 @@
-import {Routes} from '@angular/router';
+import {Router, Routes} from '@angular/router';
 import {DynamicCardCreatorComponent} from './features/dynamic-card-creator/dynamic-card-creator.component';
 import {SideNavComponent} from './layout/side-nav/side-nav.component';
 import {AboutComponent} from './layout/about/about.component';
@@ -13,6 +13,7 @@ import {AnkiSourceService} from './features/anki-table/anki-source.service';
 import {BackendSourceService} from './features/anki-table/backend-source.service';
 import {AnkiTableService} from './features/anki-table/anki-table.service';
 import {DeckShelfComponent} from './features/deck-shelf/deck-shelf.component';
+import {inject} from '@angular/core';
 
 export const routes: Routes = [
   {
@@ -20,7 +21,16 @@ export const routes: Routes = [
     component: SideNavComponent,
     children: [
       {
-        path: 'table',
+        path: '',
+        pathMatch: 'full',
+        canActivate: [() => {
+          const router = inject(Router);
+          const last = localStorage.getItem('japangular_last_deck');
+          return router.createUrlTree([last ? '/quiz' : '/deckShelf']);
+        }],
+        component: DeckShelfComponent
+      },
+      { path: 'table',
         component: DeckComponent,
         data: {label: 'Table', icon: 'table_chart'}
       },

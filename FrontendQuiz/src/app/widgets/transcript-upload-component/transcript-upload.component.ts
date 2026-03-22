@@ -3,12 +3,16 @@ import {stream_transcript} from '../../features/transcription-translation/transc
 import {NgIf} from '@angular/common';
 import {TranscriptionTranslationService} from '../../features/transcription-translation/transcription-translation.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-transcript-upload',
   templateUrl: './transcript-upload.component.html',
   imports: [
-    NgIf
+    NgIf,
+    MatIcon,
+    MatButton
   ],
   styles: [`
     .drop-zone {
@@ -78,7 +82,7 @@ export class TranscriptUploadComponent {
     this.reset();
 
     if (!file.name.endsWith('.json')) {
-      this.snackBar.open('Only JSON files are supported', 'Close', { duration: 4000 });
+      this.snackBar.open('Only JSON files are supported', 'Close', {duration: 4000});
       return;
     }
 
@@ -94,7 +98,7 @@ export class TranscriptUploadComponent {
         this.service.checkByTitleAndVTuber(data.stream_title, data.vtuber).subscribe(existAlready => {
           this.canBePersisted = !existAlready;
 
-          if(!existAlready){
+          if (!existAlready) {
             this._hoverText = 'Persist this stream';
             this.statusMessage = "✅ Loaded: " + data.stream_title + " from " + data.vtuber
           } else {
@@ -104,7 +108,7 @@ export class TranscriptUploadComponent {
           }
         })
       } catch (err) {
-        this.snackBar.open('Invalid JSON file', 'Close', { duration: 4000 });
+        this.snackBar.open('Invalid JSON file', 'Close', {duration: 4000});
       }
     };
     // prepares the above reader.onload
@@ -112,7 +116,7 @@ export class TranscriptUploadComponent {
   }
 
   persistStreamTranscripts() {
-    if(this.data && this.canBePersisted){
+    if (this.data && this.canBePersisted) {
       this.service.persistStreamTranscripts(this.data).subscribe((message: string) => {
         this.openSnackBar(message);
       });
@@ -120,7 +124,7 @@ export class TranscriptUploadComponent {
   }
 
 
-  openSnackBar(message: string){
+  openSnackBar(message: string) {
     return this.snackBar.open(message, 'Close', {duration: 4000});
   }
 

@@ -10,19 +10,19 @@ import {DomSanitizer} from '@angular/platform-browser';
       <div #kanjiContainer [innerHtml]="svgContent" class="kanji-container"></div>
   `,
     styles: [`
-    .kanji-container svg {
-      width: 100%;
-      height: auto;
-    }
+      .kanji-container svg {
+        width: 100%;
+        height: auto;
+      }
 
-    .kanji-container path {
-      cursor: pointer;
-      stroke-width: 3;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke: black; /* Default stroke color */
-    }
-  `]
+      .kanji-container path {
+        cursor: pointer;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke: black; /* Default stroke color */
+      }
+    `]
 })
 export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
   private observer!: MutationObserver;
@@ -109,8 +109,6 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
       .subscribe(svg => {
         svg = svg.replace("]>", "");
         this.svgContent = this.sanitizer.bypassSecurityTrustHtml(svg);
-        // No setTimeout — the MutationObserver handles initialization
-        // once Angular renders the SVG into the DOM
       });
   }
 

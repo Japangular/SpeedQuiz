@@ -1,18 +1,21 @@
 <form [formGroup]="cardForm">
   <div class="readingMeaning">
     <ng-container *ngFor="let slot of quizAnswerSlots">
-      <input
-        #inputRef
-        [attr.data-name]="slot.name"
-        [attr.autofocus]="slot.autofocus ? '' : null"
-        [formControlName]="slot.name"
-        [placeholder]="slot.placeholder"
-        (keydown)="toggleHint($event)"
-        directiveReadingMeaning
-        [correctAnswer]="slot.correctAnswer"
-        [strategy]="slot.strategy"
-        (onCorrectAnswer)="slot.onCorrectAnswer?.($event)"
-      />
+      <mat-form-field appearance="outline">
+        <mat-label>{{ slot.placeholder }}</mat-label>
+        <input matInput
+               #inputRef
+               [attr.data-name]="slot.name"
+               [attr.autofocus]="slot.autofocus ? '' : null"
+               [formControlName]="slot.name"
+               [placeholder]="slot.placeholder"
+               (keydown)="toggleHint($event)"
+               directiveReadingMeaning
+               [correctAnswer]="slot.correctAnswer"
+               [strategy]="slot.strategy"
+               (onCorrectAnswer)="slot.onCorrectAnswer?.($event)"
+        />
+      </mat-form-field>
     </ng-container>
   </div>
 </form>

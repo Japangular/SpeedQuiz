@@ -1,4 +1,3 @@
-
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Card} from '../../answer-slots/quiz.model';
 
@@ -28,7 +27,6 @@ export class QuizSession {
   private entries: CardSessionEntry[];
   private _dirty$ = new BehaviorSubject<boolean>(false);
 
-  /** Emits true whenever the session has unsaved changes. */
   dirty$: Observable<boolean> = this._dirty$.asObservable();
 
   constructor(cards: Card[], priorState?: PersistedSessionState) {
@@ -49,9 +47,7 @@ export class QuizSession {
   }
 
   get restoredIndex(): number | undefined {
-    // Caller passes priorState.currentIndex through the constructor chain;
-    // stored externally (DeckIterator holds cursor, not the session).
-    return undefined; // overridden by factory — see SessionFactory
+    return undefined;
   }
 
   getEntry(index: number): CardSessionEntry {

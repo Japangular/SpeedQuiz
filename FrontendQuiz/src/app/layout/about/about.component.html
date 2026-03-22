@@ -1,10 +1,6 @@
 <div class="about-container">
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- PORTFOLIO MODE                              -->
-  <!-- ═══════════════════════════════════════════ -->
   <ng-container *ngIf="siteModeService.isPortfolio">
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">person</mat-icon>
@@ -125,9 +121,6 @@
 
   </ng-container>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- VTUBER FAN MODE                             -->
-  <!-- ═══════════════════════════════════════════ -->
   <ng-container *ngIf="siteModeService.isVtuberFan">
 
     <mat-card class="about-card">
@@ -209,9 +202,6 @@
 
   </ng-container>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- SHARED: Credits & Licenses (both modes)     -->
-  <!-- ═══════════════════════════════════════════ -->
   <mat-card class="about-card">
     <mat-card-title>
       <mat-icon color="primary">copyright</mat-icon>
@@ -244,5 +234,4 @@
       </p>
     </mat-card-content>
   </mat-card>
-
 </div>

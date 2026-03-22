@@ -5,6 +5,10 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {StrokeOrderKanjiComponent} from '../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
 import {WallKanji} from './kanji-wall.model';
+import {MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatInput} from '@angular/material/input';
+import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-kanji-wall',
@@ -12,6 +16,11 @@ import {WallKanji} from './kanji-wall.model';
     StrokeOrderKanjiComponent,
     NgForOf,
     FormsModule,
+    MatFormField,
+    MatIcon,
+    MatInput,
+    MatButton,
+    MatLabel
   ],
   templateUrl: './kanji-wall.component.html',
   styleUrl: './kanji-wall.component.css'

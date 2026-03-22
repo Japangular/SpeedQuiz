@@ -1,7 +1,18 @@
-<form (ngSubmit)="check(from.valueAsNumber, to.valueAsNumber)">
-  <label> From: <input type="number" #from min="0" [max]="jouyouCount"></label>
-  <label> To: <input type="number" #to min="0" [max]="jouyouCount"></label>
-  <button type="submit">Load Kanji</button>
+<form (ngSubmit)="check(from.valueAsNumber, to.valueAsNumber)" class="kanji-controls">
+  <mat-form-field appearance="outline">
+    <mat-label>From</mat-label>
+    <input matInput type="number" #from min="0" [max]="jouyouCount" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>To</mat-label>
+    <input matInput type="number" #to min="0" [max]="jouyouCount" />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit">
+    <mat-icon>grid_view</mat-icon>
+    Load Kanji
+  </button>
 </form>
 
 <div #kanjiBoard class="kanji-board">

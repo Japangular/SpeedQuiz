@@ -5,11 +5,13 @@ import {InputVerificationDirective} from '../utils/input-verification.directive'
 import {LevenshteinStrategy, RomajiConversionStrategy, ValidationStrategy} from "../utils/ValidationStrategy";
 import {QuizEvent, QuizUtils} from '../utils/QuizUtils';
 import {NgForOf} from '@angular/common';
+import {MatFormField, MatInput} from '@angular/material/input';
+import {MatLabel} from '@angular/material/form-field';
 
 @Component({
   selector: 'app-answer-slots',
   standalone: true,
-  imports: [ReactiveFormsModule, InputVerificationDirective, NgForOf],
+  imports: [ReactiveFormsModule, InputVerificationDirective, NgForOf, MatFormField, MatInput, MatFormField, MatLabel],
   templateUrl: './answer-slots.component.html',
   styleUrls: ['./answer-slots.component.css']
 })

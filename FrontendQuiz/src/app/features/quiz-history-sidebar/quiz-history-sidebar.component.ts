@@ -45,13 +45,32 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
   constructor(private quizBoard: QuizBoardService) {
   }
 
+  private historyInitialized = false;
+
   ngOnInit(): void {
     this.cardSub = this.quizBoard.card$.subscribe(card => {
       if (!card) return;
 
+      // Pre-populate once, on first card emission (session is ready by now)
+      if (!this.historyInitialized) {
+        this.historyInitialized = true;
+        const session = this.quizBoard.getSession();
+        for (const entry of session.getAllEntries()) {
+          if (entry.solvedAt && entry.card.index !== card.index) {
+            this.history.push({
+              card: entry.card,
+              expanded: false,
+              hintUsed: entry.hintUsed,
+              timestamp: entry.solvedAt,
+            });
+          }
+        }
+        this.history.sort((a, b) => a.timestamp - b.timestamp);
+      }
+
+      // Everything below is your existing code, unchanged
       this.currentIndex = card.index;
 
-      // Collapse all entries that are now "ahead" (after a hint rewind)
       for (const entry of this.history) {
         if (entry.card.index > this.currentIndex) {
           entry.expanded = false;
