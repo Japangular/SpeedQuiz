@@ -20,7 +20,6 @@ import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
 import {MatAnchor} from '@angular/material/button';
 import {Router} from '@angular/router';
 import {MatChip} from '@angular/material/chips';
-import {PaginatorComponent} from '../../widgets/paginator/paginator.component';
 
 @Component({
   selector: 'app-anki-table',

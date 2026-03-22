@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {forkJoin, Observable, catchError, of} from 'rxjs';
-import {filter, take, switchMap, map, shareReplay} from 'rxjs/operators';
+import {catchError, forkJoin, Observable, of} from 'rxjs';
+import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {DeckShelfService} from './deck-shelf.service';
 import {LocalProfile, LocalProfileService} from '../../user-store-management/local-profile.service';
@@ -13,9 +13,8 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatBadgeModule} from '@angular/material/badge';
-import {DeckInfo, DeckContent} from '../../../generated/api';
+import {DeckContent, DeckInfo} from '../../../generated/api';
 import {CardStoreService} from '../../services/card-store.service';
-import {DeckBarComponent} from '../deck-bar/deck-bar.component';
 
 export interface DeckSelection {
   deck: DeckInfo;
@@ -210,10 +209,9 @@ export class DeckShelfComponent implements OnInit {
     const properties = sources[0].content.properties;
 
     const allCards = sources.flatMap(source => {
-      const sliced = source.maxCards
+      return source.maxCards
         ? source.content.cards.slice(0, source.maxCards)
         : source.content.cards;
-      return sliced;
     });
 
     return {properties, cards: allCards};

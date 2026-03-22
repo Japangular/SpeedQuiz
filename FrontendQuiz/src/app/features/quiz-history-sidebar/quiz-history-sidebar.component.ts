@@ -22,7 +22,6 @@ interface HistoryEntry {
   imports: [
     NgForOf,
     NgIf,
-    NgClass,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,

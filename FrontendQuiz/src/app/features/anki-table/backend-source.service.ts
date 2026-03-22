@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import {AnkiPage, AnkiPageInfo, DEV_DECK_NAME, UserTableStates} from './anki-table.model';
+import {AnkiPage, AnkiPageInfo, UserTableStates} from './anki-table.model';
 import {environment} from '../../environments/environment';
 import {Observable} from 'rxjs';
 import {AnkiSourceService} from './anki-source.service';
