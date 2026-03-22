@@ -17,7 +17,6 @@ export class Diazflash {
   @Output() buttonClicked = new EventEmitter<void>();
 
   protected buttonPressed() {
-    // Emit an event instead of alerting
     this.buttonClicked.emit();
   }
 }

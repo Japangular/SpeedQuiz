@@ -12,9 +12,7 @@ export interface ExtendedCard extends Card {
 
 export function mapDeckExtended(deck: SubmissionDeck): ExtendedCard[] {
   const byType = (type: PropertyType) =>
-    Object.entries(deck.properties)
-      .filter(([_, v]) => v === type)
-      .map(([key]) => key);
+    Object.entries(deck.properties).filter(([_, v]) => v === type).map(([key]) => key);
 
   const questionKeys = byType(PropertyType.Question);
   const answerKeys = byType(PropertyType.Answer);
@@ -35,15 +33,10 @@ export function mapDeckExtended(deck: SubmissionDeck): ExtendedCard[] {
       if (c[key] !== undefined) answers[key] = c[key];
     }
 
-    // Hint (fallback: question → answers)
     const foundHintKey = hintKeys.find(key => c[key] !== undefined);
-    const hint = foundHintKey
-      ? c[foundHintKey]
-      : `${c[firstQuestionKey]} → ${Object.values(answers).join(', ')}`;
+    const hint = foundHintKey ? c[foundHintKey] : `${c[firstQuestionKey]} → ${Object.values(answers).join(', ')}`;
 
-
-    const usedKeys = new Set([...questionKeys, ...answerKeys, ...hintKeys,
-      ...imageKeys, ...svgKeys, ...audioKeys, ...hiraganaKeys, ...answerListKeys]);
+    const usedKeys = new Set([...questionKeys, ...answerKeys, ...hintKeys, ...imageKeys, ...svgKeys, ...audioKeys, ...hiraganaKeys, ...answerListKeys]);
     const info = infoKeys.filter(key => c[key] !== undefined).map(key => `${key}: ${c[key]}`).join(', ') || `Card ${index}`;
 
     const image = imageKeys.find(k => c[k] !== undefined) ? c[imageKeys[0]] : undefined;
@@ -54,6 +47,6 @@ export function mapDeckExtended(deck: SubmissionDeck): ExtendedCard[] {
       ? c[answerListKeys[0]].split(',').map((s: string) => s.trim()) : undefined;
 
     return {
-      index, level: index, subjectType: 'other', question: firstQuestionKey ? c[firstQuestionKey] : 'No question', answers, hint, info, subjectId: index,
-      image, svg, audio, hiragana, answerList,} as ExtendedCard;});
+      index, level: index, subjectType: 'other', question: firstQuestionKey ? c[firstQuestionKey] : 'No question', answers, hint, info,
+      subjectId: index, image, svg, audio, hiragana, answerList,} as ExtendedCard;});
 }

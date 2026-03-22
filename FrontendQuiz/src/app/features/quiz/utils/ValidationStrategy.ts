@@ -40,9 +40,7 @@ export class RomajiConversionStrategy implements ValidationStrategy {
 
 function normalizeAnswers(raw: string): string[] {
   return raw
-    // remove everything inside parentheses (including the parens)
     .replace(/\([^)]*\)/g, '')
-    // now split on ,・/
     .split(/[,・/]/)
     .map(ans => ans.trim())
     .filter(Boolean);

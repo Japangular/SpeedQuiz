@@ -33,8 +33,7 @@ export class ExtractCardStateService {
     this.state = null;
   }
 
-  // ── localStorage token hash methods ──
-
+  // TODO
   saveTokenHash(cache: StoredTokenCache): void {
     localStorage.setItem(TOKEN_HASH_STORAGE_KEY, JSON.stringify(cache));
 }

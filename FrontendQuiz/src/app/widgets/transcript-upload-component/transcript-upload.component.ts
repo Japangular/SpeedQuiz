@@ -74,7 +74,7 @@ export class TranscriptUploadComponent {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
       this.readFile(input.files[0]);
-      input.value = ''; // Reset the input so selecting the same file again will trigger the event
+      input.value = '';
     }
   }
 
@@ -122,7 +122,6 @@ export class TranscriptUploadComponent {
       });
     }
   }
-
 
   openSnackBar(message: string) {
     return this.snackBar.open(message, 'Close', {duration: 4000});

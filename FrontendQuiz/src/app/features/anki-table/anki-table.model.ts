@@ -26,9 +26,8 @@ export function mapToAnkiCard(json: string): AnkiCard[] {
   try {
     const parsed = JSON.parse(json);
 
-    // Ensure each object has the keys you expect
     return parsed.map((item: any, index: number) => ({
-      index: index.toString(), // assign an index if your JSON doesn't include it
+      index: index.toString(),
       question: item.question ?? '',
       reading: item.reading ?? '',
       meaning: item.meaning ?? ''

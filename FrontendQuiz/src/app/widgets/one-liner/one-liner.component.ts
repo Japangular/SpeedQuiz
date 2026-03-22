@@ -39,7 +39,6 @@ export class OneLinerComponent {
     return this._isVisible
   }
 
-  // Optionally, split the displayText into an array of characters
   get characters() {
     return Array.from(this.displayText);
   }

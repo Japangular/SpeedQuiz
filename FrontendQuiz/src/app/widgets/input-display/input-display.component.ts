@@ -19,25 +19,18 @@ import {MatFormField, MatInput} from '@angular/material/input';
 })
 export class InputDisplayComponent implements OnInit, OnDestroy {
   kanjiControl = new FormControl('');
-  debouncedKanji = ''; // This is bound to [japanese]
+  debouncedKanji = '';
   private sub: Subscription | undefined;
 
   ngOnInit() {
-    this.sub = this.kanjiControl.valueChanges
-      .pipe(
-        debounceTime(300),         // delay 300ms after typing stops
-        distinctUntilChanged()     // ignore same values
-      )
-      .subscribe(value => {
-        this.debouncedKanji = value || '';
-      });
+    this.sub = this.kanjiControl.valueChanges.pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(value => {this.debouncedKanji = value || '';});
   }
 
   ngOnDestroy() {
     this.sub?.unsubscribe();
   }
 
-  // Optional: dummy handler if you want to ignore emitStrokeOrderComplete
   setWk(wk: any, result: any) {
     // No-op
   }

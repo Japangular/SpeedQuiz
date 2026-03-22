@@ -38,17 +38,12 @@ export class InputVerificationDirective implements OnInit, OnDestroy {
     ).subscribe(
       inputValue => {
 
-        // Apply transformation if available
-        const transformedValue = this.strategy.transformInput
-          ? this.strategy.transformInput(inputValue)
-          : inputValue;
+        const transformedValue = this.strategy.transformInput ? this.strategy.transformInput(inputValue) : inputValue;
 
-        // Update the input field if transformed
         if (transformedValue !== inputValue) {
           this.el.nativeElement.value = transformedValue;
         }
 
-        // Perform validation and emit result
         const isCorrect = this.strategy.validate(transformedValue, this.correctAnswer);
         this.onCorrectAnswer.emit(isCorrect);
       }

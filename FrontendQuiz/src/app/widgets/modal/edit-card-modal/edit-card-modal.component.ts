@@ -22,7 +22,7 @@ export class EditCardModalComponent {
     @Inject(MAT_DIALOG_DATA) public data: data_card
   ) {
     console.log("data in editCardModal: " + JSON.stringify(data));
-    // Initialize form with injected card data
+
     this.form = this.fb.group({
       question: this.fb.control<string>(data.card.question ?? '', {nonNullable: true}),
       answers: this.fb.group(

@@ -6,7 +6,7 @@ export interface CardSessionEntry {
   hintUsed: boolean;
   attempts: number;
   solvedWithoutHint: boolean;
-  solvedAt?: number;        // epoch ms — undefined until solved
+  solvedAt?: number;
   lastSeenAt?: number;
 }
 

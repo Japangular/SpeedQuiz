@@ -32,13 +32,10 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Deferred to next microtask — setting this synchronously in ngAfterViewInit
     // would change SideNavComponent's [opened] binding in the same CD cycle (NG0100).
-    Promise.resolve().then(() => {
-      this.contextPanel.set(this.historyPanel, 'history', 'Recent cards');
-    });
+    Promise.resolve().then(() => {this.contextPanel.set(this.historyPanel, 'history', 'Recent cards');});
   }
 
   ngOnDestroy(): void {
-    // Clear panel when navigating away from quiz
     this.contextPanel.clear();
   }
 

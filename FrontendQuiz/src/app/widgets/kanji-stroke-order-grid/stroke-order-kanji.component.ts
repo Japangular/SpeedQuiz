@@ -21,7 +21,7 @@ export class StrokeOrderKanjiComponent {
   japanese?: string;
 
   @Input()
-  isWrapContent: boolean = false; // alter this value to change behavior
+  isWrapContent: boolean = false;
 
   @Output()
   emitStrokeOrderComplete: EventEmitter<boolean> = new EventEmitter<boolean>();

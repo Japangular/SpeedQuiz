@@ -33,8 +33,6 @@ export class KanjiStrokeOrderDirective implements AfterViewInit {
     this.renderer.setStyle(this.el.nativeElement, 'text-align', 'center');
     this.renderer.setStyle(this.el.nativeElement, 'font-size', '102px');
 
-    //this.renderer.setStyle(this.el.nativeElement, 'transform', 'translateY(2px)');
-    // Add this after your other renderer calls
     let children = this.el.nativeElement.children;
   }
 

@@ -22,22 +22,18 @@ export class SessionSyncService implements OnDestroy {
   }
 
   async loadPriorState(deckId: string): Promise<PersistedSessionState | undefined> {
-    // Fast path — localStorage
     const local = this.readLocal(deckId);
     if (local) return local;
 
-    // Slow path — DB
     try {
       const states = await this.quizApi.getCardStates(deckId).toPromise();
       if (!states || states.length === 0) return undefined;
-
 
       const firstState = states[0];
       if (!firstState?.state) return undefined;
 
       const parsed = JSON.parse(firstState.state) as PersistedSessionState;
 
-      // Backfill localStorage so subsequent F5s are instant
       this.writeLocal(deckId, parsed);
 
       return parsed;
@@ -61,7 +57,6 @@ export class SessionSyncService implements OnDestroy {
       filter(dirty => dirty),
       debounceTime(SessionSyncService.DEBOUNCE_MS),
       tap(() => {
-        // 5 s after last change — iterator is idle, index is correct
         this.writeLocal(deckId, session.serialize(getCurrentIndex()));
       }),
       switchMap(() => {

@@ -33,11 +33,11 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
   strokeOrderComplete: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   svgContent: any;
-  private strokeNumbersVisible: boolean = true; // Initial visibility state
+  private strokeNumbersVisible: boolean = true;
   private correctOrder: string[] = [];
   private currentIndex: number = 0;
 
-  private strokeNumbersId: string = ""; // Store the stroke numbers ID
+  private strokeNumbersId: string = "";
   private strokeIdValue = "";
 
   constructor(

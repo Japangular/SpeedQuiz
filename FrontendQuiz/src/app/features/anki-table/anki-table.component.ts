@@ -87,8 +87,6 @@ export class AnkiTableComponent implements AfterViewInit {
     const offset = this.pageIndex * this.pageSize;
     this.anki.getPage(this.pageSize, offset, this.questionFilterValue).subscribe(o => {
       this.ankiPage.set(o);
-
-      // Delay to wait for view to update
       setTimeout(() => this.autoSetPageSize(), 5);
     });
   }
@@ -97,16 +95,14 @@ export class AnkiTableComponent implements AfterViewInit {
     this.anki.getIgnoredAnkiRows().subscribe(tableStatus => tableStatus.rowIds.forEach(rowId => this.ignoredRows.add(rowId)))
   }
 
-  get questionFilterValue(){
+  get questionFilterValue() {
     return this._questionFilterValue;
   }
 
-  set questionFilterValue(filterValue: string){
+  set questionFilterValue(filterValue: string) {
     this._questionFilterValue = filterValue;
   }
 
-
-  // Filter out ignored rows if the Ignore checkbox is selected
   get filteredData() {
     const pageData = this.ankiPage()?.data || [];
 
@@ -117,13 +113,12 @@ export class AnkiTableComponent implements AfterViewInit {
       filtered = filtered.filter(row => !this.ignoredRows.has(row.index));
     }
 
-    // Apply search filter on `question` column
     if (this.questionFilterValue) {
       const term = this.questionFilterValue.toLowerCase();
       const f1 = filtered.filter(row =>
         row.question?.toLowerCase().includes(term)
       );
-      if(f1.length > 1){
+      if (f1.length > 1) {
         filtered = f1;
       }
     }
@@ -131,14 +126,11 @@ export class AnkiTableComponent implements AfterViewInit {
     return filtered;
   }
 
-  // Handle change in Ignore column checkbox
   onIgnoreColumnToggle(event: any) {
     this.ignoredSelected = event.checked;
   }
 
   autoSetPageSize() {
-    // Use getBoundingClientRect().top to automatically account for everything above
-    // this component (toolbar, stepper header, mat-card, etc.) regardless of context
     const tableTop = this.elRef.nativeElement.getBoundingClientRect().top;
     const fullPageHeight = window.innerHeight - tableTop;
 
@@ -147,7 +139,6 @@ export class AnkiTableComponent implements AfterViewInit {
     const spacingBuffer = this.bottomBuffer;
 
     const availableHeight = fullPageHeight - paginatorHeight - headerRowHeight - spacingBuffer;
-
     const rowHeight = this.rowElements.first?.nativeElement?.offsetHeight;
 
     if (!rowHeight) {
@@ -174,7 +165,7 @@ export class AnkiTableComponent implements AfterViewInit {
     const offset = this.pageIndex * this.pageSize;
     this.anki.getPage(this.pageSize, offset, this.questionFilterValue).subscribe(page => {
       this.ankiPage.set(page);
-      if(this.pageSize > page.data.length){
+      if (this.pageSize > page.data.length) {
         this.pageSize = page.data.length;
       }
     });
@@ -220,7 +211,8 @@ export class AnkiTableComponent implements AfterViewInit {
       this.ignoredRows.delete(row.index);
     }
   }
-  isIgnoredSelected(){
+
+  isIgnoredSelected() {
     return this.ignoredSelected;
   }
 
@@ -253,26 +245,26 @@ export class AnkiTableComponent implements AfterViewInit {
   }
 
   learnSelected() {
-    if(this.selectedRows.size == 0){
+    if (this.selectedRows.size == 0) {
       return;
     }
 
     this.anki.learnSelected(this.extractSelectedRows());
     this.router.navigate(["/quiz"])
       .then(result => {
-        console.log('Navigation result:', result); // Should log 'true' if successful
+        console.log('Navigation result:', result);
       })
       .catch(err => {
-        console.error('Navigation failed:', err); // Logs error if navigation fails
+        console.error('Navigation failed:', err);
       });
   }
 
   persistIgnoredAnkiRows() {
-    const rowIdsToDelete = Array.from(this.ignoredRows); // convert Set to array
+    const rowIdsToDelete = Array.from(this.ignoredRows);
     this.anki.persistIgnoredAnkiRows(rowIdsToDelete).subscribe(message => console.log("persist ignored anki rows concluded with : " + message));
   }
 
-  extractSelectedRows(): AnkiCard[]{
+  extractSelectedRows(): AnkiCard[] {
     const pageData = this.ankiPage()?.data || [];
     const selectedIds = Array.from(this.selectedRows);
     const selected = pageData.filter(d => selectedIds.includes(d.index));
@@ -284,13 +276,12 @@ export class AnkiTableComponent implements AfterViewInit {
     const input = event.target as HTMLInputElement;
     this.questionFilterValue = input.value.trim().toLowerCase();
 
-    // Optional: trigger table render
     this.table.renderRows();
   }
 
   applyQuestionFilterFromClick(charOrWord: string) {
-    if(charOrWord && charOrWord.trim().length > 0){
-      if(this.questionFilterValue !== charOrWord){
+    if (charOrWord && charOrWord.trim().length > 0) {
+      if (this.questionFilterValue !== charOrWord) {
         this.questionFilterValue = charOrWord;
         this.anki.applyQuestionFilter(charOrWord);
         this.loadPage(charOrWord);
@@ -302,7 +293,7 @@ export class AnkiTableComponent implements AfterViewInit {
   }
 
   clearQuestionFilter() {
-    if(this.questionFilterValue === ""){
+    if (this.questionFilterValue === "") {
       this.highlightQuestionColumn = true;
       setTimeout(() => {
         this.highlightQuestionColumn = false;
@@ -317,16 +308,16 @@ export class AnkiTableComponent implements AfterViewInit {
 
   _highlightQuestionColumn = false;
 
-  set highlightQuestionColumn(b: boolean){
+  set highlightQuestionColumn(b: boolean) {
     this._highlightQuestionColumn = b;
   }
 
-  get highlightQuestionColumn(){
+  get highlightQuestionColumn() {
     return this._highlightQuestionColumn;
   }
 
   getFilterChipText() {
-    if(this.questionFilterValue.trim().length === 0){
+    if (this.questionFilterValue.trim().length === 0) {
       return "Click a kanji in the question column to filter";
     } else {
       return "All questions that contain " + this.questionFilterValue + " kanji";

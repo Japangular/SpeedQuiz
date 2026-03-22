@@ -34,7 +34,6 @@ export class KanjiWallComponent implements AfterViewInit {
 
   cols = 0;
   rows = 0;
-
   oldFrom = 0;
   oldTo = 0;
 
@@ -42,13 +41,8 @@ export class KanjiWallComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // 1) Load data
     this.dict.parseJouyouKanjis().subscribe(() => this.check(0, 8));
-
-    // 2) When the *ngFor finishes (or changes), measure again
     this.kanjiRefs.changes.subscribe(() => this.updateLayout());
-
-    // 3) Just in case they already exist on first pass
     setTimeout(() => this.updateLayout());
   }
 
@@ -61,7 +55,6 @@ export class KanjiWallComponent implements AfterViewInit {
     const board = this.boardRef?.nativeElement;
     const firstEl = this.kanjiRefs?.first?.nativeElement;
 
-    // Guard: if ngFor hasn’t created any child yet, bail out
     if (!board || !firstEl) return;
 
     const boardRect = board.getBoundingClientRect();
@@ -86,11 +79,9 @@ export class KanjiWallComponent implements AfterViewInit {
     }
     this.jouyouCount = this.dict.jouyou().length;
 
-    // Render a first batch so there is at least one element to measure
     const to = Math.min(from + fallbackCount, this.jouyouCount);
     this.wallKanjis = this.dict.jouyou().slice(from, to).map(k => ({kanji: k.kanji, isSolved: false}));
 
-    // After DOM paints, measure and (optionally) refetch the exact amount
     setTimeout(() => {
       this.updateLayout();
 
@@ -98,11 +89,7 @@ export class KanjiWallComponent implements AfterViewInit {
       if (targetCount > 0 && targetCount !== this.wallKanjis.length) {
         const to2 = Math.min(from + targetCount, this.jouyouCount);
         this.wallKanjis = this.dict.jouyou().slice(from, to2).map(k => ({kanji: k.kanji, isSolved: false}));
-
         console.log(this.wallKanjis.length);
-
-        // After replacing the list, Angular will re-render; the `kanjiRefs.changes`
-        // subscription will fire and `updateLayout()` will run again automatically.
       }
     });
   }
@@ -111,13 +98,13 @@ export class KanjiWallComponent implements AfterViewInit {
     if (event.shiftKey) {
       this.router.navigate(['/quizCardApp', {outlets: {leftOutlet: ['kanjiDetails', wk.kanji]}}])
         .then(result => {
-          console.log('Navigation result:', result); // Should log 'true' if successful
+          console.log('Navigation result:', result);
         })
         .catch(err => {
-          console.error('Navigation failed:', err); // Logs error if navigation fails
+          console.error('Navigation failed:', err);
         });
 
-      event.stopPropagation(); // optional: prevent bubbling
+      event.stopPropagation();
     }
   }
 }

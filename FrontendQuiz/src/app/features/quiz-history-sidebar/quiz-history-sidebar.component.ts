@@ -51,7 +51,6 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
     this.cardSub = this.quizBoard.card$.subscribe(card => {
       if (!card) return;
 
-      // Pre-populate once, on first card emission (session is ready by now)
       if (!this.historyInitialized) {
         this.historyInitialized = true;
         const session = this.quizBoard.getSession();
@@ -68,7 +67,6 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
         this.history.sort((a, b) => a.timestamp - b.timestamp);
       }
 
-      // Everything below is your existing code, unchanged
       this.currentIndex = card.index;
 
       for (const entry of this.history) {

@@ -12,7 +12,7 @@ import {map} from 'rxjs/operators';
 export class BackendSourceService extends AnkiSourceService {
   private apiUrl = `${environment.apiBaseUrl}`;
   private deckId = 'anki-local';
-  private ownerId = crypto.randomUUID(); // temporary — replace with real session later
+  private ownerId = crypto.randomUUID(); // TODO temporary — replace with real session later
 
   constructor(private http: HttpClient) {
     super();
@@ -30,7 +30,6 @@ export class BackendSourceService extends AnkiSourceService {
   }
 
   getTotal(): Observable<AnkiPageInfo> {
-    // Total comes from the page response now — fetch one page to get it
     return this.getPage(1, 0).pipe(
       map(page => page.info)
     );

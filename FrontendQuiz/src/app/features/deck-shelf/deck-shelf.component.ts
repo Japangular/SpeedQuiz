@@ -41,7 +41,6 @@ export interface DeckGroup {
     MatButtonModule,
     MatCheckboxModule,
     MatBadgeModule,
-    DeckBarComponent,
   ],
   templateUrl: './deck-shelf.component.html',
   styleUrl: './deck-shelf.component.css'
@@ -119,9 +118,7 @@ export class DeckShelfComponent implements OnInit {
           deckId: deck.id,
           deckName: deck.name
         }));
-        // Pass deck.id so QuizBoardService can persist session state against it
         this.cardStore.setCurrentDeck(provisioned, deck.name, deck.id);
-
         this.router.navigate(['/quiz']);
       },
       error: (err) => {

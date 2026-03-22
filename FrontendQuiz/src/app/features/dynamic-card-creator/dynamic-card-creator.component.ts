@@ -86,19 +86,15 @@ export class DynamicCardCreatorComponent implements OnInit {
   deleteProperty(index: number): void {
     const propertyName = this.properties.at(index).value;
 
-    // Remove from FormArray
     this.properties.removeAt(index);
 
-    // Remove from displayedColumns (for the table or UI display)
     const columnIndex = this.dynamicDeck.displayedColumns.indexOf(propertyName);
     if (columnIndex !== -1) {
       this.dynamicDeck.displayedColumns.splice(columnIndex, 1);
     }
 
-    // Remove from deckForm (remove the form control for the property)
     (this.dynamicDeck.deckForm as FormGroup).removeControl(propertyName);
 
-    // Notify the dynamic deck of the updated columns
     this.deckProperty.nextDynamicDeck(this.dynamicDeck);
   }
 
@@ -143,15 +139,14 @@ export class DynamicCardCreatorComponent implements OnInit {
   }
 
   clearPropertyInput(): void {
-    // Reset the specific property input field when the label is clicked
-    const propertyInputControl = this.dynamicDeck.deckForm.get('propertyName'); // adjust to the actual form control name
+    const propertyInputControl = this.dynamicDeck.deckForm.get('propertyName');
     if (propertyInputControl) {
       propertyInputControl.setValue('');
     }
   }
 
   clearInput(inputField: HTMLInputElement): void {
-    inputField.value = ''; // Reset the value of the field directly
+    inputField.value = '';
   }
 
   nextStep(step: number): void {

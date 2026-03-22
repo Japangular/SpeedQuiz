@@ -42,12 +42,11 @@ export class QuizBoardService implements OnDestroy {
     private deckShelfService: DeckShelfService,
     private localService: LocalProfileService,
   ) {
-    // Create a placeholder session so card$ is defined immediately
+
     this.session = new QuizSession([]);
     this.deckIterator = new DeckIterator(this.session, this.modal, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
 
-    // React to new decks pushed by DeckShelf / ExtractFromUrl / AnkiTable
     this.deckSub = this.store._currentDeck$.subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
       this.initSession(deck);
@@ -55,12 +54,12 @@ export class QuizBoardService implements OnDestroy {
 
     const last = localStorage.getItem('japangular_last_deck');
     if (last && this.store.currentDeck.cards.length === 0) {
-      const { deckId, deckName } = JSON.parse(last);
+      const {deckId, deckName} = JSON.parse(last);
       const ownerId = localService.getToken();
-      if(ownerId)
-      this.deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
-        this.store.setCurrentDeck(content, deckName, deckId);
-      });
+      if (ownerId)
+        this.deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
+          this.store.setCurrentDeck(content, deckName, deckId);
+        });
     }
   }
 

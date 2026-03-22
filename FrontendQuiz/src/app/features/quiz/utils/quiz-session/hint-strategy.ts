@@ -26,7 +26,6 @@ export class NoRewindStrategy implements HintStrategy {
   readonly name = 'noRewind';
 
   computeResumeIndex(currentIndex: number, _startPos: number, _deckLength: number): number {
-    // Stay on the same card — proceed() will advance by 1 as normal
     return currentIndex;
   }
 }

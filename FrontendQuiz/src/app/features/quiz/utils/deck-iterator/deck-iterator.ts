@@ -48,7 +48,6 @@ export class DeckIterator implements DeckCommand {
 
     this.session.recordSolved(this.index, usedHint);
 
-    // Determine next position
     if (usedHint && this.pendingResumeIndex >= 0) {
       this.index = this.pendingResumeIndex;
       this.pendingResumeIndex = -1;

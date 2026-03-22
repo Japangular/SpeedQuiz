@@ -23,8 +23,6 @@ export interface DeckCommand {
 
 export interface DeckState {
   getCard$(): Observable<Card>;
-
-  // maybe add history$, currentIndex$, etc. in the future
 }
 
 export const DECK_ITERATOR_EXAMPLE_CARDS = [
