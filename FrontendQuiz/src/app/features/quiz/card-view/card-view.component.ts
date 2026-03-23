@@ -19,8 +19,6 @@ import {hasKanji} from './card-view.model';
     NgIf,
     AsyncPipe,
     FilterAnswersPipe,
-    OneLinerComponent,
-    StrokeOrderKanjiComponent,
   ],
   templateUrl: './card-view.component.html',
   styleUrl: './card-view.component.css'

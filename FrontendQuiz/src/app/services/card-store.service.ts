@@ -3,9 +3,11 @@ import {QUIZ_API_TOKEN} from '../interfaces/QuizApi';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {UserGeneratedDeck, UserGeneratedDeckSubmissionService} from '../features/dynamic-card-creator/submission-deck.model';
 import {PropertyType, DeckContent} from '../models/deck.model';
-import {map} from 'rxjs/operators';
-import {DeckItem} from '../features/deck-table/deck/deck-table.model';
 import {QuizApi} from '../interfaces/SubmissionDeckApi';
+
+export interface DeckItem {
+  [key: string]: string;
+}
 
 export interface HeaderTable {
   deckItems: DeckItem[],
@@ -20,7 +22,7 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
   currentDeckId: string | undefined;
   currentDeck: DeckContent = {properties: {}, cards: []};
   _currentDeck: BehaviorSubject<DeckContent> = new BehaviorSubject(this.currentDeck);
-  _currentDeck$: Observable<DeckContent> = this._currentDeck.asObservable();
+  currentDeck$: Observable<DeckContent> = this._currentDeck.asObservable();
 
   constructor(@Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
   }
@@ -55,25 +57,7 @@ export class CardStoreService implements UserGeneratedDeckSubmissionService {
     this.setCurrentDeck({properties: deck.properties, cards: deck.cards});
     this.sendCurrentDeck();
   }
-
-  switchDeck(deckId: string): Observable<HeaderTable>  {
-    return this.quizApi.loadDeck(deckId).pipe(
-      map(deck => mapDeckContentToDeckItem(deck))
-    );
-  }
 }
 
-export function mapDeckContentToDeckItem(deckContent: DeckContent): HeaderTable {
-  const displayedColumns = Object.keys(deckContent.properties);
-  const deckItems: DeckItem[] = deckContent.cards.map((card: Record<string, string>) => {
-    const item: DeckItem = {};
-    displayedColumns.forEach(key => {
-      item[key] = card[key] ?? '';
-    });
-    return item;
-  });
-
-  return {deckItems, displayedColumns};
-}
 
 

@@ -15,7 +15,7 @@ export class DeckModalComponent {
   currentDeck$;
 
   constructor(private store: CardStoreService) {
-    this.currentDeck$ = this.store._currentDeck$
+    this.currentDeck$ = this.store.currentDeck$
   }
 
 }

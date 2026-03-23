@@ -10,9 +10,11 @@ import {BASE_PATH} from '../generated/api';
 import {INJECTED_QUIZ_BACKEND_API} from './interfaces/QuizApi';
 import {TokenInterceptorService} from './user-store-management/token-interceptor.service';
 import {ErrorInterceptor} from './interceptor/ErrorInterceptor';
+import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideAnimationsAsync(),
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     INJECTED_QUIZ_API,

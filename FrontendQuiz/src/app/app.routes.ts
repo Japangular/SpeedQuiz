@@ -2,7 +2,6 @@ import {Router, Routes} from '@angular/router';
 import {DynamicCardCreatorComponent} from './features/dynamic-card-creator/dynamic-card-creator.component';
 import {SideNavComponent} from './layout/side-nav/side-nav.component';
 import {AboutComponent} from './layout/about/about.component';
-import {DeckComponent} from './features/deck-table/deck/deck.component';
 import {QuizBoardComponent} from './features/quiz/quiz-board/quiz-board.component';
 import {JapaneseDictComponent} from './features/dict/japanese-dict/japanese-dict.component';
 import {AnkiTableComponent} from './features/anki-table/anki-table.component';
@@ -29,10 +28,6 @@ export const routes: Routes = [
           return router.createUrlTree([last ? '/quiz' : '/deckShelf']);
         }],
         component: DeckShelfComponent
-      },
-      { path: 'table',
-        component: DeckComponent,
-        data: {label: 'Table', icon: 'table_chart'}
       },
       {
         path: 'cardCreator',
@@ -83,7 +78,6 @@ export const routes: Routes = [
         data: {label: 'DeckShelf', icon: 'view_quilt'}
       },
 
-      // pinned to bottom
       {
         path: 'about',
         component: AboutComponent,

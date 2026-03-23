@@ -10,12 +10,16 @@ import {AnkiCard} from '../../anki-table/anki-table.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {
   BackToFirstStrategy,
-  ByIndexStrategy, createHintStrategy, createSortStrategy,
+  ByIndexStrategy,
+  createHintStrategy,
+  createSortStrategy,
   HintStrategy,
-  HintStrategyName, PersistedSessionState,
+  HintStrategyName,
+  PersistedSessionState,
   QuizSession,
   SessionSyncService,
-  SortStrategy, SortStrategyName
+  SortStrategy,
+  SortStrategyName
 } from '../utils/quiz-session';
 import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
 import {LocalProfileService} from '../../../user-store-management/local-profile.service';
@@ -46,7 +50,7 @@ export class QuizBoardService implements OnDestroy {
     this.deckIterator = new DeckIterator(this.session, this.modal, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
 
-    this.deckSub = this.store._currentDeck$.subscribe(deck => {
+    this.deckSub = this.store.currentDeck$.subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
       this.initSession(deck);
     });

@@ -1,17 +1,15 @@
-import {Component, inject, OnInit} from '@angular/core';
-import { AsyncPipe } from '@angular/common';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { CardStoreService } from '../../services/card-store.service';
+import {Component, inject} from '@angular/core';
+import {AsyncPipe} from '@angular/common';
+import {MatToolbarModule} from '@angular/material/toolbar';
+import {MatIconModule} from '@angular/material/icon';
+import {MatChipsModule} from '@angular/material/chips';
+import {CardStoreService} from '../../services/card-store.service';
 import {map, shareReplay} from 'rxjs/operators';
 import {MatBadge} from '@angular/material/badge';
-import {MatCard, MatCardAvatar, MatCardContent, MatCardHeader, MatCardSubtitle, MatCardTitle} from '@angular/material/card';
-import {Observable, of} from 'rxjs';
+import {MatCard, MatCardAvatar, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {DeckContent, PropertyType} from '../../../generated/api';
-import {MatList, MatListItem} from '@angular/material/list';
 import {MatIconButton} from '@angular/material/button';
-import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
   selector: 'app-deck-bar',
@@ -22,15 +20,10 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
     MatChipsModule,
     MatBadge,
     MatCard,
-    MatCardHeader,
     MatCardTitle,
-    MatCardSubtitle,
-    MatList,
-    MatListItem,
     MatIconButton,
     MatMenuTrigger,
     MatMenu,
-    MatMenuItem,
     MatCardContent,
     MatCardAvatar,
   ],
@@ -40,7 +33,7 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 export class DeckBarComponent {
   private store = inject(CardStoreService);
 
-  deck$ = this.store._currentDeck$.pipe(
+  deck$ = this.store.currentDeck$.pipe(
     map(deck => ({
       name: this.store.currentDeckName,
       cards: deck.cards,
