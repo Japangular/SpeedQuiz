@@ -20,10 +20,7 @@ import {hasKanji} from './card-view.model';
     AsyncPipe,
     FilterAnswersPipe,
     OneLinerComponent,
-    OneLinerComponent,
     StrokeOrderKanjiComponent,
-    StrokeOrderKanjiComponent,
-    StrokeOrderKanjiComponent
   ],
   templateUrl: './card-view.component.html',
   styleUrl: './card-view.component.css'
@@ -52,12 +49,13 @@ export class CardViewComponent {
         break;
       case QuizEvent.HINT_PRESSED:
         this.deckIteratorService.openHintModal(currentCard);
-
     }
   }
 
   isJapanese(currentCard: Card) {
-    return currentCard.subjectType !== 'KANA_VOCABULARY' && currentCard.subjectType !== 'RADICAL' && hasKanji(currentCard.question);
+    return currentCard.subjectType !== 'KANA_VOCABULARY'
+      && currentCard.subjectType !== 'RADICAL'
+      && hasKanji(currentCard.question);
   }
 
   handleStrokeOrderComplete() {

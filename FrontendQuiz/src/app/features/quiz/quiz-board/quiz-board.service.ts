@@ -23,7 +23,6 @@ import {LocalProfileService} from '../../../user-store-management/local-profile.
 @Injectable({
   providedIn: 'root'
 })
-@Injectable()
 export class QuizBoardService implements OnDestroy {
   card$!: Observable<Card>;
 
@@ -175,7 +174,9 @@ export class QuizBoardService implements OnDestroy {
     this.deckIterator.replaceSession(this.session, resumeIndex);
 
     if (deckId) {
-      this.sessionSync.startSync(deckId, this.session, () => this.deckIterator.getCurrentIndex(),);
+      this.sessionSync.startSync(
+        deckId, this.session, () => this.deckIterator.getCurrentIndex()
+      );
     }
   }
 

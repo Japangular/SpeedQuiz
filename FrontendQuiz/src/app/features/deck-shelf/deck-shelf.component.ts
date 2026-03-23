@@ -48,9 +48,7 @@ export class DeckShelfComponent implements OnInit {
   deckGroups$!: Observable<DeckGroup[]>;
   error: string | null = null;
   loadingDeckId: string | null = null;
-
   multiSelectMode = false;
-
   selectedDecks: Map<string, DeckSelection> = new Map();
 
   private static readonly INITIAL_BATCH_SIZE = 30;

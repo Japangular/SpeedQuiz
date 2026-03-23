@@ -92,7 +92,4 @@ export const routes: Routes = [
       }
     ]
   },
-
-  // fallback
-  {path: '', redirectTo: '/table', pathMatch: 'full'}
 ];
