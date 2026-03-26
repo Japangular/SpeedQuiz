@@ -1,6 +1,5 @@
 import {Injectable, OnDestroy} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
-import {Card, mapDeck} from '../answer-slots/quiz.model';
 import {CardStoreService} from '../../../services/card-store.service';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
@@ -23,6 +22,7 @@ import {
 } from '../utils/quiz-session';
 import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
 import {LocalProfileService} from '../../../user-store-management/local-profile.service';
+import {Card, mapDeck} from '../model/quiz.model';
 
 @Injectable({
   providedIn: 'root'

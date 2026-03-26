@@ -4,7 +4,7 @@ import {CommonModule} from '@angular/common';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
-import {Card} from '../../../features/quiz/answer-slots/quiz.model';
+import {Card} from '../../../features/quiz/model/quiz.model';
 
 @Component({
   selector: 'app-edit-card-modal',

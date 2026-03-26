@@ -1,23 +1,15 @@
-import {Card} from '../../answer-slots/quiz.model';
 import {Observable} from 'rxjs';
+import {Card} from '../../model/quiz.model';
 
 export interface DeckCommand {
   initialCard(): Card;
-
   getCard$(): Observable<Card>;
-
   proceed(withoutHelp?: boolean): void;
-
   nextCard(): void;
-
   previousCard(): void;
-
   useHint(): void;
-
   setAsStartPoint(): void;
-
   toggleCardType(cardType?: string): void;
-
   jumpTo(predicate: (card: Card) => boolean): void;
 }
 

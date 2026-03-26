@@ -1,6 +1,6 @@
-import {Card} from '../../answer-slots/quiz.model';
 import {SubmissionDeck} from '../../../../models/deck.model';
 import {PropertyType} from '../../../../../generated/api';
+import {Card} from '../../model/quiz.model';
 
 export interface ExtendedCard extends Card {
   image?: string;
@@ -48,5 +48,7 @@ export function mapDeckExtended(deck: SubmissionDeck): ExtendedCard[] {
 
     return {
       index, level: index, subjectType: 'other', question: firstQuestionKey ? c[firstQuestionKey] : 'No question', answers, hint, info,
-      subjectId: index, image, svg, audio, hiragana, answerList,} as ExtendedCard;});
+      subjectId: index, image, svg, audio, hiragana, answerList,
+    } as ExtendedCard;
+  });
 }

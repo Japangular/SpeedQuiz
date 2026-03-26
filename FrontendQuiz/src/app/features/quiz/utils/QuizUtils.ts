@@ -1,6 +1,6 @@
 import {FormControl, FormGroup} from "@angular/forms";
 import {ElementRef, EventEmitter, QueryList} from "@angular/core";
-import {AnswerHandler, QuizAnswerSlot} from '../answer-slots/quiz.model';
+import {AnswerHandler, QuizAnswerSlot} from '../model/quiz.model';
 
 export abstract class QuizUtils implements AnswerHandler{
   abstract emitQuizEvent: EventEmitter<QuizEvent>;

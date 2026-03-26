@@ -3,7 +3,7 @@ import {ModalService} from '../../../../widgets/modal/modal.service';
 import {DeckCommand} from './deck-iterator.model';
 import {QuizSession} from '../quiz-session';
 import {BackToFirstStrategy, HintStrategy, ReinsertLaterStrategy} from '../quiz-session';
-import {Card} from '../../answer-slots/quiz.model';
+import {Card} from '../../model/quiz.model';
 
 export class DeckIterator implements DeckCommand {
   private cardSubject = new ReplaySubject<Card>(1);

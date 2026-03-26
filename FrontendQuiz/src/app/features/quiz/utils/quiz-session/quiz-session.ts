@@ -1,5 +1,5 @@
 import {BehaviorSubject, Observable} from 'rxjs';
-import {Card} from '../../answer-slots/quiz.model';
+import {Card} from '../../model/quiz.model';
 
 export interface CardSessionEntry {
   card: Card;

@@ -1,9 +1,21 @@
 <div class="quizBoard">
-  <ng-container><app-quiz-action-bar></app-quiz-action-bar><app-deck-bar></app-deck-bar></ng-container>
-  <app-card-view [enableZoom]="true"></app-card-view>
+  <app-deck-bar />
+
+  @if (currentSlots.length > 0) {
+    <app-slot-group
+      [slots]="currentSlots"
+      (allSolved)="onCardSolved()"
+      (labelClicked)="onLabelClicked($event)"
+      (keydown)="onKeydown($event)" />
+  } @else {
+    <div class="empty-quiz-state">
+      <mat-icon>school</mat-icon>
+      <p>No deck loaded. Pick one from the shelf to start.</p>
+      <a mat-raised-button color="primary" routerLink="/deckShelf">Open deck shelf</a>
+    </div>
+  }
 </div>
 
-<!-- This template is NOT rendered here — it's picked up by SideNavComponent -->
 <ng-template #historyPanel>
-  <app-quiz-history-sidebar></app-quiz-history-sidebar>
+  <app-quiz-history-sidebar />
 </ng-template>

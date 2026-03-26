@@ -1,5 +1,5 @@
 import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -7,7 +7,7 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FormsModule} from '@angular/forms';
 import {Subscription} from 'rxjs';
 import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
-import {Card} from '../quiz/answer-slots/quiz.model';
+import {Card} from '../quiz/model/quiz.model';
 
 interface HistoryEntry {
   card: Card;

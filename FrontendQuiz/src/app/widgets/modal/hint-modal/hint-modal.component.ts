@@ -3,7 +3,7 @@ import {MAT_DIALOG_DATA, MatDialog, MatDialogModule} from '@angular/material/dia
 import {MatButtonModule} from "@angular/material/button";
 import {CommonModule} from "@angular/common";
 import {EditCardModalComponent} from '../edit-card-modal/edit-card-modal.component';
-import {Card} from '../../../features/quiz/answer-slots/quiz.model';
+import {Card} from '../../../features/quiz/model/quiz.model';
 
 @Component({
   selector: 'app-hint-modal',

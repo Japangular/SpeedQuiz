@@ -1,7 +1,8 @@
-import {Card} from '../../answer-slots/quiz.model';
+import {Card} from '../../model/quiz.model';
 
 export interface SortStrategy {
   readonly name: string;
+
   sort(cards: Card[]): Card[];
 }
 
@@ -44,7 +45,8 @@ export class WeakCardsFirstStrategy implements SortStrategy {
   constructor(
     private getHintUsed: (cardIndex: number) => boolean,
     private getSolvedWithoutHint: (cardIndex: number) => boolean
-  ) {}
+  ) {
+  }
 
   sort(cards: Card[]): Card[] {
     return [...cards].sort((a, b) => {
