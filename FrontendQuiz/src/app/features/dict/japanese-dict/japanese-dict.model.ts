@@ -1,7 +1,3 @@
-// ═══════════════════════════════════════════════════════════════
-//  Dictionary entry types — matches backend EntryDto.java
-// ═══════════════════════════════════════════════════════════════
-
 export interface EntryDto {
   entSeq: number;
   kanji: string[];
@@ -16,10 +12,6 @@ export interface SenseDto {
   antonyms: string[];
   misc: string[];
 }
-
-// ═══════════════════════════════════════════════════════════════
-//  Kanji dictionary types — unchanged
-// ═══════════════════════════════════════════════════════════════
 
 export interface KanjiDTO {
   kanji: string;
@@ -38,10 +30,6 @@ export interface KanjiQuizData {
 export function mapKanjiToQuizData(kanji: KanjiDTO): KanjiQuizData {
   return kanji;
 }
-
-// ═══════════════════════════════════════════════════════════════
-//  MeCab tokenizer types — unchanged
-// ═══════════════════════════════════════════════════════════════
 
 export interface WordFeature {
   surface: string;
@@ -68,10 +56,6 @@ export const WORD_FEATURE_COLUMNS = [
   "Inflection", "Conjugation", "Root form", "Reading", "Pronunciation"
 ];
 
-// ═══════════════════════════════════════════════════════════════
-//  Search mode enum — unchanged
-// ═══════════════════════════════════════════════════════════════
-
 export enum SearchMode {
   Kanji = 'kanji',
   Tokenize = 'tokenize',
@@ -79,19 +63,6 @@ export enum SearchMode {
   JoujouKanjis = 'jouyouKanjis',
   Combined = 'CombinedRows',
 }
-
-// ═══════════════════════════════════════════════════════════════
-//  Entry → quiz data mapper — updated for EntryDto shape
-// ═══════════════════════════════════════════════════════════════
-//
-//  Old version used `any` types and accessed raw JAXB field names:
-//    entry.kele?.map((k: any) => k.keb)
-//    entry.rele?.map((r: any) => r.reb)
-//    entry.sense?.flatMap((s: any) => s.gloss)
-//
-//  New version is fully typed — the backend already flattened the
-//  nested KElement/RElement structures into string arrays, and
-//  renamed Sense fields to clean English names.
 
 export function mapEntryToQuizData(entry: EntryDto) {
   const kanji = entry.kanji?.join(', ') ?? '';

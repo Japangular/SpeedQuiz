@@ -16,7 +16,7 @@ RUN npm install -g @openapitools/openapi-generator-cli && \
       -i api.yaml \
       -g typescript-angular \
       -o ./src/generated/api \
-      --additional-properties=ngVersion=17.0.0,npmName=speedquiz-client
+      --additional-properties=ngVersion=19.0.0,npmName=speedquiz-client
 
 # Install and build Angular app
 RUN npm install && npm run build --prod

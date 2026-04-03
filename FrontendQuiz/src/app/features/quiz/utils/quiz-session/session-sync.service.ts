@@ -140,4 +140,13 @@ export class SessionSyncService implements OnDestroy {
       return undefined;
     }
   }
+
+  clearSession(deckId: string): void {
+    this.clearLocal(deckId);
+    this.quizApi.updateCardStates(deckId, [
+      { deckId, cardId: '_session', state: '' }
+    ]).subscribe({
+      error: err => console.warn('SessionSync: remote clear failed', err)
+    });
+  }
 }

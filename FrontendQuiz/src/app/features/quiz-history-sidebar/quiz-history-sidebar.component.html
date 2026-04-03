@@ -13,6 +13,11 @@
 
     <div class="question-row" (click)="toggle(entry)">
       <span class="card-index">#{{ entry.card.index }}</span>
+
+      <mat-icon *ngIf="entry.hintUsed" class="hint-used-icon">visibility</mat-icon>
+      <mat-icon *ngIf="!entry.hintUsed && entry.solvedExactly === true" class="exact-icon">check_circle</mat-icon>
+      <mat-icon *ngIf="!entry.hintUsed && entry.solvedExactly === false" class="fuzzy-icon">check_circle_outline</mat-icon>
+
       <span class="question-text">{{ entry.card.question }}</span>
       <span class="entry-icons">
         <mat-icon *ngIf="entry.hintUsed" class="hint-icon" matTooltip="Hint was used">lightbulb</mat-icon>

@@ -43,10 +43,9 @@ export class DeckIterator implements DeckCommand {
     return this.card$;
   }
 
-  proceed(withoutHelp?: boolean): void {
+  proceed(withoutHelp?: boolean, exact?: boolean): void {
     const usedHint = withoutHelp === false || this.hintUsedOnCurrentCard;
-
-    this.session.recordSolved(this.index, usedHint);
+    this.session.recordSolved(this.index, usedHint, exact);
 
     if (usedHint && this.pendingResumeIndex >= 0) {
       this.index = this.pendingResumeIndex;

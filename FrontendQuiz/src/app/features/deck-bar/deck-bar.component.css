@@ -2,18 +2,19 @@
   gap: 12px;
   font-size: 14px;
   height: 48px;
+  text-align: center;
 }
 
-.deck-name {
-  font-weight: 500;
+.title {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 
-.deck-chips {
-  margin-left: 8px;
-}
-
-.spacer {
-  flex: 1 1 auto;
+mat-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .empty {

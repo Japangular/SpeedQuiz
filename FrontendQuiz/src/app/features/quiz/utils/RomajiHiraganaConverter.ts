@@ -59,13 +59,13 @@ export class RomajiHiraganaConverter {
             i += checkLen;
 
             if (i < romaji.length) {
-              if (romaji[i] == "o" && romaji.substring(i - 1, 1) == "o" && currentAlphabet == "hiragana") {
+              if (romaji[i] == "o" && romaji.substring(i - 1, i) == "o" && currentAlphabet == "hiragana") {
                 resultString += currentAlphabet == "hiragana" ? this.hiragana.u : this.katakana.u;
                 i++;
-              } else if (romaji[i] == "e" && romaji.substring(i - 1, 1) == "e" && currentAlphabet == "hiragana") {
+              } else if (romaji[i] == "e" && romaji.substring(i - 1, i) == "e" && currentAlphabet == "hiragana") {
                 resultString += currentAlphabet == "hiragana" ? this.hiragana.i : this.katakana.i;
                 i++;
-              } else if (romaji[i] == romaji.substring(i - 1, 1) && currentAlphabet == "katakana") {
+              } else if (romaji[i] == romaji.substring(i - 1, i) && currentAlphabet == "katakana") {
                 if (romaji[i] == romaji.substring(i - 1, i) && currentAlphabet == "katakana") {
                   if (romaji[i] == "n") {
                     break;
@@ -158,7 +158,7 @@ export class RomajiHiraganaConverter {
     "wa": "ワ", "wo": "ヲ",
     "n": "ン",
     "kya": "キャ", "kyu": "キュ", "kyo": "キョ",
-    "gya": "ギャ", "gyu": "ぎゅ", "gyo": "ギョ",
+    "gya": "ギャ", "gyu": "ギュ", "gyo": "ギョ",
     "sha": "シャ", "shu": "シュ", "sho": "ショ",
     "ja": "ジャ", "ju": "ジュ", "jo": "ジョ",
     "cha": "チャ", "chu": "チュ", "cho": "チョ",

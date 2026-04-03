@@ -1,5 +1,5 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {CardStoreService} from '../../../services/card-store.service';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
@@ -29,8 +29,10 @@ import {Card, mapDeck} from '../model/quiz.model';
 })
 export class QuizBoardService implements OnDestroy {
   card$!: Observable<Card>;
+  private resetSubject = new Subject<void>();
+  reset$ = this.resetSubject.asObservable();
 
-  private deckIterator!: DeckIterator;
+  private readonly deckIterator!: DeckIterator;
   private session!: QuizSession;
   private deckSub?: Subscription;
 
@@ -85,8 +87,8 @@ export class QuizBoardService implements OnDestroy {
     });
   }
 
-  nextCard(withoutHelp?: boolean): void {
-    this.deckIterator.proceed(withoutHelp);
+  nextCard(withoutHelp?: boolean, exact?: boolean): void {
+    this.deckIterator.proceed(withoutHelp, exact);
   }
 
   useHint(): void {
@@ -141,6 +143,34 @@ export class QuizBoardService implements OnDestroy {
 
     this.store.setCurrentDeck(deck);
   }
+  resetSession(): void {
+    const deckId = this.currentDeckId;
+    if (!deckId) return;
+
+    // Stop auto-sync so stale data doesn't get written back
+    this.sessionSync.stopSync();
+
+    // Clear persisted state (local + backend)
+    this.sessionSync.clearLocal(deckId);
+    this.sessionSync.clearSession(deckId);
+
+    // Rebuild session from the current deck without prior state
+    const deck = this.store.currentDeck;
+    if (!deck || deck.cards.length === 0) return;
+
+    let cards = mapDeck(deck);
+    cards = this.sortStrategy.sort(cards);
+
+    this.session = new QuizSession(cards);          // no priorState
+    this.deckIterator.replaceSession(this.session, 0);
+
+    // Restart auto-sync with the fresh session
+    this.sessionSync.startSync(
+      deckId, this.session, () => this.deckIterator.getCurrentIndex()
+    );
+    this.resetSubject.next();
+  }
+
 
   setHintStrategy(name: HintStrategyName, params?: { n?: number }): void {
     this.hintStrategy = createHintStrategy(name, params);

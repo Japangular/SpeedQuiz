@@ -13,6 +13,7 @@ interface HistoryEntry {
   card: Card;
   expanded: boolean;
   hintUsed: boolean;
+  solvedExactly?: boolean;
   timestamp: number;
 }
 
@@ -59,14 +60,27 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
               card: entry.card,
               expanded: false,
               hintUsed: entry.hintUsed,
+              solvedExactly: entry.solvedExactly,
               timestamp: entry.solvedAt,
             });
           }
         }
         this.history.sort((a, b) => a.timestamp - b.timestamp);
+        this.quizBoard.reset$.subscribe(() => {
+          this.history = [];
+          this.historyInitialized = false;
+        });
       }
 
       this.currentIndex = card.index;
+
+      const session = this.quizBoard.getSession();
+      for (const entry of this.history) {
+        const sessionEntry = session.getEntry(entry.card.index);
+        if (sessionEntry?.solvedExactly !== undefined) {
+          entry.solvedExactly = sessionEntry.solvedExactly;
+        }
+      }
 
       for (const entry of this.history) {
         if (entry.card.index > this.currentIndex) {

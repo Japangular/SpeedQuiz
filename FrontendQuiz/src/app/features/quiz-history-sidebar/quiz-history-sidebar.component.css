@@ -181,3 +181,13 @@
   width: 24px;
   height: 24px;
 }
+
+.exact-icon {
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.fuzzy-icon {
+  color: #ffc107;
+  font-size: 18px;
+}

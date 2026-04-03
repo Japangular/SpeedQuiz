@@ -38,10 +38,6 @@ export class LocalProfileService {
 
   constructor(private http: HttpClient) { }
 
-  // ══════════════════════════════════════════
-  //  Bootstrap
-  // ══════════════════════════════════════════
-
   initialize(): Observable<boolean> {
     const stored = this.loadFromStorage();
 
@@ -67,10 +63,6 @@ export class LocalProfileService {
     return of(false);
   }
 
-  // ══════════════════════════════════════════
-  //  Provisioning
-  // ══════════════════════════════════════════
-
   provision(displayName: string): Observable<LocalProfile | null> {
     return this.http.post<ProvisionResponse>(`${this.apiUrl}/provision`, {displayName}).pipe(
       map(response => {
@@ -88,10 +80,6 @@ export class LocalProfileService {
       })
     )
   }
-
-  // ══════════════════════════════════════════
-  //  Token access
-  // ══════════════════════════════════════════
 
   getToken(): string | null {
     return this.profileSubject.value?.token ?? null;
@@ -113,10 +101,6 @@ export class LocalProfileService {
     this.saveToStorage(updated);
     this.profileSubject.next(updated);
   }
-
-  // ══════════════════════════════════════════
-  //  Signed export / import
-  // ══════════════════════════════════════════
 
   exportProfile(): Observable<string> {
     const profile = this.profileSubject.value;
@@ -176,10 +160,6 @@ export class LocalProfileService {
     this.profileSubject.next(null);
   }
 
-  // ══════════════════════════════════════════
-  //  HMAC helpers
-  // ══════════════════════════════════════════
-
   private async sign(profile: LocalProfile, secret: string): Promise<string> {
     const key = await this.deriveKey(secret);
     const data = new TextEncoder().encode(JSON.stringify(profile));
@@ -204,10 +184,6 @@ export class LocalProfileService {
       ['sign']
     );
   }
-
-  // ══════════════════════════════════════════
-  //  Private helpers
-  // ══════════════════════════════════════════
 
   private validateAndAccept(profile: LocalProfile): Observable<boolean> {
     return this.validate(profile.token).pipe(

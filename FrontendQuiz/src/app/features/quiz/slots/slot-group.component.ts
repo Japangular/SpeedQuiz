@@ -1,6 +1,6 @@
 import {
   Component, EventEmitter, Input, Output, QueryList,
-  ViewChildren, AfterViewInit
+  ViewChildren, AfterViewInit, OnChanges
 } from '@angular/core';
 import {Slot} from '../model/slot.model';
 import {DisplaySlotComponent} from './display-slot.component';
@@ -12,7 +12,7 @@ import {StrokeOrderKanjiComponent} from '../../../widgets/kanji-stroke-order-gri
   standalone: true,
   imports: [DisplaySlotComponent, AnswerSlotComponent, AnswerSlotComponent, StrokeOrderKanjiComponent],
   template: `
-    @for (slot of slots; track $index) {
+    @for (slot of slots; track slot.fieldName + slot.value) {
       @if (slot.role === 'display') {
         <app-display-slot
           [value]="slot.value"
@@ -53,17 +53,18 @@ import {StrokeOrderKanjiComponent} from '../../../widgets/kanji-stroke-order-gri
     }
   `]
 })
-export class SlotGroupComponent implements AfterViewInit {
+export class SlotGroupComponent implements AfterViewInit, OnChanges {
   @Input({required: true}) slots: Slot[] = [];
   @Input() showStrokeOrder = true;
 
-  @Output() allSolved = new EventEmitter<void>();
+  @Output() allSolved = new EventEmitter<{ exact: boolean }>();
   @Output() labelClicked = new EventEmitter<{ value: string; event: MouseEvent }>();
 
   @ViewChildren(AnswerSlotComponent) answerSlots!: QueryList<AnswerSlotComponent>;
 
   private solvedSet = new Set<number>();
   private answerCount = 0;
+  private allExact = true;
 
   ngAfterViewInit(): void {
     // Focus the first answer slot
@@ -75,6 +76,7 @@ export class SlotGroupComponent implements AfterViewInit {
   /** Called when slots input changes (new card). */
   ngOnChanges(): void {
     this.solvedSet.clear();
+    this.allExact = true;
     this.answerCount = this.slots.filter(s => s.role === 'answer').length;
     // Reset all answer inputs
     this.answerSlots?.forEach(slot => slot.reset());
@@ -85,11 +87,11 @@ export class SlotGroupComponent implements AfterViewInit {
   onAnswerResult(slotIndex: number, result: AnswerResult): void {
     if (result.correct) {
       this.solvedSet.add(slotIndex);
+      if (result.exact === false) this.allExact = false;
 
-      if (this.solvedSet.size >= this.answerCount) {
-        this.allSolved.emit();
+      if (this.answerCount > 0 && this.solvedSet.size >= this.answerCount) {
+        this.allSolved.emit({ exact: this.allExact });
       } else {
-        // Focus next unsolved answer slot
         this.focusNextUnsolved(slotIndex);
       }
     }

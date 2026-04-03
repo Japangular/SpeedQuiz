@@ -60,8 +60,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.contextPanel.clear();
   }
 
-  onCardSolved(): void {
-    this.quizBoard.nextCard(true);
+  onCardSolved(result: { exact: boolean }): void {
+    this.quizBoard.nextCard(true, result.exact);
   }
 
   onLabelClicked(event: { value: string; event: MouseEvent }): void {

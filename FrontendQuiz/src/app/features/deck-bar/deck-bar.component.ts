@@ -5,11 +5,11 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import {CardStoreService} from '../../services/card-store.service';
 import {map, shareReplay} from 'rxjs/operators';
-import {MatBadge} from '@angular/material/badge';
-import {MatCard, MatCardAvatar, MatCardContent, MatCardTitle} from '@angular/material/card';
+import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {DeckContent, PropertyType} from '../../../generated/api';
 import {MatIconButton} from '@angular/material/button';
-import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
+import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-deck-bar',
@@ -18,20 +18,18 @@ import {MatMenu, MatMenuTrigger} from '@angular/material/menu';
     MatToolbarModule,
     MatIconModule,
     MatChipsModule,
-    MatBadge,
     MatCard,
     MatCardTitle,
     MatIconButton,
-    MatMenuTrigger,
-    MatMenu,
     MatCardContent,
-    MatCardAvatar,
+    MatTooltip,
   ],
   templateUrl: './deck-bar.component.html',
   styleUrl: './deck-bar.component.css'
 })
 export class DeckBarComponent {
   private store = inject(CardStoreService);
+  private quizBoard = inject(QuizBoardService);
 
   deck$ = this.store.currentDeck$.pipe(
     map(deck => ({
@@ -56,5 +54,9 @@ export class DeckBarComponent {
       .find(([_, t]) => t === type)?.[0];
     if (!key) return [];
     return deck.cards.map(card => card[key]);
+  }
+
+  resetDeck(): void {
+    this.quizBoard.resetSession();
   }
 }

@@ -6,6 +6,7 @@ export interface CardSessionEntry {
   hintUsed: boolean;
   attempts: number;
   solvedWithoutHint: boolean;
+  solvedExactly?: boolean;
   solvedAt?: number;
   lastSeenAt?: number;
 }
@@ -70,10 +71,11 @@ export class QuizSession {
     }
   }
 
-  recordSolved(index: number, usedHint: boolean): void {
+  recordSolved(index: number, usedHint: boolean, exact?: boolean): void {
     const entry = this.entries[index];
     entry.attempts++;
     entry.solvedWithoutHint = !usedHint;
+    entry.solvedExactly = exact;
     entry.solvedAt = Date.now();
     entry.lastSeenAt = Date.now();
     this.markDirty();

@@ -15,6 +15,7 @@ import {
 export interface AnswerResult {
   fieldName: string;
   correct: boolean;
+  exact?: boolean;
 }
 
 @Component({
@@ -71,21 +72,34 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.setupSubscription();
+  }
+
+  ngOnChanges(): void {
+    this.resolved = false;
+    this.control.reset('');
+    this.subscription?.unsubscribe();
+    this.setupSubscription();
+  }
+
+  private setupSubscription(): void {
     const validatorFn = this.validator ?? validatorForField(this.fieldName);
 
-    this.subscription = this.control.valueChanges.pipe(debounceTime(300), distinctUntilChanged(),).subscribe(input => {
+    this.subscription = this.control.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+    ).subscribe(input => {
       if (this.resolved || !input) return;
 
       const result = validatorFn(input, this.correctAnswer);
 
-      // Apply transformation (romaji → hiragana)
       if (result.transformedInput && result.transformedInput !== input) {
         this.inputRef?.nativeElement && (this.inputRef.nativeElement.value = result.transformedInput);
       }
 
       if (result.correct) {
         this.resolved = true;
-        this.result.emit({ fieldName: this.fieldName, correct: true });
+        this.result.emit({ fieldName: this.fieldName, correct: true, exact: result.exact });
       }
     });
   }

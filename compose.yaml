@@ -1,5 +1,3 @@
-version: '3.8'
-
 networks:
   custom_net:
     driver: bridge
