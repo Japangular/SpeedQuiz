@@ -8,7 +8,11 @@ import {Card} from './quiz.model';
  *
  * Once we simplify Card → QuizCard (fields + roles), this adapter disappears.
  */
-export function cardToSlots(card: Card, mode?: QuizMode): Slot[] {
+export function cardToSlots(
+  card: Card,
+  mode?: QuizMode,
+  properties?: Record<string, string>,
+): Slot[] {
   if (mode) {
     const fields: Record<string, string> = {
       ...card.answers,
@@ -24,6 +28,7 @@ export function cardToSlots(card: Card, mode?: QuizMode): Slot[] {
     value: card.question,
     role: 'display',
     fieldName: 'question',
+    propertyType: properties?.['question'] ?? 'question',
   });
 
   for (const [key, value] of Object.entries(card.answers)) {
@@ -32,6 +37,7 @@ export function cardToSlots(card: Card, mode?: QuizMode): Slot[] {
         value,
         role: 'answer',
         fieldName: key,
+        propertyType: properties?.[key],
       });
     }
   }

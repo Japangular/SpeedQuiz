@@ -37,6 +37,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
   newestFirst = false;
 
   private currentIndex = -1;
+  private visitedIndices = new Set<number>();
   private cardSub?: Subscription;
   private shouldScroll = false;
 
@@ -66,13 +67,16 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
           }
         }
         this.history.sort((a, b) => a.timestamp - b.timestamp);
+        this.history.forEach(e => this.visitedIndices.add(e.card.index));
         this.quizBoard.reset$.subscribe(() => {
           this.history = [];
+          this.visitedIndices.clear();
           this.historyInitialized = false;
         });
       }
 
       this.currentIndex = card.index;
+      this.visitedIndices.add(card.index);
 
       const session = this.quizBoard.getSession();
       for (const entry of this.history) {
@@ -83,7 +87,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
       }
 
       for (const entry of this.history) {
-        if (entry.card.index > this.currentIndex) {
+        if (!this.visitedIndices.has(entry.card.index)) {
           entry.expanded = false;
         }
       }
@@ -126,7 +130,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
   }
 
   isDisabled(entry: HistoryEntry): boolean {
-    return entry.card.index > this.currentIndex;
+    return !this.visitedIndices.has(entry.card.index);
   }
 
   toggle(entry: HistoryEntry): void {

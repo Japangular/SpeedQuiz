@@ -58,6 +58,7 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
   @Input({ required: true }) fieldName!: string;
   @Input() renderHint?: RenderHint;
   @Input() validator?: ValidatorFn;
+  @Input() propertyType?: string;
 
   @Output() result = new EventEmitter<AnswerResult>();
 
@@ -83,7 +84,7 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
   }
 
   private setupSubscription(): void {
-    const validatorFn = this.validator ?? validatorForField(this.fieldName);
+    const validatorFn = this.validator ?? validatorForField(this.fieldName, this.propertyType);
 
     this.subscription = this.control.valueChanges.pipe(
       debounceTime(300),

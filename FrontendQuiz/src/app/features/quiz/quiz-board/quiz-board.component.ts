@@ -14,6 +14,7 @@ import { QuizBoardService } from './quiz-board.service';
 import { Slot } from '../model/slot.model';
 import {cardToSlots} from '../model/card-to-slot.adapter';
 import {Card} from '../model/quiz.model';
+import {CardStoreService} from '../../../services/card-store.service';
 
 @Component({
   selector: 'app-quiz-board',
@@ -41,11 +42,11 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     private quizBoard: QuizBoardService,
     private modal: ModalService,
     private contextPanel: ContextPanelService,
+    private store: CardStoreService,
   ) {
-
     this.cardSub = this.quizBoard.card$.subscribe(card => {
       this.currentCard = card;
-      this.currentSlots = cardToSlots(card);
+      this.currentSlots = cardToSlots(card, undefined, this.store.currentDeck.properties);
     });
   }
 

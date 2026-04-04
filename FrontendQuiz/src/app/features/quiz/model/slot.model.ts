@@ -6,6 +6,7 @@ export interface Slot {
   role: SlotRole;
   renderHint?: RenderHint;
   fieldName?: string;
+  propertyType?: string;
   choices?: string[];
 }
 

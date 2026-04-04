@@ -24,6 +24,7 @@ import {StrokeOrderKanjiComponent} from '../../../widgets/kanji-stroke-order-gri
           [correctAnswer]="slot.value"
           [fieldName]="slot.fieldName ?? 'answer'"
           [renderHint]="slot.renderHint"
+          [propertyType]="slot.propertyType"
           (result)="onAnswerResult($index, $event)"/>
       }
     }
