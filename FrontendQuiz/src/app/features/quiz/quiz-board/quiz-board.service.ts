@@ -48,8 +48,16 @@ export class QuizBoardService implements OnDestroy {
   ) {
 
     this.session = new QuizSession([]);
-    this.deckIterator = new DeckIterator(this.session, this.modal, this.hintStrategy);
+    this.deckIterator = new DeckIterator(this.session, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
+
+    this.deckIterator.deckCompleted$.subscribe(() => {
+      this.modal.openDeckCompletedModal([]).subscribe(result => {
+        if (result === 'restart') {
+          this.deckIterator.restart();
+        }
+      });
+    });
 
     this.deckSub = toObservable(this.deckStore.deck).subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
@@ -75,15 +83,6 @@ export class QuizBoardService implements OnDestroy {
 
   getDeckCommand(): DeckCommand {
     return this.deckIterator;
-  }
-
-  openHintModal(card: Card): void {
-    this.modal.openHintModal(card).subscribe(result => {
-
-      if (result === 'reset') {
-        this.deckIterator.useHint();
-      }
-    });
   }
 
   nextCard(withoutHelp?: boolean, exact?: boolean): void {

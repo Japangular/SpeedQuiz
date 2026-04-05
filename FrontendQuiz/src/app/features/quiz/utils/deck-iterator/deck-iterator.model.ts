@@ -4,10 +4,12 @@ import {Card} from '../../model/quiz.model';
 export interface DeckCommand {
   initialCard(): Card;
   getCard$(): Observable<Card>;
+  deckCompleted$: Observable<void>;
   proceed(withoutHelp?: boolean, exact?: boolean): void;
   nextCard(): void;
   previousCard(): void;
   useHint(): void;
+  restart(): void;
   setAsStartPoint(): void;
   toggleCardType(cardType?: string): void;
   jumpTo(predicate: (card: Card) => boolean): void;

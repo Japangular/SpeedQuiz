@@ -1,13 +1,14 @@
-import {Observable, ReplaySubject} from 'rxjs';
-import {ModalService} from '../../../../widgets/modal/modal.service';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
 import {DeckCommand} from './deck-iterator.model';
-import {QuizSession} from '../quiz-session';
-import {BackToFirstStrategy, HintStrategy, ReinsertLaterStrategy} from '../quiz-session';
+import {BackToFirstStrategy, HintStrategy, QuizSession, ReinsertLaterStrategy} from '../quiz-session';
 import {Card} from '../../model/quiz.model';
 
 export class DeckIterator implements DeckCommand {
   private cardSubject = new ReplaySubject<Card>(1);
   private card$: Observable<Card> = this.cardSubject.asObservable();
+
+  private completedSubject = new Subject<void>();
+  deckCompleted$: Observable<void> = this.completedSubject.asObservable();
 
   private index: number;
   private startPos: number = 0;
@@ -17,7 +18,6 @@ export class DeckIterator implements DeckCommand {
 
   constructor(
     private session: QuizSession,
-    private modalService: ModalService,
     private hintStrategy: HintStrategy = new BackToFirstStrategy(),
     startPos?: number,
   ) {
@@ -50,8 +50,9 @@ export class DeckIterator implements DeckCommand {
     if (usedHint && this.pendingResumeIndex >= 0) {
       this.index = this.pendingResumeIndex;
       this.pendingResumeIndex = -1;
-    } else {
-      this.advanceIndex();
+    } else if (!this.advanceIndex()) {
+      this.hintUsedOnCurrentCard = false;
+      return;
     }
 
     this.hintUsedOnCurrentCard = false;
@@ -78,7 +79,15 @@ export class DeckIterator implements DeckCommand {
   nextCard(): void {
     this.hintUsedOnCurrentCard = false;
     this.pendingResumeIndex = -1;
-    this.advanceIndex();
+    if (this.advanceIndex()) {
+      this.emitCurrent();
+    }
+  }
+
+  restart(): void {
+    this.index = this.startPos;
+    this.hintUsedOnCurrentCard = false;
+    this.pendingResumeIndex = -1;
     this.emitCurrent();
   }
 
@@ -123,16 +132,13 @@ export class DeckIterator implements DeckCommand {
     this.hintStrategy = strategy;
   }
 
-  private advanceIndex(): void {
+  private advanceIndex(): boolean {
     if (this.index < this.session.length - 1) {
       this.index++;
+      return true;
     } else {
-      this.modalService.openDeckCompletedModal([]).subscribe(result => {
-        if (result === 'restart') {
-          this.index = this.startPos;
-        }
-        this.emitCurrent();
-      });
+      this.completedSubject.next();
+      return false;
     }
   }
 
