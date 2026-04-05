@@ -4,7 +4,7 @@ import {MatIconModule} from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
 import {MatCard, MatCardContent, MatCardTitle} from '@angular/material/card';
 import {MatIconButton} from '@angular/material/button';
-import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
+import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
 import {MatTooltip} from '@angular/material/tooltip';
 import {DeckStore} from '../../store/deck.store';
 
@@ -25,12 +25,12 @@ import {DeckStore} from '../../store/deck.store';
 })
 export class DeckBarComponent {
   private deckStore = inject(DeckStore);
-  private quizBoard = inject(QuizBoardService);
+  private quizEngine = inject(QuizEngine);
 
   deckName = this.deckStore.deckName;
   hasCards = this.deckStore.hasCards;
 
   resetDeck(): void {
-    this.quizBoard.resetSession();
+    this.quizEngine.resetSession();
   }
 }

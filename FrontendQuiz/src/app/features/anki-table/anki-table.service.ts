@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import {AnkiCard, AnkiPage, AnkiPageInfo, UserTableStates} from './anki-table.model';
-import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
+import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
 import {AnkiSourceService} from './anki-source.service';
 import {DeckStore} from '../../store/deck.store';
 import {PropertyType} from '../../../generated/api';

@@ -10,7 +10,7 @@ import {QuizHistorySidebarComponent} from '../../quiz-history-sidebar/quiz-histo
 import {SlotGroupComponent} from '../slots/slot-group.component';
 import {ContextPanelService} from '../../../layout/side-nav/panel.service';
 import {ModalService} from '../../../widgets/modal/modal.service';
-import {QuizBoardService} from './quiz-board.service';
+import {QuizEngine} from './quiz-engine.service';
 import {Slot} from '../model/slot.model';
 import {cardToSlots} from '../model/card-to-slot.adapter';
 import {Card} from '../model/quiz.model';
@@ -37,17 +37,26 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   currentSlots: Slot[] = [];
   private currentCard?: Card;
   private cardSub?: Subscription;
+  private completedSub?: Subscription;
 
   private deckStore = inject(DeckStore);
 
   constructor(
-    private quizBoard: QuizBoardService,
+    private quizEngine: QuizEngine,
     private modal: ModalService,
     private contextPanel: ContextPanelService,
   ) {
-    this.cardSub = this.quizBoard.card$.subscribe(card => {
+    this.cardSub = this.quizEngine.card$.subscribe(card => {
       this.currentCard = card;
       this.currentSlots = cardToSlots(card, undefined, this.deckStore.properties());
+    });
+
+    this.completedSub = this.quizEngine.deckCompleted$.subscribe(() => {
+      this.modal.openDeckCompletedModal([]).subscribe(result => {
+        if (result === 'restart') {
+          this.quizEngine.getDeckCommand().restart();
+        }
+      });
     });
   }
 
@@ -59,11 +68,12 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cardSub?.unsubscribe();
+    this.completedSub?.unsubscribe();
     this.contextPanel.clear();
   }
 
   onCardSolved(result: { exact: boolean }): void {
-    this.quizBoard.nextCard(true, result.exact);
+    this.quizEngine.nextCard(true, result.exact);
   }
 
   onLabelClicked(event: { value: string; event: MouseEvent }): void {
@@ -78,7 +88,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     if (event.ctrlKey && event.code === 'KeyH') {
       event.preventDefault();
       if (this.currentCard) {
-        this.quizBoard.useHint();
+        this.quizEngine.useHint();
         this.modal.openHintModal(this.currentCard).subscribe();
       }
     }

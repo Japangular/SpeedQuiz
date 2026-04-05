@@ -30,8 +30,19 @@ export class DeckIterator implements DeckCommand {
     this.session = session;
     this.index = restoredIndex ?? 0;
     this.startPos = 0;
-    this.hintUsedOnCurrentCard = false;
-    this.pendingResumeIndex = -1;
+
+    // Restore hint state if the current card had hint used but wasn't solved yet
+    const entry = this.index < session.length ? session.getEntry(this.index) : undefined;
+    if (entry?.hintUsed && !entry.solvedAt) {
+      this.hintUsedOnCurrentCard = true;
+      this.pendingResumeIndex = this.hintStrategy.computeResumeIndex(
+        this.index, this.startPos, session.length
+      );
+    } else {
+      this.hintUsedOnCurrentCard = false;
+      this.pendingResumeIndex = -1;
+    }
+
     this.emitCurrent();
   }
 

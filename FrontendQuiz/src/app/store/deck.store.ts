@@ -1,6 +1,8 @@
-import { computed } from '@angular/core';
-import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
+import {computed, inject} from '@angular/core';
+import {signalStore, withState, withComputed, withMethods, patchState, withHooks} from '@ngrx/signals';
 import { DeckContent, PropertyType } from '../models/deck.model';
+import {DeckShelfService} from '../features/deck-shelf/deck-shelf.service';
+import {LocalProfileService} from '../user-store-management/local-profile.service';
 
 export interface DeckStoreState {
   deck: DeckContent | null;
@@ -35,4 +37,24 @@ export const DeckStore = signalStore(
       return { name: store.deckName(), content: deck };
     },
   })),
+
+  withHooks((store) => {
+    const deckShelfService = inject(DeckShelfService);
+    const localService = inject(LocalProfileService);
+
+    return {
+      onInit() {
+        const last = localStorage.getItem('japangular_last_deck');
+        if (last && store.cards().length === 0) {
+          const { deckId, deckName } = JSON.parse(last);
+          const ownerId = localService.getToken();
+          if (ownerId) {
+            deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
+              store.loadDeck(content, deckName, deckId);
+            });
+          }
+        }
+      },
+    };
+  }),
 );

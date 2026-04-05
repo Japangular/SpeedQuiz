@@ -6,7 +6,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FormsModule} from '@angular/forms';
 import {Subscription} from 'rxjs';
-import {QuizBoardService} from '../quiz/quiz-board/quiz-board.service';
+import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
 import {Card} from '../quiz/model/quiz.model';
 
 interface HistoryEntry {
@@ -43,18 +43,18 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLElement>;
 
-  constructor(private quizBoard: QuizBoardService) {
+  constructor(private quizEngine: QuizEngine) {
   }
 
   private historyInitialized = false;
 
   ngOnInit(): void {
-    this.cardSub = this.quizBoard.card$.subscribe(card => {
+    this.cardSub = this.quizEngine.card$.subscribe(card => {
       if (!card) return;
 
       if (!this.historyInitialized) {
         this.historyInitialized = true;
-        const session = this.quizBoard.getSession();
+        const session = this.quizEngine.getSession();
         for (const entry of session.getAllEntries()) {
           if (entry.solvedAt && entry.card.index !== card.index) {
             this.history.push({
@@ -67,8 +67,12 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
           }
         }
         this.history.sort((a, b) => a.timestamp - b.timestamp);
-        this.history.forEach(e => this.visitedIndices.add(e.card.index));
-        this.quizBoard.reset$.subscribe(() => {
+        this.history.forEach(e => {
+          if (e.card.index <= card.index) {
+            this.visitedIndices.add(e.card.index);
+          }
+        });
+        this.quizEngine.reset$.subscribe(() => {
           this.history = [];
           this.visitedIndices.clear();
           this.historyInitialized = false;
@@ -90,7 +94,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
       this.visitedIndices.add(card.index);
 
-      const session = this.quizBoard.getSession();
+      const session = this.quizEngine.getSession();
       for (const entry of this.history) {
         const sessionEntry = session.getEntry(entry.card.index);
         if (sessionEntry) {
@@ -113,7 +117,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
         existing.timestamp = Date.now();
         this.history.push(existing);
       } else {
-        const session = this.quizBoard.getSession();
+        const session = this.quizEngine.getSession();
         const sessionEntry = session?.getEntry(card.index);
 
         this.history.push({
@@ -155,7 +159,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   jumpToCard(entry: HistoryEntry): void {
     if (this.isDisabled(entry)) return;
-    this.quizBoard.getDeckCommand().jumpTo(c => c.index === entry.card.index);
+    this.quizEngine.getDeckCommand().jumpTo(c => c.index === entry.card.index);
   }
 
   getAnswers(card: Card): { key: string; value: string }[] {

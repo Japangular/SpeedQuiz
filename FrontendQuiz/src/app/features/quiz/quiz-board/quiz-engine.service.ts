@@ -17,8 +17,6 @@ import {
   SortStrategy,
   SortStrategyName
 } from '../utils/quiz-session';
-import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
-import {LocalProfileService} from '../../../user-store-management/local-profile.service';
 import {Card, mapDeck} from '../model/quiz.model';
 import {DeckStore} from '../../../store/deck.store';
 import {toObservable} from '@angular/core/rxjs-interop';
@@ -26,8 +24,9 @@ import {toObservable} from '@angular/core/rxjs-interop';
 @Injectable({
   providedIn: 'root'
 })
-export class QuizBoardService implements OnDestroy {
+export class QuizEngine implements OnDestroy {
   card$!: Observable<Card>;
+  deckCompleted$!: Observable<void>;
   private resetSubject = new Subject<void>();
   reset$ = this.resetSubject.asObservable();
 
@@ -40,39 +39,16 @@ export class QuizBoardService implements OnDestroy {
   private currentDeckId?: string;
   private deckStore = inject(DeckStore);
 
-  constructor(
-    private modal: ModalService,
-    private sessionSync: SessionSyncService,
-    private deckShelfService: DeckShelfService,
-    private localService: LocalProfileService,
-  ) {
-
+  constructor(private sessionSync: SessionSyncService) {
     this.session = new QuizSession([]);
     this.deckIterator = new DeckIterator(this.session, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
-
-    this.deckIterator.deckCompleted$.subscribe(() => {
-      this.modal.openDeckCompletedModal([]).subscribe(result => {
-        if (result === 'restart') {
-          this.deckIterator.restart();
-        }
-      });
-    });
+    this.deckCompleted$ = this.deckIterator.deckCompleted$;
 
     this.deckSub = toObservable(this.deckStore.deck).subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
       this.initSession(deck);
     });
-
-    const last = localStorage.getItem('japangular_last_deck');
-    if (last && this.deckStore.cards().length === 0) {
-      const {deckId, deckName} = JSON.parse(last);
-      const ownerId = localService.getToken();
-      if (ownerId)
-        this.deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
-          this.deckStore.loadDeck(content, deckName, deckId);
-        });
-    }
   }
 
   ngOnDestroy(): void {
@@ -143,28 +119,12 @@ export class QuizBoardService implements OnDestroy {
     this.resetSubject.next();
   }
 
-
-  setHintStrategy(name: HintStrategyName, params?: { n?: number }): void {
-    this.hintStrategy = createHintStrategy(name, params);
-    this.deckIterator.setHintStrategy(this.hintStrategy);
-  }
-
-  setSortStrategy(name: SortStrategyName): void {
-    this.sortStrategy = createSortStrategy(name);
-    // Re-sorting mid-session: resort and rebuild session, preserving stats
-    // For now, this only takes effect on next deck load.
-    // TODO: implement mid-session re-sort if needed
-  }
-
   getSession(): QuizSession {
     return this.session;
   }
 
-  getCurrentIndex(): number {
-    return this.deckIterator.getCurrentIndex();
-  }
-
   private async initSession(deck: SubmissionDeck): Promise<void> {
+    this.resetSubject.next();
     const deckId = this.deckStore.deckId() ?? this.deckStore.deckName();
     this.currentDeckId = deckId;
     let cards = mapDeck(deck);
