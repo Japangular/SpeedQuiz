@@ -1,20 +1,20 @@
-import { AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
-import { MatAnchor } from '@angular/material/button';
+import {AfterViewInit, Component, HostListener, inject, OnDestroy, TemplateRef, ViewChild} from '@angular/core';
+import {Subscription} from 'rxjs';
+import {FormsModule} from '@angular/forms';
+import {RouterLink} from '@angular/router';
+import {MatIcon} from '@angular/material/icon';
+import {MatAnchor} from '@angular/material/button';
 
-import { DeckBarComponent } from '../../deck-bar/deck-bar.component';
-import { QuizHistorySidebarComponent } from '../../quiz-history-sidebar/quiz-history-sidebar.component';
-import { SlotGroupComponent } from '../slots/slot-group.component';
-import { ContextPanelService } from '../../../layout/side-nav/panel.service';
-import { ModalService } from '../../../widgets/modal/modal.service';
-import { QuizBoardService } from './quiz-board.service';
-import { Slot } from '../model/slot.model';
+import {DeckBarComponent} from '../../deck-bar/deck-bar.component';
+import {QuizHistorySidebarComponent} from '../../quiz-history-sidebar/quiz-history-sidebar.component';
+import {SlotGroupComponent} from '../slots/slot-group.component';
+import {ContextPanelService} from '../../../layout/side-nav/panel.service';
+import {ModalService} from '../../../widgets/modal/modal.service';
+import {QuizBoardService} from './quiz-board.service';
+import {Slot} from '../model/slot.model';
 import {cardToSlots} from '../model/card-to-slot.adapter';
 import {Card} from '../model/quiz.model';
-import {CardStoreService} from '../../../services/card-store.service';
+import {DeckStore} from '../../../store/deck.store';
 
 @Component({
   selector: 'app-quiz-board',
@@ -38,15 +38,16 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   private currentCard?: Card;
   private cardSub?: Subscription;
 
+  private deckStore = inject(DeckStore);
+
   constructor(
     private quizBoard: QuizBoardService,
     private modal: ModalService,
     private contextPanel: ContextPanelService,
-    private store: CardStoreService,
   ) {
     this.cardSub = this.quizBoard.card$.subscribe(card => {
       this.currentCard = card;
-      this.currentSlots = cardToSlots(card, undefined, this.store.currentDeck.properties);
+      this.currentSlots = cardToSlots(card, undefined, this.deckStore.properties());
     });
   }
 
@@ -77,16 +78,9 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     if (event.ctrlKey && event.code === 'KeyH') {
       event.preventDefault();
       if (this.currentCard) {
-        this.modal.openHintModal(this.currentCard).subscribe(result => {
-          if (result === 'reset') {
-            this.quizBoard.useHint();
-          }
-        });
+        this.quizBoard.useHint();
+        this.modal.openHintModal(this.currentCard).subscribe();
       }
-    }
-    if (event.ctrlKey && event.code === 'KeyD') {
-      event.preventDefault();
-      this.modal.openDeckModal();
     }
   }
 }

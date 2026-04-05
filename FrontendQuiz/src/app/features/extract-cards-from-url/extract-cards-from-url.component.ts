@@ -10,9 +10,10 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {MatButtonModule, MatIconButton} from '@angular/material/button';
 import {MatFormFieldModule} from '@angular/material/form-field';
-import {CardStoreService} from '../../services/card-store.service';
 import {PropertyType} from '../../../generated/api';
 import {ParseResult, ParseOptions, ColumnRole, parsePastedText} from './paste-parser';
+import {DeckStore} from '../../store/deck.store';
+import { QUIZ_API_TOKEN } from '../../interfaces/quiz-api';
 
 export interface DeckCard {
   [key: string]: string;
@@ -41,7 +42,8 @@ export interface DeckCard {
 export class ExtractCardsFromUrlComponent {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
-  private cardStore = inject(CardStoreService);
+  private deckStore = inject(DeckStore);
+  private quizApi = inject(QUIZ_API_TOKEN);
 
   @ViewChild(MatStepper) stepper!: MatStepper;
 
@@ -143,7 +145,7 @@ export class ExtractCardsFromUrlComponent {
 
   practiceNow(): void {
     const deck = this.buildDeckContent();
-    this.cardStore.setCurrentDeck(deck, 'Imported Deck', 'imported-paste');
+    this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste');
     this.router.navigate(['/quiz']);
   }
 
@@ -153,8 +155,8 @@ export class ExtractCardsFromUrlComponent {
     this.saving = true;
 
     const deck = this.buildDeckContent();
-    this.cardStore.setCurrentDeck(deck, 'Imported Deck', 'imported-paste');
-    this.cardStore.sendCurrentDeck();
+    this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste');
+    this.quizApi.createDeck('Imported Deck', deck).subscribe();
 
     setTimeout(() => {
       this.saving = false;

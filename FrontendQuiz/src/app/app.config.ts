@@ -2,12 +2,11 @@ import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
 import {provideRouter} from '@angular/router';
 
 import {routes} from './app.routes';
-import {INJECTED_QUIZ_API} from './interfaces/SubmissionDeckApi';
+import {INJECTED_QUIZ_API} from './interfaces/quiz-api';
 import {HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {LoggerInterceptor} from './interceptor/LoggerInterceptor';
 import {environment} from './environments/environment';
 import {BASE_PATH} from '../generated/api';
-import {INJECTED_QUIZ_BACKEND_API} from './interfaces/QuizApi';
 import {TokenInterceptorService} from './user-store-management/token-interceptor.service';
 import {ErrorInterceptor} from './interceptor/ErrorInterceptor';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
@@ -18,7 +17,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({eventCoalescing: true}),
     provideRouter(routes),
     INJECTED_QUIZ_API,
-    INJECTED_QUIZ_BACKEND_API,
     // withInterceptorsFromDi() is required for class-based HTTP_INTERCEPTORS
     // to work with the standalone provideHttpClient() API
     provideHttpClient(withInterceptorsFromDi()),

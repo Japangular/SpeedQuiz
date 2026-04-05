@@ -1,8 +1,8 @@
-@if (deck$ | async; as deck) {
+@if (hasCards()) {
   <mat-card appearance="outlined">
     <mat-card-content>
   <span class="title">
-    <mat-card-title>{{ deck.name }}</mat-card-title>
+    <mat-card-title>{{ deckName() }}</mat-card-title>
   </span>
       <button mat-icon-button (click)="resetDeck()" matTooltip="Reset progress">
         <mat-icon>restart_alt</mat-icon>

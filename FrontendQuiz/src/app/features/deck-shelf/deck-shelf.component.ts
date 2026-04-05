@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
 import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
 import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
@@ -14,7 +14,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatBadgeModule} from '@angular/material/badge';
 import {DeckContent, DeckInfo} from '../../../generated/api';
-import {CardStoreService} from '../../services/card-store.service';
+import {DeckStore} from '../../store/deck.store';
 
 export interface DeckSelection {
   deck: DeckInfo;
@@ -51,12 +51,12 @@ export class DeckShelfComponent implements OnInit {
   multiSelectMode = false;
   selectedDecks: Map<string, DeckSelection> = new Map();
 
+  private deckStore = inject(DeckStore);
   private static readonly INITIAL_BATCH_SIZE = 30;
 
   constructor(
     private deckShelfService: DeckShelfService,
     private profileService: LocalProfileService,
-    private cardStore: CardStoreService,
     private router: Router
   ) {
   }
@@ -115,7 +115,7 @@ export class DeckShelfComponent implements OnInit {
           deckId: deck.id,
           deckName: deck.name
         }));
-        this.cardStore.setCurrentDeck(provisioned, deck.name, deck.id);
+        this.deckStore.loadDeck(provisioned, deck.name, deck.id);
         this.router.navigate(['/quiz']);
       },
       error: (err) => {
@@ -182,7 +182,7 @@ export class DeckShelfComponent implements OnInit {
         const mixedName = results.map(r => r.deckName).join(' + ');
         const mixedId = 'mixed-' + selections.map(s => s.deck.id).sort().join('-');
 
-        this.cardStore.setCurrentDeck(merged, mixedName, mixedId);
+        this.deckStore.loadDeck(merged, mixedName, mixedId);
         this.selectedDecks.clear();
         this.multiSelectMode = false;
         this.router.navigate(['/quiz']);

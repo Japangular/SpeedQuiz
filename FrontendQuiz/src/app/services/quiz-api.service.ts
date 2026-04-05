@@ -3,7 +3,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {DeckInfo, DeckContent, DeckPage, DeckCardState} from '../models/deck.model';
-import {QuizApi} from '../interfaces/SubmissionDeckApi';
+import {QuizApi} from '../interfaces/quiz-api';
 
 @Injectable({providedIn: 'root'})
 export class QuizApiService implements QuizApi {

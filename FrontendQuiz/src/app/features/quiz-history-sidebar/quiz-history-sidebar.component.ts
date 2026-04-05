@@ -75,14 +75,29 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
         });
       }
 
+      const previousIndex = this.currentIndex;
       this.currentIndex = card.index;
+
+      if (previousIndex >= 0 && card.index < previousIndex) {
+        const reset = new Set<number>();
+        for (const idx of this.visitedIndices) {
+          if (idx <= card.index) {
+            reset.add(idx);
+          }
+        }
+        this.visitedIndices = reset;
+      }
+
       this.visitedIndices.add(card.index);
 
       const session = this.quizBoard.getSession();
       for (const entry of this.history) {
         const sessionEntry = session.getEntry(entry.card.index);
-        if (sessionEntry?.solvedExactly !== undefined) {
-          entry.solvedExactly = sessionEntry.solvedExactly;
+        if (sessionEntry) {
+          entry.hintUsed = sessionEntry.hintUsed;
+          if (sessionEntry.solvedExactly !== undefined) {
+            entry.solvedExactly = sessionEntry.solvedExactly;
+          }
         }
       }
 

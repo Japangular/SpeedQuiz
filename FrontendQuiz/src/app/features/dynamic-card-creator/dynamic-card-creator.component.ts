@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, Inject, OnInit, ViewChild} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatStep, MatStepper} from '@angular/material/stepper';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
@@ -19,10 +19,12 @@ import {
 import {MatButton} from '@angular/material/button';
 import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
-import {CardStoreService} from '../../services/card-store.service';
 import {PropertyType} from './submission-deck.model';
 import {DeckPropertyService, DynamicDeck} from './deck-property.service';
 import {take} from 'rxjs';
+import {QUIZ_API_TOKEN, QuizApi} from '../../interfaces/quiz-api';
+import {DeckContent} from '../../../generated/api';
+import {DeckStore} from '../../store/deck.store';
 
 @Component({
   selector: 'app-dynamic-card-creator',
@@ -61,7 +63,10 @@ export class DynamicCardCreatorComponent implements OnInit {
   dynamicDeck!: DynamicDeck;
   @ViewChild('propertyInput') propertyInput!: ElementRef;
 
-  constructor(private fb: FormBuilder, private submissionService: CardStoreService, private deckProperty: DeckPropertyService) {
+  deckStore = inject(DeckStore);
+
+  constructor(private fb: FormBuilder, private deckProperty: DeckPropertyService, @Inject(QUIZ_API_TOKEN) private quizApi: QuizApi) {
+
   }
 
   ngOnInit(): void {
@@ -130,12 +135,13 @@ export class DynamicCardCreatorComponent implements OnInit {
   }
 
   onCardSubmit(): void {
-    this.submissionService.sendUserGeneratedDeck({
-      deckName: this.dynamicDeck.deckForm.get('deckName')?.value,
-      username: this.dynamicDeck.username,
+    const deckName = this.dynamicDeck.deckForm.get('deckName')?.value ?? 'Untitled';
+    const deck: DeckContent = {
       properties: this.dynamicDeck.propertyTypes,
-      cards: this.dynamicDeck.cards
-    });
+      cards: this.dynamicDeck.cards,
+    };
+    this.deckStore.loadDeck(deck, deckName);
+    this.quizApi.createDeck(deckName, deck).subscribe();
   }
 
   clearPropertyInput(): void {

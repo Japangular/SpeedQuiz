@@ -5,8 +5,7 @@
     <app-slot-group
       [slots]="currentSlots"
       (allSolved)="onCardSolved($event)"
-      (labelClicked)="onLabelClicked($event)"
-      (keydown)="onKeydown($event)" />
+      (labelClicked)="onLabelClicked($event)" />
   } @else {
     <div class="empty-quiz-state">
       <mat-icon>school</mat-icon>

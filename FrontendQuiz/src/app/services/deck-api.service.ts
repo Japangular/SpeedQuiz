@@ -1,5 +1,5 @@
 import {Inject, Injectable} from '@angular/core';
-import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/SubmissionDeckApi';
+import {QUIZ_API_TOKEN, QuizApi} from '../interfaces/quiz-api';
 import {Observable, of} from 'rxjs';
 import {DeckInfo, DeckMetadata} from '../models/deck.model';
 import {PropertyType} from '../features/dynamic-card-creator/submission-deck.model';

@@ -1,11 +1,8 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {inject, Injectable, OnDestroy} from '@angular/core';
 import {Observable, Subject, Subscription} from 'rxjs';
-import {CardStoreService} from '../../../services/card-store.service';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 import {SubmissionDeck} from '../../../models/deck.model';
-import {PropertyType} from '../../../../generated/api';
-import {AnkiCard} from '../../anki-table/anki-table.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {
   BackToFirstStrategy,
@@ -23,6 +20,8 @@ import {
 import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
 import {LocalProfileService} from '../../../user-store-management/local-profile.service';
 import {Card, mapDeck} from '../model/quiz.model';
+import {DeckStore} from '../../../store/deck.store';
+import {toObservable} from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
@@ -39,9 +38,9 @@ export class QuizBoardService implements OnDestroy {
   private hintStrategy: HintStrategy = new BackToFirstStrategy();
   private sortStrategy: SortStrategy = new ByIndexStrategy();
   private currentDeckId?: string;
+  private deckStore = inject(DeckStore);
 
   constructor(
-    private store: CardStoreService,
     private modal: ModalService,
     private sessionSync: SessionSyncService,
     private deckShelfService: DeckShelfService,
@@ -52,18 +51,18 @@ export class QuizBoardService implements OnDestroy {
     this.deckIterator = new DeckIterator(this.session, this.modal, this.hintStrategy);
     this.card$ = this.deckIterator.getCard$();
 
-    this.deckSub = this.store.currentDeck$.subscribe(deck => {
+    this.deckSub = toObservable(this.deckStore.deck).subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
       this.initSession(deck);
     });
 
     const last = localStorage.getItem('japangular_last_deck');
-    if (last && this.store.currentDeck.cards.length === 0) {
+    if (last && this.deckStore.cards().length === 0) {
       const {deckId, deckName} = JSON.parse(last);
       const ownerId = localService.getToken();
       if (ownerId)
         this.deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
-          this.store.setCurrentDeck(content, deckName, deckId);
+          this.deckStore.loadDeck(content, deckName, deckId);
         });
     }
   }
@@ -117,32 +116,6 @@ export class QuizBoardService implements OnDestroy {
     });
   }
 
-  learnSelected(ankiCards: AnkiCard[]): void {
-    if (!ankiCards || ankiCards.length === 0) return;
-
-    const cards = ankiCards.map(card => ({
-      index: card.index,
-      question: card.question,
-      reading: card.reading,
-      meaning: card.meaning,
-      hint: [card.index, card.question, card.reading, card.meaning].join(' : '),
-    }));
-
-    const deck = {
-      deckName: 'SelectedAnkiDeck',
-      username: 'ankiUser',
-      properties: {
-        index: PropertyType.Info,
-        question: PropertyType.Question,
-        reading: PropertyType.Answer,
-        meaning: PropertyType.Answer,
-        hint: PropertyType.Hint,
-      },
-      cards: cards,
-    } as SubmissionDeck;
-
-    this.store.setCurrentDeck(deck);
-  }
   resetSession(): void {
     const deckId = this.currentDeckId;
     if (!deckId) return;
@@ -155,7 +128,7 @@ export class QuizBoardService implements OnDestroy {
     this.sessionSync.clearSession(deckId);
 
     // Rebuild session from the current deck without prior state
-    const deck = this.store.currentDeck;
+    const deck = this.deckStore.deck();
     if (!deck || deck.cards.length === 0) return;
 
     let cards = mapDeck(deck);
@@ -193,7 +166,7 @@ export class QuizBoardService implements OnDestroy {
   }
 
   private async initSession(deck: SubmissionDeck): Promise<void> {
-    const deckId = this.store.currentDeckId ?? this.store.currentDeckName;
+    const deckId = this.deckStore.deckId() ?? this.deckStore.deckName();
     this.currentDeckId = deckId;
     let cards = mapDeck(deck);
     cards = this.sortStrategy.sort(cards);
