@@ -2,7 +2,7 @@ import {inject, Injectable, OnDestroy} from '@angular/core';
 import {Observable, Subject, Subscription} from 'rxjs';
 import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
-import {SubmissionDeck} from '../../../models/deck.model';
+import {DeckContent} from '../../../models/deck.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {
   BackToFirstStrategy,
@@ -69,28 +69,6 @@ export class QuizEngine implements OnDestroy {
     this.deckIterator.useHint();
   }
 
-  setAsStartPoint(): void {
-    this.deckIterator.setAsStartPoint();
-    this.deckIterator.nextCard();
-  }
-
-  jumpTo(jumpKey: string): void {
-    const type = detectJumpKeyType(jumpKey);
-
-    this.deckIterator.jumpTo(card => {
-      switch (type) {
-        case 'index':
-          return card.index === parseInt(jumpKey);
-        case 'reading':
-          return card.answers['reading'] === jumpKey;
-        case 'meaning':
-          return card.answers['meaning'].toLowerCase() === jumpKey.toLowerCase();
-        default:
-          return false;
-      }
-    });
-  }
-
   resetSession(): void {
     const deckId = this.currentDeckId;
     if (!deckId) return;
@@ -123,7 +101,7 @@ export class QuizEngine implements OnDestroy {
     return this.session;
   }
 
-  private async initSession(deck: SubmissionDeck): Promise<void> {
+  private async initSession(deck: DeckContent): Promise<void> {
     this.resetSubject.next();
     const deckId = this.deckStore.deckId() ?? this.deckStore.deckName();
     this.currentDeckId = deckId;
@@ -155,13 +133,4 @@ export class QuizEngine implements OnDestroy {
       );
     }
   }
-}
-
-type JumpKeyType = 'index' | 'meaning' | 'reading' | 'unknown';
-
-function detectJumpKeyType(input: string): JumpKeyType {
-  if (/^\d+$/.test(input)) return 'index';
-  if (/^[\u3040-\u309F]+$/.test(input)) return 'reading';
-  if (/^[A-Za-z]+$/.test(input)) return 'meaning';
-  return 'unknown';
 }

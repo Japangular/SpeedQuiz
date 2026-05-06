@@ -1,5 +1,4 @@
-import {PropertyType} from '../../dynamic-card-creator/submission-deck.model';
-import {SubmissionDeck} from '../../../models/deck.model';
+import {DeckContent, PropertyType} from '../../../models/deck.model';
 
 export interface Card {
   index: number;
@@ -18,7 +17,7 @@ export interface AnswersMap {
 
 type AnswerType = Pick<Card, Extract<keyof Card, keyof AnswersMap>>;
 
-export function mapDeck(deck: SubmissionDeck): Card[] {
+export function mapDeck(deck: DeckContent): Card[] {
   const answerKeys = Object.entries(deck.properties)
     .filter(([_, value]) => value === PropertyType.Answer)
     .map(([key]) => key);

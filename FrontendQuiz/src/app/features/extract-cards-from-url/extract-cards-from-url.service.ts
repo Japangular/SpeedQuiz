@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
-import {SubmissionDeck} from '../../models/deck.model';
+import {DeckContent} from '../../models/deck.model';
 
 class ImportedCard {
 }
@@ -27,7 +27,7 @@ export class ExtractCardsFromUrlService {
     return of(true);
   }
 
-  saveDeck(deck: SubmissionDeck): Observable<any> {
+  saveDeck(deck: DeckContent): Observable<any> {
     return this.http.post(`${this.apiUrl}/quizApi/submission-deck`, deck);
   }
 }

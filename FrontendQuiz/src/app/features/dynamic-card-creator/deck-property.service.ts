@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {PropertyType} from './submission-deck.model';
+import {PropertyType} from '../../../generated/api';
 
 @Injectable({
   providedIn: 'root'

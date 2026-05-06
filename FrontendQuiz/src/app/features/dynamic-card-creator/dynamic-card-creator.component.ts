@@ -19,11 +19,10 @@ import {
 import {MatButton} from '@angular/material/button';
 import {MatInput} from '@angular/material/input';
 import {MatOption, MatSelect} from '@angular/material/select';
-import {PropertyType} from './submission-deck.model';
 import {DeckPropertyService, DynamicDeck} from './deck-property.service';
 import {take} from 'rxjs';
 import {QUIZ_API_TOKEN, QuizApi} from '../../interfaces/quiz-api';
-import {DeckContent} from '../../../generated/api';
+import {DeckContent, PropertyType} from '../../../generated/api';
 import {DeckStore} from '../../store/deck.store';
 
 @Component({

@@ -17,11 +17,11 @@ import java.util.UUID;
  * assumes one provider = one deck. User-created decks are many-per-user.
  * <p>
  * Instead, DeckRegistryService calls this adapter directly.
- * This is still an adapter: it translates SubmissionDeckRepository's
+ * This is still an adapter: it translates DeckContentRepository's
  * query-based API into the listing/loading contract the registry needs.
  * <p>
  * Target:  DeckRegistryService's expectations (listDecks, loadDeck)
- * Adaptee: SubmissionDeckRepository (speaks in SQL queries and Optional)
+ * Adaptee: DeckContentRepository (speaks in SQL queries and Optional)
  * Adapter: this class (translates repository calls → DeckInfo list + deck loading)
  * <p>
  * Why not implement DeckProvider?
