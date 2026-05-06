@@ -27,7 +27,6 @@ services:
       SPRING_DATASOURCE_POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}    # for Flyway
       OPENAPI_SPEC_PATH: /app/api.yaml
-      APP_WANIKANI_USE_DEV_CACHE: "true"
     depends_on:
       - db
       - python_dict

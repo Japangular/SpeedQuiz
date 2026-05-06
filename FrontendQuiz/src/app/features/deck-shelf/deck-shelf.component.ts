@@ -67,9 +67,7 @@ export class DeckShelfComponent implements OnInit {
       take(1),
       switchMap(profile =>
         this.deckShelfService.getDeckOverview(
-          profile.token,
-          profile.wkClaimedName,
-          profile.wkTokenHash
+          profile.token
         )
       ),
       map(decks => {

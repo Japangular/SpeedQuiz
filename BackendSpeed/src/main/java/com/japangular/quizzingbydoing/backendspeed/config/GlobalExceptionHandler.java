@@ -2,7 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.exception.KanjiNotFoundException;
-import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.externalClients.wanikani.client.exceptions.WaniKaniException;
+import com.japangular.quizzingbydoing.backendspeed.quizFeatures.exception.DeckNotFoundException;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.exceptions.DuplicateTranscriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +29,9 @@ public class GlobalExceptionHandler {
     return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
   }
 
-  @ExceptionHandler(WaniKaniException.class)
-  public ResponseEntity<ApiError> handleWaniKani(WaniKaniException ex) {
-    HttpStatus status = HttpStatus.resolve(ex.getStatusCode());
-    if (status == null) status = HttpStatus.BAD_GATEWAY;
-    return buildResponse(status, ex.getMessage());
+  @ExceptionHandler(DeckNotFoundException.class)
+  public ResponseEntity<ApiError> handleDeckNotFound(DeckNotFoundException ex) {
+    return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
   @ExceptionHandler(JsonProcessingException.class)

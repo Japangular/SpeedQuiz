@@ -56,17 +56,15 @@ Japanese text segmentation via MeCab and is called server-to-server from the bac
 `openapi-generator-maven-plugin`; the frontend Dockerfile generates a TypeScript-Angular HTTP client from the same spec. Controllers implement the
 generated interfaces, so the API contract is enforced at compile time on both sides.
 
-**Adapter Pattern for Deck Sources** — Cards come from three very different sources: Anki SQLite, user-created decks in PostgreSQL, and the WaniKani
-API. Each source is wrapped in an adapter (`AnkiDeckAdapter`, `UserDeckAdapter`, `WaniKaniDeckAdapter`) that translates its native format into a
-common `DeckProvider`/`DeckContent` interface. `DeckRegistryService` acts as a facade that unifies all three behind one API.
+**Adapter Pattern for Deck Sources** — Cards come from currently two different sources: Anki SQLite, user-created decks in PostgreSQL that translates its native format into a
+common `DeckProvider`/`DeckContent` interface. Further providers could entail other learning platforms with token based api access like WaniKani. `DeckRegistryService` acts as a facade that unifies all three behind one API.
 
 **Dual Datasource Strategy** — PostgreSQL (via HikariCP connection pool) for application data, SQLite (read-only, via JdbcTemplate) for Anki import.
 JPA repositories are used for entities with typed columns (Kanji, UserTableState, Transcripts). JdbcTemplate is used for tables with jsonb blobs or
 raw SQL needs (Deck, CardProgress, Session).
 
 **Global Error Handling** — A single `@RestControllerAdvice` handler maps all exceptions to a consistent `ApiError` JSON response with status, error
-type, message, and timestamp. Custom exceptions (`KanjiNotFoundException`, `DuplicateTranscriptException`, `WaniKaniException`) map to appropriate
-HTTP status codes. No stack traces leak to the client.
+type, message, and timestamp. Custom exceptions map to appropriate HTTP status codes. No stack traces leak to the client.
 
 **Quiz Validation Strategies** — The frontend uses a Strategy pattern for answer checking. `RomajiConversionStrategy` converts romaji input to hiragana
 for exact matching; `LevenshteinStrategy` allows fuzzy matching for English meanings. Strategies are assigned per answer slot based on property type,
@@ -89,9 +87,6 @@ them in a paginated table with row-level ignore/restore.
 
 **Japanese Dictionary** — Backed by JMDict_e.xml (~213k entries, indexed at startup) with MeCab-powered text segmentation. Paste a Japanese sentence
 and get it broken down into individual words with dictionary lookups.
-
-**WaniKani Integration** — Connects to the WaniKani API to pull assignments and subjects, with token verification, in-memory caching with TTL
-expiry, and a dev-cache mode for offline development.
 
 **Stream Transcript Cards** — Upload transcripts (e.g. from Japanese streams), store them with deduplication detection (409 Conflict on duplicate
 title+vtuber), and turn them into study material.
@@ -142,9 +137,8 @@ ng serve
 │       │   └── session/               Session management (JdbcTemplate)
 │       ├── quizFeatures/              Deck registry facade, browsing, DeckProvider interface
 │       ├── sourceFeatures/
-│       │   ├── adapters/              AnkiDeckAdapter, UserDeckAdapter, WaniKaniDeckAdapter
+│       │   ├── adapters/              AnkiDeckAdapter, UserDeckAdapter
 │       │   ├── ankiParsing/           SQLite → CSV → structured cards pipeline
-│       │   ├── externalClients/       WaniKani API client, mapper, verification
 │       │   ├── extractCardsFromUrl/   URL-based card import
 │       │   ├── htmlTableImport/       HTML table → deck importer
 │       │   └── transcriptCards/       Transcript storage, deduplication, mapping
@@ -157,7 +151,6 @@ ng serve
 │       │   ├── deck-table/            Paginated deck viewer with chooser
 │       │   ├── dict/                  Dictionary + MeCab tokenizer UI
 │       │   ├── dynamic-card-creator/  Stepper-based deck builder
-│       │   ├── extract-cards-from-url/ WaniKani import wizard
 │       │   ├── kanji-details/         Single kanji detail view
 │       │   ├── kanji-wall/            Visual kanji grid with stroke order
 │       │   ├── quiz/                  Quiz engine (board, answer slots, card view, validation)

@@ -27,20 +27,16 @@ public class DeckService {
   private final UserDeckSource userDeckSource;
   private final ObjectMapper objectMapper;
 
-  public List<DeckInfo> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
-    return deckRegistry.listDecks(ownerId, wkClaimedName, wkTokenHash);
+  public List<DeckInfo> listDecks(UUID ownerId) {
+    return deckRegistry.listDecks(ownerId);
   }
 
-  public DeckContent loadDeck(String deckId, UUID ownerId,
-                              String wkClaimedName, String wkApiToken,
-                              String wkTokenHash) {
-    return deckRegistry.loadDeck(deckId, ownerId, wkClaimedName, wkApiToken, wkTokenHash);
+  public DeckContent loadDeck(String deckId, UUID ownerId) {
+    return deckRegistry.loadDeck(deckId, ownerId);
   }
 
-  public DeckPage browseDeck(String deckId, UUID ownerId,
-                             Integer limit, Integer offset, String filter,
-                             String wkClaimedName, String wkApiToken, String wkTokenHash) {
-    DeckContent content = loadDeck(deckId, ownerId, wkClaimedName, wkApiToken, wkTokenHash);
+  public DeckPage browseDeck(String deckId, UUID ownerId, Integer limit, Integer offset, String filter) {
+    DeckContent content = loadDeck(deckId, ownerId);
     return deckBrowsingService.getPage(content, limit, offset, filter);
   }
 

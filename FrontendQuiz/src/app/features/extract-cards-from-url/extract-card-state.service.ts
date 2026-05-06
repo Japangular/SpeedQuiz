@@ -7,8 +7,6 @@ export interface ExtractCardState {
   payload?: any;
 }
 
-const TOKEN_HASH_STORAGE_KEY = 'wk_token_cache';
-
 export interface StoredTokenCache {
   claimedName: string;
   tokenHash: string;
@@ -31,24 +29,5 @@ export class ExtractCardStateService {
 
   clear(): void {
     this.state = null;
-  }
-
-  // TODO
-  saveTokenHash(cache: StoredTokenCache): void {
-    localStorage.setItem(TOKEN_HASH_STORAGE_KEY, JSON.stringify(cache));
-}
-
-  loadTokenHash(): StoredTokenCache | null {
-    const raw = localStorage.getItem(TOKEN_HASH_STORAGE_KEY);
-    if (!raw) return null;
-    try {
-      return JSON.parse(raw) as StoredTokenCache;
-    } catch {
-      return null;
-    }
-  }
-
-  clearTokenHash(): void {
-    localStorage.removeItem(TOKEN_HASH_STORAGE_KEY);
   }
 }

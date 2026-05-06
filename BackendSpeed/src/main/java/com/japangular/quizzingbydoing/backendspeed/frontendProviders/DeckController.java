@@ -33,19 +33,18 @@ public class DeckController implements DeckApi {
   }
 
   @Override
-  public ResponseEntity<List<DeckInfo>> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
-    return ResponseEntity.ok(deckService.listDecks(resolveOwner(ownerId), wkClaimedName, wkTokenHash));
+  public ResponseEntity<List<DeckInfo>> listDecks(UUID ownerId) {
+    return ResponseEntity.ok(deckService.listDecks(resolveOwner(ownerId)));
   }
 
   @Override
-  public ResponseEntity<DeckContent> loadDeck(String deckId, UUID ownerId, String wkClaimedName, String wkApiToken, String wkTokenHash) {
-    return ResponseEntity.ok(deckService.loadDeck(deckId, resolveOwner(ownerId), wkClaimedName, wkApiToken, wkTokenHash));
+  public ResponseEntity<DeckContent> loadDeck(String deckId, UUID ownerId) {
+    return ResponseEntity.ok(deckService.loadDeck(deckId, resolveOwner(ownerId)));
   }
 
   @Override
-  public ResponseEntity<DeckPage> browseDeck(String deckId, UUID ownerId, Integer limit, Integer offset, String filter, String wkClaimedName,
-                                             String wkApiToken, String wkTokenHash) {
-    return ResponseEntity.ok(deckService.browseDeck(deckId, resolveOwner(ownerId), limit, offset, filter, wkClaimedName, wkApiToken, wkTokenHash));
+  public ResponseEntity<DeckPage> browseDeck(String deckId, UUID ownerId, Integer limit, Integer offset, String filter) {
+    return ResponseEntity.ok(deckService.browseDeck(deckId, resolveOwner(ownerId), limit, offset, filter));
   }
 
   @Override

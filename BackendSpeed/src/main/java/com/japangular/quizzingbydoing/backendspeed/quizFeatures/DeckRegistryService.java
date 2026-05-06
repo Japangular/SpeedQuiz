@@ -1,8 +1,8 @@
 package com.japangular.quizzingbydoing.backendspeed.quizFeatures;
 
 import com.japangular.quizzingbydoing.backendspeed.model.DeckInfo;
+import com.japangular.quizzingbydoing.backendspeed.quizFeatures.exception.DeckNotFoundException;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.adapters.UserDeckAdapter;
-import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.adapters.WaniKaniDeckAdapter;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckContent;
 import com.japangular.quizzingbydoing.backendspeed.quizFeatures.model.DeckProvider;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +25,6 @@ import java.util.UUID;
  * 2. UserDeckAdapter (injected directly)
  * → Doesn't implement DeckProvider because it's multi-deck-per-user
  * → Called explicitly with username context
- * <p>
- * 3. WaniKaniDeckAdapter (injected directly)
- * → Doesn't implement DeckProvider because it needs auth context
- * → Called explicitly with token/session context
  */
 @Service
 @RequiredArgsConstructor
@@ -36,30 +32,25 @@ public class DeckRegistryService {
 
   private final ApplicationContext context;
   private final UserDeckAdapter userDeckAdapter;
-  private final WaniKaniDeckAdapter waniKaniDeckAdapter;
 
   private List<DeckProvider> getStaticProviders() {
     return new ArrayList<>(context.getBeansOfType(DeckProvider.class).values());
   }
 
-  public List<DeckInfo> listDecks(UUID ownerId, String wkClaimedName, String wkTokenHash) {
+  public List<DeckInfo> listDecks(UUID ownerId) {
     List<DeckInfo> result = new ArrayList<>();
     getStaticProviders().forEach(p -> result.add(p.getDeckInfo()));
     result.addAll(userDeckAdapter.listDecks(ownerId));
-    result.addAll(waniKaniDeckAdapter.listDecks(wkClaimedName, wkTokenHash));
     return result;
   }
 
-  public DeckContent loadDeck(String deckId, UUID ownerId, String wkClaimedName, String wkApiToken, String wkTokenHash) {
+  public DeckContent loadDeck(String deckId, UUID ownerId) {
     if (userDeckAdapter.handles(deckId)) {
       return userDeckAdapter.loadDeck(deckId, ownerId);
     }
-    if (waniKaniDeckAdapter.handles(deckId)) {
-      return waniKaniDeckAdapter.loadDeck(wkClaimedName, wkApiToken, wkTokenHash);
-    }
     return getStaticProviders().stream()
         .filter(p -> p.getDeckInfo().getId().equals(deckId))
-        .findFirst().orElseThrow(() -> new RuntimeException("Deck not found: " + deckId))
+        .findFirst().orElseThrow(() -> new DeckNotFoundException(deckId))
         .getDeckContent();
   }
 }

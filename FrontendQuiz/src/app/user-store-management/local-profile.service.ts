@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {BehaviorSubject, catchError, from, Observable, of} from 'rxjs';
 import {map, switchMap, tap} from 'rxjs/operators';
@@ -7,9 +7,6 @@ import {environment} from '../environments/environment';
 export interface LocalProfile {
   token: string;
   displayName: string;
-  wkTokenHash?: string;
-  wkProvider?: string;
-  wkClaimedName?: string;
   exportedAt?: string;
 }
 
@@ -36,16 +33,17 @@ export class LocalProfileService {
   private initializedSubject = new BehaviorSubject<boolean>(false);
   initialized$ = this.initializedSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {
+  }
 
   initialize(): Observable<boolean> {
     const stored = this.loadFromStorage();
 
-    if (stored?.token){
+    if (stored?.token) {
       // Trust localStorage immediately → UI renders the sidenav right away.
       // No blank screen, no flicker.
-            this.profileSubject.next(stored);
-          this.initializedSubject.next(true);
+      this.profileSubject.next(stored);
+      this.initializedSubject.next(true);
 
       // Validate in the background — if the token is dead, kick back to provision.
       return this.validate(stored.token).pipe(
@@ -85,7 +83,7 @@ export class LocalProfileService {
     return this.profileSubject.value?.token ?? null;
   }
 
-  getDisplayName(): string | null  {
+  getDisplayName(): string | null {
     return this.profileSubject.value?.displayName ?? null;
   }
 
@@ -93,9 +91,9 @@ export class LocalProfileService {
     return this.profileSubject.value?.token != null;
   }
 
-  updateProfile(patch: Partial<LocalProfile>): void{
+  updateProfile(patch: Partial<LocalProfile>): void {
     const current = this.profileSubject.value;
-    if(!current) return;
+    if (!current) return;
 
     const updated = {...current, ...patch};
     this.saveToStorage(updated);
@@ -119,7 +117,7 @@ export class LocalProfileService {
     );
   }
 
-  importProfile(json: string): Observable<boolean>{
+  importProfile(json: string): Observable<boolean> {
     try {
       const parsed = JSON.parse(json);
 
@@ -143,7 +141,7 @@ export class LocalProfileService {
             if (!valid) {
               console.warn('Save file signature verification failed — file may have been tampered with');
               return of(false);
-          }
+            }
             return this.validateAndAccept(profile);
           })
         );

@@ -12,11 +12,8 @@ export class DeckShelfService {
 
   constructor(private http: HttpClient, private deckApi: DeckService) { }
 
-  getDeckOverview(ownerId: string, wkClaimedName?: string, wkTokenHash?: string): Observable<DeckInfo[]> {
+  getDeckOverview(ownerId: string): Observable<DeckInfo[]> {
     let params: any = { ownerId };
-    if (wkClaimedName) params.wkClaimedName = wkClaimedName;
-    if (wkTokenHash) params.wkTokenHash = wkTokenHash;
-
     return this.http.get<DeckInfo[]>(`${this.apiUrl}/quizApi/decks`, { params });
   }
 

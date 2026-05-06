@@ -22,16 +22,6 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: wkClaimedName
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkTokenHash
-          in: query
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: A list of available decks
@@ -87,21 +77,6 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: wkClaimedName
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkApiToken
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkTokenHash
-          in: query
-          required: false
-          schema:
-            type: string
       responses:
         '200':
           description: Full deck content
@@ -141,21 +116,6 @@ paths:
             type: integer
             default: 0
         - name: filter
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkClaimedName
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkApiToken
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: wkTokenHash
           in: query
           required: false
           schema:
