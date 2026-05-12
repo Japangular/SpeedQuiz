@@ -57,6 +57,7 @@
               <mat-select [value]="columnRoles[i]" (selectionChange)="setColumnRole(i, $event.value)">
                 <mat-option value="question">Question</mat-option>
                 <mat-option value="answer">Answer</mat-option>
+                <mat-option value="hiragana">Hiragana (romaji → かな)</mat-option>
                 <mat-option value="skip">Skip</mat-option>
               </mat-select>
               <mat-hint>{{ header }}</mat-hint>
@@ -70,10 +71,10 @@
             <thead>
             <tr>
               <th *ngFor="let header of parseResult.columnHeaders; let i = index"
-                    [class.skipped]="columnRoles[i] === 'skip'"
-                    [class.question-col]="columnRoles[i] === 'question'">
+                  [class.skipped]="columnRoles[i] === 'skip'"
+                  [class.question-col]="columnRoles[i] === 'question'">
                 {{ header }}
-                  <span class="role-badge" *ngIf="columnRoles[i] === 'question'">Q</span>
+                <span class="role-badge" *ngIf="columnRoles[i] === 'question'">Q</span>
               </th>
             </tr>
             </thead>
@@ -117,26 +118,76 @@
         <div class="deck-summary">
           <mat-icon color="primary">style</mat-icon>
           <span>{{ deckCards.length }} cards</span>
+          <span *ngIf="splitsAfter.size > 0" class="splits-summary">
+    · {{ splitsAfter.size + 1 }} sections
+  </span>
         </div>
 
         <div class="review-table-wrapper">
           <table class="review-table">
             <thead>
-              <tr>
-                <th *ngFor="let col of deckColumnHeaders">{{ col }}</th>
-                <th class="action-col"></th>
-              </tr>
+            <tr>
+              <th *ngFor="let col of deckColumnHeaders">{{ col }}</th>
+              <th class="action-col"></th>
+            </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let card of deckCards; let i = index">
+            <!-- Section 1 header, only when sections exist -->
+            <tr *ngIf="splitsAfter.size > 0" class="section-divider section-divider-first">
+              <td [attr.colspan]="deckColumnKeys.length + 1">
+                <div class="divider-content">
+                  <mat-icon class="divider-icon">label</mat-icon>
+                  <input
+                    class="section-name-input"
+                    type="text"
+                    [value]="firstSectionName"
+                    placeholder="Section 1"
+                    (input)="firstSectionName = $any($event.target).value"
+                    aria-label="Section name">
+                  <!-- no merge button on the first section -->
+                </div>
+              </td>
+            </tr>
+            <ng-container *ngFor="let card of deckCards; let i = index">
+              <!-- The card row itself -->
+              <tr>
                 <td *ngFor="let col of deckColumnKeys">{{ card[col] }}</td>
                 <td class="action-col">
                   <button mat-icon-button color="warn" (click)="removeCard(i)"
                           aria-label="Remove card">
                     <mat-icon>close</mat-icon>
-          </button>
+                  </button>
+                  <button mat-icon-button (click)="toggleSplitAfter(i)"
+                          [class.split-active]="splitsAfter.has(i)"
+                          [attr.aria-label]="splitsAfter.has(i) ? 'Remove split' : 'Split after this row'"
+                          [matTooltip]="splitsAfter.has(i) ? 'Remove split' : 'Split deck after this row'">
+                    <mat-icon>{{ splitsAfter.has(i) ? 'unfold_less' : 'unfold_more' }}</mat-icon>
+                  </button>
                 </td>
               </tr>
+
+              <!-- Divider row, shown only if a split exists after this row -->
+              <tr *ngIf="splitsAfter.has(i)" class="section-divider">
+                <td [attr.colspan]="deckColumnKeys.length + 1">
+                  <div class="divider-content">
+                    <mat-icon class="divider-icon">label</mat-icon>
+                    <input
+                      class="section-name-input"
+                      type="text"
+                      [value]="displaySectionName(i)"
+                      [placeholder]="defaultSectionName(i)"
+                      (input)="renameSection(i, $any($event.target).value)"
+                      aria-label="Section name">
+                    <button mat-icon-button class="merge-button"
+                            (click)="toggleSplitAfter(i)"
+                            matTooltip="Merge with previous section"
+                            aria-label="Merge with previous section">
+                      <mat-icon>link_off</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
             </tbody>
           </table>
         </div>
@@ -170,9 +221,9 @@
           <p>Your deck has <strong>{{ deckCards.length }}</strong> cards and is ready.</p>
 
           <div class="choose-actions">
-          <button
-            mat-raised-button
-            color="primary"
+            <button
+              mat-raised-button
+              color="primary"
               (click)="practiceNow()"
               [disabled]="deckCards.length === 0">
               <mat-icon>play_arrow</mat-icon>
@@ -183,23 +234,23 @@
               mat-raised-button
               (click)="saveDeck()"
               [disabled]="deckCards.length === 0 || saving || saved">
-            <mat-icon>save</mat-icon>
-            {{ saved ? 'Saved!' : 'Save to my decks' }}
-          </button>
-        </div>
+              <mat-icon>save</mat-icon>
+              {{ saved ? 'Saved!' : 'Save to my decks' }}
+            </button>
+          </div>
 
-        <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
+          <mat-progress-bar *ngIf="saving" mode="indeterminate"></mat-progress-bar>
 
           <div *ngIf="saved" class="saved-info">
             <mat-icon color="primary">check_circle</mat-icon>
             <span>Deck saved. You can find it in the DeckShelf.</span>
           </div>
 
-        <div class="step-actions">
+          <div class="step-actions">
             <button mat-button color="accent" matStepperPrevious>Back to review</button>
             <button mat-button (click)="resetStepper()">Import another deck</button>
+          </div>
         </div>
-      </div>
 
       </ng-template>
     </mat-step>

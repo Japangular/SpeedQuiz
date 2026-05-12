@@ -19,7 +19,8 @@ type AnswerType = Pick<Card, Extract<keyof Card, keyof AnswersMap>>;
 
 export function mapDeck(deck: DeckContent): Card[] {
   const answerKeys = Object.entries(deck.properties)
-    .filter(([_, value]) => value === PropertyType.Answer)
+    .filter(([_, value]) =>
+      value === PropertyType.Answer || value === PropertyType.Hiragana)
     .map(([key]) => key);
 
   const questionKeys = Object.entries(deck.properties)

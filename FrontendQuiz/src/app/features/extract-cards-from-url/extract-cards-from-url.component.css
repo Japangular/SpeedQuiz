@@ -217,3 +217,61 @@
   margin-top: 16px;
   align-items: center;
 }
+
+/* Section divider row in the review table */
+.review-table tr.section-divider td {
+  padding: 0;
+  background: #fff8e1;          /* soft yellow, matches the warning-info palette */
+  border-top: 2px solid #f9a825;
+  border-bottom: 2px solid #f9a825;
+}
+
+.review-table tr.section-divider .divider-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.review-table .divider-icon {
+  color: #f57c00;
+}
+
+.review-table .section-name-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.review-table .section-name-input:focus {
+  outline: 1px solid #f9a825;
+  background: white;
+}
+
+.review-table .section-name-input::placeholder {
+  color: #888;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* The split-toggle button gets a subtle highlight when active */
+.review-table .action-col button.split-active {
+  background: rgba(249, 168, 37, 0.15);
+}
+
+.review-table .action-col {
+  white-space: nowrap;
+}
+.review-table .action-col button {
+  display: inline-flex;
+}
+
+/* Splits summary badge in the header */
+.deck-summary .splits-summary {
+  color: #f57c00;
+  font-weight: 500;
+}

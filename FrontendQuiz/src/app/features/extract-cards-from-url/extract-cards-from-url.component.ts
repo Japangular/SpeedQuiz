@@ -14,6 +14,7 @@ import {PropertyType} from '../../../generated/api';
 import {ParseResult, ParseOptions, ColumnRole, parsePastedText} from './paste-parser';
 import {DeckStore} from '../../store/deck.store';
 import { QUIZ_API_TOKEN } from '../../interfaces/quiz-api';
+import {MatTooltip} from '@angular/material/tooltip';
 
 export interface DeckCard {
   [key: string]: string;
@@ -33,8 +34,8 @@ export interface DeckCard {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatIconButton,
     MatProgressBarModule,
+    MatTooltip,
   ],
   templateUrl: './extract-cards-from-url.component.html',
   styleUrls: ['./extract-cards-from-url.component.css'],
@@ -55,6 +56,7 @@ export class ExtractCardsFromUrlComponent {
   deckCards: DeckCard[] = [];
   deckColumnHeaders: string[] = [];
   deckColumnKeys: string[] = [];
+  private hiraganaKeys: string[] = [];
   private questionKey = '';
   private answerKeys: string[] = [];
 
@@ -118,8 +120,10 @@ export class ExtractCardsFromUrlComponent {
       return;
     }
 
-    if (!activeColumns.some(c => c.role === 'answer')) {
-      this.snackBar.open('Please assign at least one column as "Answer"', 'OK', {duration: 4000});
+  // an answer-shaped column for the validation check — hiragana counts as an answer
+  const isAnswerLike = (r: ColumnRole) => r === 'answer' || r === 'hiragana';
+  if (!activeColumns.some(c => isAnswerLike(c.role))) {
+    this.snackBar.open('Please assign at least one column as "Answer" or "Hiragana"', 'OK', {duration: 4000});
       return;
     }
 
@@ -127,6 +131,7 @@ export class ExtractCardsFromUrlComponent {
     this.deckColumnKeys = activeColumns.map(c => c.header);
     this.questionKey = activeColumns.find(c => c.role === 'question')!.header;
     this.answerKeys = activeColumns.filter(c => c.role === 'answer').map(c => c.header);
+  this.hiraganaKeys = activeColumns.filter(c => c.role === 'hiragana').map(c => c.header);
 
     this.deckCards = this.parseResult.rows.map(row => {
       const card: DeckCard = {};
@@ -139,8 +144,30 @@ export class ExtractCardsFromUrlComponent {
     this.snackBar.open(`${this.deckCards.length} cards ready for review`, 'OK', {duration: 3000});
   }
 
+
+
   removeCard(index: number): void {
     this.deckCards = this.deckCards.filter((_, i) => i !== index);
+    // Shift split indices to keep them pointing at the right rows
+    const shifted = new Set<number>();
+    const shiftedNames = new Map<number, string>();
+    for (const s of this.splitsAfter) {
+      if (s < index) {
+        shifted.add(s);
+        const n = this.sectionNames.get(s);
+        if (n) shiftedNames.set(s, n);
+      } else if (s >= index) {
+        // Drop split if it was exactly at this row's boundary; otherwise shift down
+        const newIdx = s - 1;
+        if (newIdx >= 0) {
+          shifted.add(newIdx);
+          const n = this.sectionNames.get(s);
+          if (n) shiftedNames.set(newIdx, n);
+        }
+      }
+    }
+    this.splitsAfter = shifted;
+    this.sectionNames = shiftedNames;
   }
 
   practiceNow(): void {
@@ -165,6 +192,39 @@ export class ExtractCardsFromUrlComponent {
     }, 1000);
   }
 
+  splitsAfter = new Set<number>();
+  sectionNames = new Map<number, string>();
+  firstSectionName: string = ''
+
+  toggleSplitAfter(rowIndex: number): void {
+    if (this.splitsAfter.has(rowIndex)) {
+      this.splitsAfter.delete(rowIndex);
+      this.sectionNames.delete(rowIndex);
+    } else {
+      this.splitsAfter.add(rowIndex);
+    }
+  }
+
+  renameSection(splitIndex: number, name: string): void {
+    if (name.trim()) {
+      this.sectionNames.set(splitIndex, name.trim());
+    } else {
+      this.sectionNames.delete(splitIndex);
+    }
+  }
+
+  defaultSectionName(splitIndex: number): string {
+    // Section number = how many splits come at-or-before this one
+    const sectionNumber = [...this.splitsAfter]
+      .filter(s => s <= splitIndex)
+      .length + 1;
+    return `Section ${sectionNumber}`;
+  }
+
+  displaySectionName(splitIndex: number): string {
+    return this.sectionNames.get(splitIndex) ?? this.defaultSectionName(splitIndex);
+  }
+
   resetStepper(): void {
     this.pastedText = '';
     this.parseResult = null;
@@ -175,19 +235,16 @@ export class ExtractCardsFromUrlComponent {
     this.deckColumnKeys = [];
     this.saving = false;
     this.saved = false;
+    this.splitsAfter.clear();
+    this.sectionNames.clear();
     this.stepper.reset();
   }
 
   private buildDeckContent() {
     const properties: Record<string, PropertyType> = {};
     properties[this.questionKey] = PropertyType.Question;
-    for (const key of this.answerKeys) {
-      properties[key] = PropertyType.Answer;
-    }
-
-    return {
-      properties,
-      cards: this.deckCards,
-    };
+    for (const key of this.answerKeys)   properties[key] = PropertyType.Answer;
+    for (const key of this.hiraganaKeys) properties[key] = PropertyType.Hiragana;
+    return { properties, cards: this.deckCards };
   }
 }

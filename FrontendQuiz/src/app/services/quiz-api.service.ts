@@ -4,13 +4,19 @@ import {Observable} from 'rxjs';
 import {environment} from '../environments/environment';
 import {DeckInfo, DeckContent, DeckPage, DeckCardState} from '../models/deck.model';
 import {QuizApi} from '../interfaces/quiz-api';
+import {LocalProfileService} from '../user-store-management/local-profile.service';
 
 @Injectable({providedIn: 'root'})
 export class QuizApiService implements QuizApi {
   private apiUrl = `${environment.apiBaseUrl}/quizApi/decks`;
-  private ownerId = crypto.randomUUID(); // temporary
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private profile: LocalProfileService,
+  ) {}
+
+  private get ownerId(): string {
+    return this.profile.getToken() ?? '';
   }
 
   listDecks(): Observable<DeckInfo[]> {

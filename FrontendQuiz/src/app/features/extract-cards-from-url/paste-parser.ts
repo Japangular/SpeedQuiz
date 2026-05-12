@@ -1,5 +1,5 @@
 export type DetectedDelimiter = 'tab' | 'newline-group';
-export type ColumnRole = 'question' | 'answer' | 'skip';
+export type ColumnRole = 'question' | 'answer' | 'hiragana' | 'skip';
 
 export interface ParseResult {
   rows: string[][];
@@ -104,7 +104,6 @@ function classifyColumn(samples: string[]): LineType {
 }
 
 function classifyLine(line: string): LineType {
-  if (line.length <= 2) return 'short';
 
   const chars = [...line.replace(/\s/g, '')];
   const total = chars.length || 1;
@@ -149,13 +148,13 @@ function buildHeaders(types: LineType[]): string[] {
         name = usedNames.has('Kanji') ? 'Kanji/Vocab' : 'Kanji';
         break;
       case 'kana':
-        name = usedNames.has('Reading') ? 'Kana' : 'Reading';
+        name = usedNames.has('Reading') ? 'Kana' : 'Hiragana';
         break;
       case 'latin':
         name = usedNames.has('Meaning') ? 'English' : 'Meaning';
         break;
       case 'short':
-        name = usedNames.has('Kanji') ? 'Short' : 'Kanji';
+        name = usedNames.has('Kanji') ? 'Hiragana' : 'Kanji';
         break;
       default:
         name = `Column ${usedNames.size + 1}`;
