@@ -2,6 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.exception.KanjiNotFoundException;
+import com.japangular.quizzingbydoing.backendspeed.persistence.deck.DuplicateDeckException;
 import com.japangular.quizzingbydoing.backendspeed.quizFeatures.exception.DeckNotFoundException;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.transcriptCards.exceptions.DuplicateTranscriptException;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -57,6 +59,12 @@ public class GlobalExceptionHandler {
         .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
         .collect(Collectors.joining(", "));
     return buildResponse(HttpStatus.BAD_REQUEST, message);
+  }
+
+  @ExceptionHandler(DuplicateDeckException.class)
+  public ResponseEntity<ApiError> handleDuplicateDeck(DuplicateDeckException ex) {
+    return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ApiError(409, "deck_exists", ex.getMessage(), Instant.now()));
   }
 
   private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message) {

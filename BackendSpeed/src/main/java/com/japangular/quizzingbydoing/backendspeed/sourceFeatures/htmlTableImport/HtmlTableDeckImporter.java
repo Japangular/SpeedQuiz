@@ -20,7 +20,7 @@ public class HtmlTableDeckImporter {
   public DeckModel importHtml(
       InputStream input,
       String deckName,
-      String username
+      UUID ownerId
   ) throws Exception {
 
     TableData tableData = extractor.extract(input);
@@ -34,7 +34,7 @@ public class HtmlTableDeckImporter {
 
     return new DeckModel(
         deckName,
-        username,
+        ownerId,
         properties,
         cards
     );

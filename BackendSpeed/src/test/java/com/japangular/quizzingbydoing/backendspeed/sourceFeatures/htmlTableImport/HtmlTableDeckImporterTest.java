@@ -4,6 +4,7 @@ import com.japangular.quizzingbydoing.backendspeed.persistence.deck.DeckModel;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
+import java.util.UUID;
 
 import static com.japangular.quizzingbydoing.backendspeed.sourceFeatures.htmlTableImport.HtmlTableExtractorTest.TANOS;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +23,7 @@ class HtmlTableDeckImporterTest {
       DeckModel deck = importer.importHtml(
           in,
           "JLPT N5 Vocab",
-          "testuser"
+          UUID.fromString("00000000-0000-0000-0000-000000000001")
       );
 
       assertEquals("JLPT N5 Vocab", deck.getDeckName());
@@ -51,7 +52,7 @@ class HtmlTableDeckImporterTest {
 
         assertNotNull(in);
 
-        DeckModel deck = importer.importHtml(in, file, "tester");
+        DeckModel deck = importer.importHtml(in, file, UUID.fromString("00000000-0000-0000-0000-000000000001"));
 
         assertFalse(deck.getCards().isEmpty(),
             "Deck should not be empty for file: " + file);

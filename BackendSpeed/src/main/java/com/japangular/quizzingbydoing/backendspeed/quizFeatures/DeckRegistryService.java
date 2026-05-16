@@ -24,7 +24,7 @@ import java.util.UUID;
  * <p>
  * 2. UserDeckAdapter (injected directly)
  * → Doesn't implement DeckProvider because it's multi-deck-per-user
- * → Called explicitly with username context
+ * → Called explicitly with ownerID context
  */
 @Service
 @RequiredArgsConstructor

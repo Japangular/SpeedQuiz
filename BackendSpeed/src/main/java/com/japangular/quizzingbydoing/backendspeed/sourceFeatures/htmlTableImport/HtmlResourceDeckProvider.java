@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class HtmlResourceDeckProvider implements DeckProvider {
@@ -30,7 +31,7 @@ public class HtmlResourceDeckProvider implements DeckProvider {
   @Override
   public DeckContent getDeckContent() {
     try (InputStream in = new FileInputStream(fullPath)) {
-      DeckModel deck = importer.importHtml(in, entry.getName(), "system");
+      DeckModel deck = importer.importHtml(in, entry.getName(), UUID.fromString("00000000-0000-0000-0000-000000000000"));
       return new DeckContent(deck.getProperties(), deck.getCards());
     } catch (Exception e) {
       throw new RuntimeException("Failed to load deck: " + entry.getId(), e);
