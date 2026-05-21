@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -65,6 +66,15 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ApiError> handleDuplicateDeck(DuplicateDeckException ex) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
         .body(new ApiError(409, "deck_exists", ex.getMessage(), Instant.now()));
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  public ResponseEntity<ApiError> handleUploadTooLarge(MaxUploadSizeExceededException ex) {
+    long maxBytes = ex.getMaxUploadSize(); // -1 if not known
+    String msg = maxBytes > 0
+        ? "File too large. Maximum allowed: " + (maxBytes / (1024 * 1024)) + " MB"
+        : "File too large.";
+    return buildResponse(HttpStatus.PAYLOAD_TOO_LARGE, msg);
   }
 
   private ResponseEntity<ApiError> buildResponse(HttpStatus status, String message) {

@@ -13,6 +13,7 @@ import {BackendSourceService} from './features/anki-table/backend-source.service
 import {AnkiTableService} from './features/anki-table/anki-table.service';
 import {DeckShelfComponent} from './features/deck-shelf/deck-shelf.component';
 import {inject} from '@angular/core';
+import {AnkiImportComponent} from './features/anki-import/anki-import.component';
 
 export const routes: Routes = [
   {
@@ -77,7 +78,12 @@ export const routes: Routes = [
         component: DeckShelfComponent,
         data: {label: 'DeckShelf', icon: 'view_quilt'}
       },
-
+      {
+        path: 'ankiImport',
+        component: AnkiImportComponent,
+        title: 'Import Anki',
+        data: { label: 'Anki Import', icon: 'cloud_upload' }
+      },
       {
         path: 'about',
         component: AboutComponent,
