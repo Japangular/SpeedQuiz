@@ -11,13 +11,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Facade that unifies all deck sources behind one API.
- * <p>
- * Three types of sources, three integration strategies:
- * <p>
  * 1. DeckProvider beans (auto-discovered via ApplicationContext)
  * → AnkiDeckAdapter, HtmlResourceDeckProvider
  * → These implement DeckProvider, so they're found automatically
@@ -46,7 +44,10 @@ public class DeckRegistryService {
 
   public DeckContent loadDeck(String deckId, UUID ownerId) {
     if (userDeckAdapter.handles(deckId)) {
-      return userDeckAdapter.loadDeck(deckId, ownerId);
+      Optional<DeckContent> deckContent = userDeckAdapter.loadDeck(deckId, ownerId);
+      if (deckContent.isPresent()) {
+        return deckContent.get();
+      }
     }
     return getStaticProviders().stream()
         .filter(p -> p.getDeckInfo().getId().equals(deckId))

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -33,6 +34,7 @@ import java.util.UUID;
 @Component
 @RequiredArgsConstructor
 public class UserDeckAdapter {
+
   private final DeckRepository repository;
   private static final String ID_PREFIX = "user:";
 
@@ -46,11 +48,11 @@ public class UserDeckAdapter {
         .toList();
   }
 
-  public DeckContent loadDeck(String deckId, UUID ownerId) {
+  public Optional<DeckContent> loadDeck(String deckId, UUID ownerId) {
     String deckName = deckId.substring(ID_PREFIX.length());
-    DeckModel deck =
-        repository.findByOwnerIdAndDeckName(ownerId, deckName).orElseThrow(() -> new RuntimeException("User deck not found: " + deckId));
-    return new DeckContent(deck.getProperties(), deck.getCards());
+
+    return repository.findByOwnerIdAndDeckName(ownerId, deckName)
+        .map(deck -> new DeckContent(deck.getProperties(), deck.getCards()));
   }
 
   public boolean handles(String deckId) {
