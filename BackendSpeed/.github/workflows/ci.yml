@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (Maven)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./BackendSpeed
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Make api.yaml available to Maven build
+        run: cp ../api.yaml ./api.yaml
+
+      - name: Build and run tests
+        run: ./mvnw -B verify
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./FrontendQuiz
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: FrontendQuiz/package-lock.json
+
+      - name: Set up JDK 21 (needed by OpenAPI Generator)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate API client
+        run: |
+          npx --yes @openapitools/openapi-generator-cli generate \
+            -i ../api.yaml \
+            -g typescript-angular \
+            -o ./src/generated/api \
+            --additional-properties=ngVersion=19.0.0,npmName=speedquiz-client
+
+      - name: Build
+        run: npm run build
+
+      - name: Test (headless)
+        run: npm test -- --watch=false --browsers=ChromeHeadless
