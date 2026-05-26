@@ -2,48 +2,48 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-backend:
-  name: Backend (Maven)
-  runs-on: ubuntu-latest
-  services:
-    postgres:
-      image: postgres:16
-      env:
-        POSTGRES_DB: speedquizdb
-        POSTGRES_USER: speedquiz
-        POSTGRES_PASSWORD: ci_password
-      ports:
-        - 5432:5432
-      options: >-
-        --health-cmd "pg_isready -U speedquiz -d speedquizdb"
-        --health-interval 5s
-        --health-timeout 5s
-        --health-retries 10
-  defaults:
-    run:
-      working-directory: ./BackendSpeed
-  env:
-    SPRING_PROFILES_ACTIVE: ci
-    POSTGRES_PASSWORD: ci_password
-  steps:
-    - uses: actions/checkout@v4
+  backend:
+    name: Backend (Maven)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: speedquizdb
+          POSTGRES_USER: speedquiz
+          POSTGRES_PASSWORD: ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U speedquiz -d speedquizdb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ./BackendSpeed
+    env:
+      SPRING_PROFILES_ACTIVE: ci
+      POSTGRES_PASSWORD: ci_password
+    steps:
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: 'maven'
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
-    - name: Make api.yaml available to Maven build
-      run: cp ../api.yaml ./api.yaml
+      - name: Make api.yaml available to Maven build
+        run: cp ../api.yaml ./api.yaml
 
-    - name: Build and run tests
-      run: ./mvnw -B verify
+      - name: Build and run tests
+        run: ./mvnw -B verify
 
   frontend:
     name: Frontend (Angular)
