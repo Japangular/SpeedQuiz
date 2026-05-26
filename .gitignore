@@ -30,6 +30,10 @@ build/
 .vscode/
 
 ./FrontendQuiz/src/api
+css_generate_context.sh
+generate_deploy_context.sh
+nginx-auth-snippet.conf
+complete_generate_context.sh
 
 JMdict_e.xml
 
