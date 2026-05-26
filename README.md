@@ -206,6 +206,11 @@ ng serve
 
 ## Credits
 
+### JMdict
+
+JMdict
+Japanese-English dictionary data from the [JMdict-EDICT Dictionary Project](https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project), the property of the Electronic Dictionary Research and Development Group (EDRDG), used in accordance with the [EDRDG License](https://www.edrdg.org/edrdg/licence.html) (Creative Commons Attribution-ShareAlike).
+
 ### KanjiVG
 
 This project includes kanji stroke order diagrams sourced from the
@@ -217,8 +222,4 @@ KanjiVG website: http://kanjivg.tagaini.net
 
 ### Fonts
 
-This project uses the KanjiStrokeOrders font, licensed under a BSD-style
-license. The stroke order diagrams are copyrighted by Ulrich Apel and the
-Wadoku and AAAA projects. See `THIRD_PARTY_LICENSES.md` for the full license
-text. For more information, see the
-[KanjiStrokeOrders font page](http://sites.google.com/site/nihilistorguk/).
+This project uses the KanjiStrokeOrders font, copyrighted by Ulrich Apel, the AAAA project, and the Wadoku project. See [LICENSE-KanjiStrokeOrders.txt](./LICENSE-KanjiStrokeOrders.txt) for the full BSD 3-Clause License text. For more information, see the [KanjiStrokeOrders font page](http://sites.google.com/site/nihilistorguk/).

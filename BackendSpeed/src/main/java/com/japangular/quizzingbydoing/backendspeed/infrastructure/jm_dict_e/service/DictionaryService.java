@@ -29,10 +29,25 @@ public class DictionaryService {
   @Value("${app.dictionary.path:/app/jmdict_e.xml}")
   private String filename;
 
+  @Value("${app.dictionary.required:false}")
+  private boolean required;
+
   @PostConstruct
   public void loadDictionary() throws Exception {
     logger.info("Loading Dictionary by parsing XML from {}...", filename);
     File file = new File(filename);
+
+    if (!file.exists()) {
+      if (required) {
+        throw new IllegalStateException(
+            "Dictionary file not found at " + filename
+                + ". Set app.dictionary.required=false to allow startup without it.");
+      }
+      logger.warn("Dictionary file not found at {} — endpoints will return empty results.", filename);
+      return;
+    }
+    logger.info("Loading Dictionary by parsing XML from {}...", filename);
+
     JAXBContext context = JAXBContext.newInstance(Entry.class);
     Unmarshaller unmarshaller = context.createUnmarshaller();
 
@@ -66,6 +81,10 @@ public class DictionaryService {
     }
 
     buildIndex();
+  }
+
+  public int getEntryCount() {
+    return entries.size();
   }
 
   private void buildIndex() {
