@@ -84,7 +84,7 @@ jobs:
 
       - name: Test (headless)
         run: npm test -- --watch=false --browsers=ChromeHeadless
-        continue-on-error: true
+        continue-on-error: false
 
   e2e:
     name: E2E (Playwright)
