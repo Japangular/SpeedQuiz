@@ -170,4 +170,17 @@ export async function mockBackend(page: Page): Promise<void> {
             body: JSON.stringify(MOCK_KANJI_RESULTS[term] ?? []),
         });
     });
+
+    // GET http://localhost/kanjivg/<codepoint> — stroke-order SVG for the
+    // StrokeOrderKanji component. It's fetched on port 80 (not :4200), so it's
+    // unreachable in tests and trips the global "Cannot reach server" snackbar.
+    // A stub SVG returns 200 so the error path never fires; the component just
+    // finds zero strokes, which is fine since no test asserts on stroke order.
+    await page.route('**/kanjivg/**', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'image/svg+xml',
+            body: '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+        });
+    });
 }
