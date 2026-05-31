@@ -85,3 +85,62 @@ jobs:
       - name: Test (headless)
         run: npm test -- --watch=false --browsers=ChromeHeadless
         continue-on-error: true
+
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            FrontendQuiz/package-lock.json
+            e2e/package-lock.json
+
+      - name: Set up JDK 21 (needed by OpenAPI Generator)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # ng serve can't compile without the generated client, so do this first.
+      - name: Install frontend dependencies
+        working-directory: ./FrontendQuiz
+        run: npm ci
+
+      - name: Generate API client
+        working-directory: ./FrontendQuiz
+        run: |
+          npx --yes @openapitools/openapi-generator-cli generate \
+            -i ../api.yaml \
+            -g typescript-angular \
+            -o ./src/generated/api \
+            --additional-properties=ngVersion=19.0.0,npmName=speedquiz-client
+
+      - name: Install e2e dependencies
+        working-directory: ./e2e
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: ./e2e
+        run: npx playwright install --with-deps chromium
+
+      # Playwright's webServer boots `ng serve` (npm --prefix ../FrontendQuiz run start).
+      # GitHub sets CI=true automatically, so your config's CI branch kicks in:
+      # retries, single worker, github + html reporters, reuseExistingServer=false.
+      - name: Run Playwright tests
+        working-directory: ./e2e
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report/
+          retention-days: 7
