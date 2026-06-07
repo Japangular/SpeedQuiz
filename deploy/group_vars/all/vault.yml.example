@@ -1,0 +1,13 @@
+# Template for secrets. Copy to vault.yml, fill in real values, then encrypt:
+#   cp vault.yml.example vault.yml
+#   # edit vault.yml
+#   ansible-vault encrypt vault.yml
+#
+# After that, vault.yml is encrypted at rest and Ansible decrypts it in memory
+# whenever you pass --ask-vault-pass (or --vault-password-file).
+---
+vault_postgres_db: speedquiz
+vault_postgres_user: speedquiz
+vault_postgres_password: replace-me-with-a-strong-password
+
+cors_allowed_origins: "https://yourdomain.example"

@@ -47,7 +47,6 @@ export function cardToSlots(
 
 function detectQuestionKey(card: Card): string {
   // Try to find the original key name.
-  // For WaniKani cards, subjectType gives us a hint.
   // Fallback to 'question'.
   if (card.subjectType === 'KANJI') return 'kanji';
   if (card.subjectType === 'vocabulary' || card.subjectType === 'VOCABULARY')

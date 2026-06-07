@@ -1,0 +1,10 @@
+# One host: the VM.
+# Run everything as root for simplicity (the bootstrap role still creates
+# an unprivileged 'speedquiz' user that owns and runs the app).
+all:
+  hosts:
+    speedquiz:
+      ansible_host: hetzner-mzk
+      ansible_become: true
+      ansible_become_method: sudo
+      ansible_python_interpreter: /usr/bin/python3

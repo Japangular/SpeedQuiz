@@ -1,0 +1,96 @@
+# Bootstrap role: turn a fresh (or partly-used) Ubuntu host into a safe baseline.
+# Fachfrage hooks:
+#   - "Wie härtet man einen Linux-Server ab?" -> SSH drop-in, UFW, fail2ban, unattended-upgrades
+#   - "Wieso ein eigener Service-User?" -> Least privilege; app does not run as root
+---
+- name: Set timezone to Europe/Berlin
+  community.general.timezone:
+    name: Europe/Berlin
+
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - sudo
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - curl
+      - ca-certificates
+      - git
+      - gnupg
+      - python3-requests   # needed by some ansible modules
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Create deploy group
+  ansible.builtin.group:
+    name: "{{ deploy_user }}"
+    state: present
+
+- name: Create deploy user (will own /opt/speedquiz and run docker compose)
+  ansible.builtin.user:
+    name: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    groups: [sudo]
+    append: true
+    shell: /bin/bash
+    create_home: true
+    state: present
+
+- name: Install SSH key for deploy user
+  ansible.posix.authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ ssh_public_key }}"
+    state: present
+
+- name: Re-install SSH key for root (so we don't lock ourselves out)
+  ansible.posix.authorized_key:
+    user: root
+    key: "{{ ssh_public_key }}"
+    state: present
+
+- name: Harden sshd via drop-in (no passwords, no root password login)
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/00-hardening.conf
+    mode: "0644"
+    content: |
+      # Managed by Ansible. Do not edit by hand.
+      PasswordAuthentication no
+      PermitRootLogin prohibit-password
+      ChallengeResponseAuthentication no
+      KbdInteractiveAuthentication no
+  notify: Restart sshd
+
+- name: UFW default policies (deny in, allow out)
+  community.general.ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: incoming, policy: deny }
+    - { direction: outgoing, policy: allow }
+
+- name: UFW allow SSH, HTTP, HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop: ["22", "80", "443"]
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+
+- name: Enable unattended security upgrades
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: "0644"
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+
+- name: Ensure fail2ban is running and enabled
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true

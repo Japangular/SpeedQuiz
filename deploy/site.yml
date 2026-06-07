@@ -1,0 +1,11 @@
+# Full provisioning + first deploy.
+# Idempotent: safe to re-run any time.
+---
+- name: Provision and deploy SpeedQuiz on Hetzner
+  hosts: speedquiz
+  become: true
+  roles:
+    - bootstrap   # OS user, SSH hardening, UFW, fail2ban, unattended-upgrades
+    - docker      # Docker Engine + compose plugin
+    - nginx       # Host nginx as TLS-terminating reverse proxy, certbot
+    - speedquiz   # Clone repo, render .env + compose override, docker compose up

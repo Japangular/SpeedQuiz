@@ -1,0 +1,130 @@
+---
+- name: Ensure app directory exists
+  ansible.builtin.file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Clone or update the SpeedQuiz repo
+  ansible.builtin.git:
+    repo: "{{ repo_url }}"
+    dest: "{{ app_dir }}"
+    version: "{{ repo_branch }}"
+    force: true
+  become_user: "{{ deploy_user }}"
+
+- name: Ensure JMdict data file exists
+  ansible.builtin.get_url:
+    url: http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz
+    dest: "{{ app_dir }}/jmdict_e.xml.gz"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+    # Only fetch if the unzipped target doesn't already exist
+    force: false
+  register: jmdict_download
+
+- name: Decompress JMdict (only if just downloaded)
+  ansible.builtin.command: gunzip -f "{{ app_dir }}/jmdict_e.xml.gz"
+  args:
+    creates: "{{ app_dir }}/jmdict_e.xml"
+  when: jmdict_download.changed
+
+- name: Render .env file (secrets from vault)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ app_dir }}/.env"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+
+- name: Render compose.override.yml (close dev ports, bind nginx to localhost)
+  ansible.builtin.template:
+    src: compose.override.yml.j2
+    dest: "{{ app_dir }}/compose.override.yml"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"
+
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: "{{ app_dir }}/backups"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0700"
+
+- name: Check if database container is currently running
+  ansible.builtin.command: docker compose ps -q db
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ deploy_user }}"
+  register: db_container
+  changed_when: false
+  failed_when: false
+
+- name: Pre-deploy database dump (skipped on first deploy when DB doesn't exist yet)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ts=$(date +%Y%m%d-%H%M%S)
+    docker compose exec -T db pg_dump -U {{ postgres_user }} {{ postgres_db }} \
+      | gzip > backups/pre-deploy-${ts}.sql.gz
+  args:
+    chdir: "{{ app_dir }}"
+    executable: /bin/bash
+  become_user: "{{ deploy_user }}"
+  when: db_container.stdout | length > 0
+  changed_when: true
+
+- name: Bring stack up (build images on the host, then start)
+  ansible.builtin.command: docker compose up -d --build --remove-orphans
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ deploy_user }}"
+  register: compose_result
+  changed_when: >-
+    compose_result.stdout is search('Started|Created|Recreated')
+    or compose_result.stderr is search('Started|Created|Recreated')
+
+- name: Wait briefly for JVM cold start before health checks
+  ansible.builtin.pause:
+    seconds: 20
+  when: compose_result.changed
+
+- name: Wait for backend actuator /health to report UP
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ backend_public_port }}/api/actuator/health"
+    return_content: true
+    status_code: 200
+  register: health
+  until: >
+    health.status == 200
+    and health.json.status == 'UP'
+    and health.json.components.dictionary.status == 'UP'
+  retries: 12
+  delay: 5
+
+- name: Prune dangling Docker images and old build cache
+  ansible.builtin.shell: |
+    docker image prune -f
+    docker builder prune -f --filter "until=72h"
+  become_user: "{{ deploy_user }}"
+  changed_when: false
+
+- name: Prune deploy backups older than 30 days
+  ansible.builtin.find:
+    paths: "{{ app_dir }}/backups"
+    age: 30d
+    patterns: "pre-deploy-*.sql.gz"
+  register: old_backups
+  changed_when: false
+
+- name: Delete old backups
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ old_backups.files }}"
+  loop_control:
+    label: "{{ item.path }}"

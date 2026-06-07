@@ -1,0 +1,38 @@
+# Production overrides for compose.yaml. Rendered by Ansible.
+#
+# What we do here (and WHY in interview-Sprech):
+#   - All container ports that were published for local development are dropped
+#     (`!reset []`). The database, the Spring Boot backend, the MeCab service
+#     and the frontend container do not need to be reachable from outside the
+#     docker network in production.
+#   - The compose-internal nginx is bound to 127.0.0.1:{{ backend_public_port }}
+#     only -- so the host nginx (which holds the TLS cert) is the single
+#     ingress point.
+#   - `restart: unless-stopped` so containers survive reboots.
+#
+# The `!reset` tag requires Docker Compose v2.24+ (we install the latest plugin
+# in the docker role, so this is fine).
+services:
+  db:
+    ports: !reset []
+    restart: unless-stopped
+
+  backend:
+    ports: !reset []
+    restart: unless-stopped
+
+  python_dict:
+    ports: !reset []
+    restart: unless-stopped
+
+  frontend:
+    ports: !reset []
+    restart: unless-stopped
+
+  nginx:
+    ports: !override
+      - "127.0.0.1:{{ backend_public_port }}:80"
+    volumes:
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
+      - ./nginx-auth-snippet.conf:/etc/nginx/site-snippets/auth.conf:ro
+    restart: unless-stopped

@@ -1,0 +1,23 @@
+# Non-secret defaults
+---
+# OS user that owns /opt/speedquiz and runs the container stack.
+deploy_user: speedquiz
+app_dir: /opt/speedquiz
+
+# Your GitHub repo (HTTPS clone URL is fine for a public repo).
+repo_url: https://github.com/Japangular/SpeedQuiz.git
+repo_branch: main
+
+domain_name: "{{ vault_domain_name }}"
+letsencrypt_email: "{{ vault_letsencrypt_email }}"
+ssh_public_key: "{{ vault_ssh_public_key }}"
+
+# Internal port the host nginx forwards to (compose's nginx binds 127.0.0.1:<this>:80).
+backend_public_port: 8081
+
+# Indirection so vault.yml can change without touching role tasks.
+postgres_db: "{{ vault_postgres_db }}"
+postgres_user: "{{ vault_postgres_user }}"
+postgres_password: "{{ vault_postgres_password }}"
+
+cors_allowed_origins: "{{ vault_cors_allowed_origins }}"

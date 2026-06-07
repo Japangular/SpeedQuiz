@@ -1,0 +1,9 @@
+# Release playbook: re-runs only the speedquiz role.
+# Use this for routine deployments after site.yml has provisioned the host.
+#   ansible-playbook deploy.yml --ask-vault-pass
+---
+- name: Release a new version of SpeedQuiz
+  hosts: speedquiz
+  become: true
+  roles:
+    - speedquiz

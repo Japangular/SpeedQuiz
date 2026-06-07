@@ -1,0 +1,88 @@
+# Nginx role: install nginx on the host as TLS-terminating reverse proxy
+# in front of the container stack, plus certbot with automatic renewal.
+#
+# Architecture:
+#   - Ansible fully owns the nginx site config.
+#   - Certbot uses webroot challenge (certonly), never touches nginx config.
+#   - Two templates: HTTP-only for bootstrap, full TLS for steady state.
+#
+# Fachfrage hooks:
+#   - "Warum host nginx UND container nginx?" -> Separation of concerns: TLS
+#     and certbot live on the host; the container stack stays portable.
+#   - "Wie wird das Zertifikat erneuert?" -> certbot.timer (systemd) prueft
+#     2x taeglich. Renewal nutzt webroot challenge ohne Config-Aenderung.
+#   - "Warum nicht certbot --nginx?" -> Mode hat in vorheriger Iteration die
+#     Ansible-gemanagete Config ueberschrieben. certonly + webroot trennt
+#     Config-Management von Cert-Management sauber.
+---
+- name: Install nginx and certbot
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - certbot
+    state: present
+    update_cache: true
+
+- name: Create ACME webroot directory
+  ansible.builtin.file:
+    path: /var/www/letsencrypt
+    state: directory
+    mode: "0755"
+
+- name: Check if TLS certificate already exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+  register: tls_cert
+
+- name: Render HTTP-only site config (bootstrap, before cert exists)
+  ansible.builtin.template:
+    src: speedquiz-http.conf.j2
+    dest: /etc/nginx/sites-available/speedquiz.conf
+    mode: "0644"
+  when: not tls_cert.stat.exists
+  notify: Reload nginx
+
+- name: Enable SpeedQuiz site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/speedquiz.conf
+    dest: /etc/nginx/sites-enabled/speedquiz.conf
+    state: link
+  notify: Reload nginx
+
+- name: Disable default nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload nginx
+
+- name: Ensure nginx running
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Flush handlers (nginx must serve :80 before the ACME challenge)
+  ansible.builtin.meta: flush_handlers
+
+- name: Obtain Let's Encrypt certificate (webroot challenge)
+  ansible.builtin.command: >
+    certbot certonly --webroot
+      -w /var/www/letsencrypt
+      --non-interactive --agree-tos
+      --email {{ letsencrypt_email }}
+      -d {{ domain_name }}
+  args:
+    creates: "/etc/letsencrypt/live/{{ domain_name }}/fullchain.pem"
+
+- name: Render TLS site config (steady state; overrides HTTP-only on first run)
+  ansible.builtin.template:
+    src: speedquiz-tls.conf.j2
+    dest: /etc/nginx/sites-available/speedquiz.conf
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Ensure certbot renewal timer is enabled
+  ansible.builtin.service:
+    name: certbot.timer
+    state: started
+    enabled: true

@@ -68,8 +68,7 @@ Anki SQLite, HTML resource files (JLPT lists from Tanos), and user-created
 PostgreSQL decks. Each source has an adapter that translates its native format
 into a common `DeckProvider` / `DeckContent` interface, and
 `DeckRegistryService` acts as a facade that unifies all three behind one API.
-Further providers could fit the same shape — e.g. token-based external
-platforms like WaniKani.
+Further providers could fit the same shape.
 
 **Dual Datasource Strategy** — PostgreSQL (via HikariCP connection pool) for
 application data, SQLite (read-only, via JdbcTemplate) for Anki import. JPA

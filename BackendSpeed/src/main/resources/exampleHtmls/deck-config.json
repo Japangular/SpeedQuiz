@@ -1,0 +1,29 @@
+{
+  "source": "currentSpeedQuiz",
+  "attribution": "selfmade example for two types",
+  "freeForAllUsersWithShoutout": true,
+  "decks": [
+    {
+      "file": "VocabList.N5.html",
+      "id": "tanos_n5_vocab",
+      "name": "JLPT N5 Vocabulary",
+      "description": "First few rows of tanos.co.uk file of same name",
+      "tags": [
+        "jlpt",
+        "n5",
+        "vocab"
+      ]
+    },
+    {
+      "file": "KanjiList.N5.html",
+      "id": "tanos_n5_kanji",
+      "name": "JLPT N5 Kanji",
+      "description": "First few rows of tanos.co.uk file of same name",
+      "tags": [
+        "jlpt",
+        "n5",
+        "kanji"
+      ]
+    }
+  ]
+}
