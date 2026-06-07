@@ -47,3 +47,8 @@ gitFilter/
 htmlImports/
 
 .env
+
+*_scrot.png
+collection*.db
+collection-shm
+collection-wal
