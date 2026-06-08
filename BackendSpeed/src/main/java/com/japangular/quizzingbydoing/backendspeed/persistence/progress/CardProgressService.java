@@ -23,4 +23,8 @@ public class CardProgressService {
   public void removeStates(String deckId, UUID ownerId, List<String> cardIds) {
     repository.deleteStates(deckId, ownerId, cardIds);
   }
+
+  public void removeAllForDeck(String deckId, UUID ownerId) {
+    repository.deleteAllForDeck(deckId, ownerId);
+  }
 }

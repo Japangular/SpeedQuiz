@@ -3,25 +3,15 @@ import {Card} from './quiz.model';
 
 /**
  * Bridge: converts the current Card model to Slot[].
- * This adapter exists so we can swap the rendering layer
- * without changing QuizSession or DeckIterator.
- *
- * Once we simplify Card → QuizCard (fields + roles), this adapter disappears.
+ * The optional `mode` only influences the ORDER of answer slots
+ * (via mode.answerFields). Slot shape is unchanged either way, so
+ * rendering and answer validation are unaffected.
  */
 export function cardToSlots(
   card: Card,
   mode?: QuizMode,
   properties?: Record<string, string>,
 ): Slot[] {
-  if (mode) {
-    const fields: Record<string, string> = {
-      ...card.answers,
-    };
-    const questionKey = detectQuestionKey(card);
-    fields[questionKey] = card.question;
-    return buildSlots(fields, mode);
-  }
-
   const slots: Slot[] = [];
 
   slots.push({
@@ -31,7 +21,9 @@ export function cardToSlots(
     propertyType: properties?.['question'] ?? 'question',
   });
 
-  for (const [key, value] of Object.entries(card.answers)) {
+  const orderedKeys = orderAnswerKeys(Object.keys(card.answers), mode?.answerFields);
+  for (const key of orderedKeys) {
+    const value = card.answers[key];
     if (value && value !== card.question) {
       slots.push({
         value,
@@ -45,11 +37,10 @@ export function cardToSlots(
   return slots;
 }
 
-function detectQuestionKey(card: Card): string {
-  // Try to find the original key name.
-  // Fallback to 'question'.
-  if (card.subjectType === 'KANJI') return 'kanji';
-  if (card.subjectType === 'vocabulary' || card.subjectType === 'VOCABULARY')
-    return 'vocabulary';
-  return 'question';
+/** Keys listed in `preferred` come first (in that order); the rest keep natural order. */
+function orderAnswerKeys(present: string[], preferred?: string[]): string[] {
+  if (!preferred || preferred.length === 0) return present;
+  const ordered = preferred.filter(k => present.includes(k));
+  const rest = present.filter(k => !ordered.includes(k));
+  return [...ordered, ...rest];
 }

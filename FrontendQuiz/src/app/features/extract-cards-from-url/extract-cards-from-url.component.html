@@ -211,6 +211,30 @@
       </ng-template>
     </mat-step>
 
+    <!-- ═══ STEP: Arrange field order ═══ -->
+    <mat-step>
+      <ng-template matStepLabel>Arrange</ng-template>
+      <ng-template matStepContent>
+        <p class="arrange-hint">
+          Drag to set the order answers appear while quizzing.
+          <strong>{{ questionKey }}</strong> is always shown first as the prompt.
+        </p>
+
+        <div cdkDropList (cdkDropListDropped)="drop($event)" class="field-order-list">
+          <div *ngFor="let key of answerOrder" cdkDrag class="field-row">
+            <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+            <span class="field-name">{{ key }}</span>
+            <span class="field-role">{{ fieldRole(key) }}</span>
+          </div>
+        </div>
+
+        <div class="step-actions">
+          <button mat-button color="accent" matStepperPrevious>Back to review</button>
+          <button mat-raised-button color="primary" matStepperNext>Looks good</button>
+        </div>
+      </ng-template>
+    </mat-step>
+
     <!-- ═══ STEP 3: Choose — Practice now or Save ═══ -->
     <mat-step>
       <ng-template matStepLabel>Start</ng-template>

@@ -95,6 +95,10 @@ public class DeckRepository {
     }
   }
 
+  public int deleteByOwnerIdAndDeckName(UUID ownerId, String deckName) {
+    return jdbcTemplate.update("DELETE FROM deck WHERE owner_id = ? AND deck_name = ?", ownerId, deckName);
+  }
+
   private DeckModel mapRowToDeck(ResultSet rs) throws SQLException {
     DeckModel deck = new DeckModel();
     deck.setDeckName(rs.getString("deck_name"));

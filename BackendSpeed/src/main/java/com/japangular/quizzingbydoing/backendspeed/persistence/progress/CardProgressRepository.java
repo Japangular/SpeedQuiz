@@ -48,4 +48,9 @@ public class CardProgressRepository {
 
     jdbcTemplate.update(sql, deckId, ownerId, cardIds.toArray(new String[0]));
   }
+
+  public int deleteAllForDeck(String deckId, UUID ownerId) {
+    return jdbcTemplate.update(
+        "DELETE FROM deck_card_state WHERE deck_id = ? AND owner_id = ?", deckId, ownerId);
+  }
 }

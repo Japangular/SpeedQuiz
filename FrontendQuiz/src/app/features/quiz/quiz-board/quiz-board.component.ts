@@ -15,6 +15,9 @@ import {Slot} from '../model/slot.model';
 import {cardToSlots} from '../model/card-to-slot.adapter';
 import {Card} from '../model/quiz.model';
 import {DeckStore} from '../../../store/deck.store';
+import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { QuizMode } from '../model/slot.model';
+import { FieldOrderService } from '../model/field-order.service';
 
 @Component({
   selector: 'app-quiz-board',
@@ -27,6 +30,7 @@ import {DeckStore} from '../../../store/deck.store';
     DeckBarComponent,
     QuizHistorySidebarComponent,
     SlotGroupComponent,
+    DragDropModule,
   ],
   templateUrl: './quiz-board.component.html',
   styleUrl: './quiz-board.component.css'
@@ -35,6 +39,11 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('historyPanel') historyPanel!: TemplateRef<any>;
 
   currentSlots: Slot[] = [];
+  fieldOrder: string[] = [];
+  showReorder = false;
+  private lastDeckId?: string;
+  private fieldOrderService = inject(FieldOrderService);
+
   private currentCard?: Card;
   private cardSub?: Subscription;
   private completedSub?: Subscription;
@@ -48,7 +57,14 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   ) {
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       this.currentCard = card;
-      this.currentSlots = cardToSlots(card, undefined, this.deckStore.properties());
+
+      const deckId = this.deckStore.deckId();
+      if (deckId !== this.lastDeckId) {
+        this.lastDeckId = deckId;
+        this.fieldOrder = this.fieldOrderService.orderedAnswerFields(deckId, this.deckStore.properties());
+      }
+
+      this.currentSlots = cardToSlots(card, this.buildMode(), this.deckStore.properties());
     });
 
     this.completedSub = this.quizEngine.deckCompleted$.subscribe(() => {
@@ -91,6 +107,22 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
         this.quizEngine.useHint();
         this.modal.openHintModal(this.currentCard).subscribe();
       }
+    }
+  }
+
+  private buildMode(): QuizMode {
+    return { name: 'custom-order', questionFields: ['question'], answerFields: this.fieldOrder };
+  }
+
+  toggleReorder(): void {
+    this.showReorder = !this.showReorder;
+  }
+
+  onReorder(event: CdkDragDrop<string[]>): void {
+    moveItemInArray(this.fieldOrder, event.previousIndex, event.currentIndex);
+    this.fieldOrderService.saveOrder(this.deckStore.deckId(), this.fieldOrder);
+    if (this.currentCard) {
+      this.currentSlots = cardToSlots(this.currentCard, this.buildMode(), this.deckStore.properties());
     }
   }
 }

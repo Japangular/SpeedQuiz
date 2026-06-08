@@ -62,26 +62,22 @@ export class DeckShelfComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadDecks();
+  }
+
+  private loadDecks(): void {
+    this.error = null;
     this.deckGroups$ = this.profileService.profile$.pipe(
       filter((p): p is LocalProfile => p != null),
       take(1),
-      switchMap(profile =>
-        this.deckShelfService.getDeckOverview( )
-      ),
+      switchMap(() => this.deckShelfService.getDeckOverview()),
       map(decks => {
         const groups = new Map<string, DeckInfo[]>();
-
         for (const deck of decks) {
-          if (!groups.has(deck.attribution)) {
-            groups.set(deck.attribution, []);
-          }
+          if (!groups.has(deck.attribution)) groups.set(deck.attribution, []);
           groups.get(deck.attribution)!.push(deck);
         }
-
-        return Array.from(groups.entries()).map(([attribution, decks]) => ({
-          attribution,
-          decks
-        }));
+        return Array.from(groups.entries()).map(([attribution, decks]) => ({ attribution, decks }));
       }),
       catchError(err => {
         console.error('Failed to load decks', err);
@@ -90,6 +86,24 @@ export class DeckShelfComponent implements OnInit {
       }),
       shareReplay(1)
     );
+  }
+
+  deleteDeck(deck: DeckInfo): void {
+    if (!confirm(`Delete "${deck.name}"? This removes the deck and its progress.`)) return;
+
+    this.deckShelfService.deleteDeck(deck.id).subscribe({
+      next: () => {
+        const last = localStorage.getItem('japangular_last_deck');
+        if (last && JSON.parse(last).deckId === deck.id) {
+          localStorage.removeItem('japangular_last_deck');
+        }
+        this.loadDecks();
+      },
+      error: err => {
+        console.error('Failed to delete deck', err);
+        this.error = 'Could not delete the deck. Please try again.';
+      }
+    });
   }
 
   loadDeck(deck: DeckInfo): void {

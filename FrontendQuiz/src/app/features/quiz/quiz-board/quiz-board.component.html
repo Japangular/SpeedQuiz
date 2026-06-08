@@ -1,5 +1,19 @@
 <div class="quizBoard">
-  <app-deck-bar />
+  <app-deck-bar
+    [canReorder]="fieldOrder.length > 1 && currentSlots.length > 0"
+    [reorderActive]="showReorder"
+    (reorderToggle)="toggleReorder()" />
+
+  @if (showReorder && fieldOrder.length > 1) {
+    <div class="field-order-list" cdkDropList (cdkDropListDropped)="onReorder($event)">
+      @for (key of fieldOrder; track key) {
+        <div class="field-order-chip" cdkDrag>
+          <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+          <span>{{ key }}</span>
+        </div>
+      }
+    </div>
+  }
 
   @if (currentSlots.length > 0) {
     <app-slot-group

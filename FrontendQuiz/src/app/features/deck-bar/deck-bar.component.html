@@ -1,9 +1,18 @@
 @if (hasCards()) {
   <mat-card appearance="outlined">
     <mat-card-content>
-  <span class="title">
-    <mat-card-title>{{ deckName() }}</mat-card-title>
-  </span>
+      <span class="title">
+        <mat-card-title>{{ deckName() }}</mat-card-title>
+      </span>
+
+      @if (canReorder) {
+        <button mat-icon-button
+                (click)="reorderToggle.emit()"
+                [matTooltip]="reorderActive ? 'Done reordering' : 'Reorder fields'">
+          <mat-icon>{{ reorderActive ? 'check' : 'swap_vert' }}</mat-icon>
+        </button>
+      }
+
       <button mat-icon-button (click)="resetDeck()" matTooltip="Reset progress">
         <mat-icon>restart_alt</mat-icon>
       </button>

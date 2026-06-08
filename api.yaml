@@ -69,6 +69,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeckContent'
+    delete:
+      tags:
+        - deck
+      summary: Delete a user-created deck
+      operationId: deleteDeck
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/SessionToken'
+      responses:
+        '204':
+          description: Deck deleted
+        '404':
+          description: Deck not found
 
   /quizApi/decks/{deckId}/page:
     get:

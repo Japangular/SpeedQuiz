@@ -63,12 +63,19 @@
           <span matListItemTitle>{{ deck.name }}</span>
           <span matListItemLine *ngIf="deck.description">{{ deck.description }}</span>
 
-          <button *ngIf="!multiSelectMode"
-                  mat-icon-button matListItemMeta
-                  (click)="loadDeck(deck); $event.stopPropagation()"
-                  [disabled]="loadingDeckId === deck.id">
-            <mat-icon>play_arrow</mat-icon>
-          </button>
+          <span matListItemMeta *ngIf="!multiSelectMode" class="deck-actions">
+            <button mat-icon-button
+                    (click)="loadDeck(deck); $event.stopPropagation()"
+                    [disabled]="loadingDeckId === deck.id">
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+            <button mat-icon-button color="warn"
+                    *ngIf="deck.attribution === 'user'"
+                    (click)="deleteDeck(deck); $event.stopPropagation()"
+                    [disabled]="loadingDeckId === deck.id">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </span>
         </mat-list-item>
       </mat-nav-list>
 

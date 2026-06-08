@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, EventEmitter, inject, Input, Output} from '@angular/core';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatIconModule} from '@angular/material/icon';
 import {MatChipsModule} from '@angular/material/chips';
@@ -29,6 +29,10 @@ export class DeckBarComponent {
 
   deckName = this.deckStore.deckName;
   hasCards = this.deckStore.hasCards;
+
+  @Input() canReorder = false;
+  @Input() reorderActive = false;
+  @Output() reorderToggle = new EventEmitter<void>();
 
   resetDeck(): void {
     this.quizEngine.resetSession();

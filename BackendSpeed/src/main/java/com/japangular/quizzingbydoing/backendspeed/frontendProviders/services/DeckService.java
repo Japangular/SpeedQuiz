@@ -50,6 +50,11 @@ public class DeckService {
     }
   }
 
+  public void deleteDeck(String deckId, UUID ownerId) {
+    deckRegistry.deleteDeck(deckId, ownerId);          // throws DeckNotFoundException (404) if missing/not owned
+    cardProgressService.removeAllForDeck(deckId, ownerId);
+  }
+
   public List<DeckCardState> getCardStates(String deckId, UUID ownerId) {
     return cardProgressService.getStates(deckId, ownerId).stream()
         .map(this::toDto)

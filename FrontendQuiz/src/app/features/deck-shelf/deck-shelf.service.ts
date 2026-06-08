@@ -15,7 +15,12 @@ export class DeckShelfService {
   getDeckOverview(): Observable<DeckInfo[]> {
     return this.http.get<DeckInfo[]>(`${this.apiUrl}/quizApi/decks`);
   }
+
   loadDeck(deckId: string): Observable<DeckContent> {
     return this.http.get<DeckContent>(`${this.apiUrl}/quizApi/decks/${deckId}`);
+  }
+
+  deleteDeck(deckId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/quizApi/decks/${deckId}`);
   }
 }

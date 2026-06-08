@@ -54,4 +54,14 @@ public class DeckRegistryService {
         .findFirst().orElseThrow(() -> new DeckNotFoundException(deckId))
         .getDeckContent();
   }
+
+  public void deleteDeck(String deckId, UUID ownerId) {
+    if (!userDeckAdapter.handles(deckId)) {
+      throw new DeckNotFoundException(deckId);   // built-in decks can't be deleted
+    }
+    if (userDeckAdapter.deleteDeck(deckId, ownerId) == 0) {
+      throw new DeckNotFoundException(deckId);   // wrong owner or already gone
+    }
+  }
 }
+

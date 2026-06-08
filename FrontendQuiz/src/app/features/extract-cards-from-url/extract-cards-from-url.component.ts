@@ -13,8 +13,9 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {PropertyType} from '../../../generated/api';
 import {ParseResult, ParseOptions, ColumnRole, parsePastedText} from './paste-parser';
 import {DeckStore} from '../../store/deck.store';
-import { QUIZ_API_TOKEN } from '../../interfaces/quiz-api';
+import {QUIZ_API_TOKEN} from '../../interfaces/quiz-api';
 import {MatTooltip} from '@angular/material/tooltip';
+import {DragDropModule, CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
 
 export interface DeckCard {
   [key: string]: string;
@@ -36,6 +37,7 @@ export interface DeckCard {
     MatIconModule,
     MatProgressBarModule,
     MatTooltip,
+    DragDropModule,
   ],
   templateUrl: './extract-cards-from-url.component.html',
   styleUrls: ['./extract-cards-from-url.component.css'],
@@ -57,8 +59,9 @@ export class ExtractCardsFromUrlComponent {
   deckColumnHeaders: string[] = [];
   deckColumnKeys: string[] = [];
   private hiraganaKeys: string[] = [];
-  private questionKey = '';
+   questionKey = '';
   private answerKeys: string[] = [];
+  answerOrder: string[] = [];
 
   saving = false;
   saved = false;
@@ -120,10 +123,10 @@ export class ExtractCardsFromUrlComponent {
       return;
     }
 
-  // an answer-shaped column for the validation check — hiragana counts as an answer
-  const isAnswerLike = (r: ColumnRole) => r === 'answer' || r === 'hiragana';
-  if (!activeColumns.some(c => isAnswerLike(c.role))) {
-    this.snackBar.open('Please assign at least one column as "Answer" or "Hiragana"', 'OK', {duration: 4000});
+    // an answer-shaped column for the validation check — hiragana counts as an answer
+    const isAnswerLike = (r: ColumnRole) => r === 'answer' || r === 'hiragana';
+    if (!activeColumns.some(c => isAnswerLike(c.role))) {
+      this.snackBar.open('Please assign at least one column as "Answer" or "Hiragana"', 'OK', {duration: 4000});
       return;
     }
 
@@ -131,7 +134,8 @@ export class ExtractCardsFromUrlComponent {
     this.deckColumnKeys = activeColumns.map(c => c.header);
     this.questionKey = activeColumns.find(c => c.role === 'question')!.header;
     this.answerKeys = activeColumns.filter(c => c.role === 'answer').map(c => c.header);
-  this.hiraganaKeys = activeColumns.filter(c => c.role === 'hiragana').map(c => c.header);
+    this.hiraganaKeys = activeColumns.filter(c => c.role === 'hiragana').map(c => c.header);
+    this.answerOrder = [...this.answerKeys, ...this.hiraganaKeys];
 
     this.deckCards = this.parseResult.rows.map(row => {
       const card: DeckCard = {};
@@ -144,7 +148,13 @@ export class ExtractCardsFromUrlComponent {
     this.snackBar.open(`${this.deckCards.length} cards ready for review`, 'OK', {duration: 3000});
   }
 
+  drop(event: CdkDragDrop<string[]>): void {
+    moveItemInArray(this.answerOrder, event.previousIndex, event.currentIndex);
+  }
 
+  fieldRole(key: string): 'answer' | 'hiragana' {
+    return this.hiraganaKeys.includes(key) ? 'hiragana' : 'answer';
+  }
 
   removeCard(index: number): void {
     this.deckCards = this.deckCards.filter((_, i) => i !== index);
@@ -238,13 +248,17 @@ export class ExtractCardsFromUrlComponent {
     this.splitsAfter.clear();
     this.sectionNames.clear();
     this.stepper.reset();
+    this.answerOrder = [];
   }
 
   private buildDeckContent() {
     const properties: Record<string, PropertyType> = {};
     properties[this.questionKey] = PropertyType.Question;
-    for (const key of this.answerKeys)   properties[key] = PropertyType.Answer;
-    for (const key of this.hiraganaKeys) properties[key] = PropertyType.Hiragana;
+    for (const key of this.answerOrder) {
+      properties[key] = this.hiraganaKeys.includes(key)
+        ? PropertyType.Hiragana
+        : PropertyType.Answer;
+    }
     return { properties, cards: this.deckCards };
   }
 }

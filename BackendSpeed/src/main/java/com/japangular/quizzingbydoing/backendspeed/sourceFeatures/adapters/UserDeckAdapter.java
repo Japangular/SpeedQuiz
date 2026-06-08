@@ -58,4 +58,9 @@ public class UserDeckAdapter {
   public boolean handles(String deckId) {
     return deckId != null && deckId.startsWith(ID_PREFIX);
   }
+
+  public int deleteDeck(String deckId, UUID ownerId) {
+    String deckName = deckId.substring(ID_PREFIX.length());
+    return repository.deleteByOwnerIdAndDeckName(ownerId, deckName);
+  }
 }

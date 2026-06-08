@@ -21,3 +21,18 @@ app-card-view {
   min-height: 0;
   overflow: auto;
 }
+
+.field-order-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--mat-divider-color, #ccc);
+  border-radius: 8px;
+  margin: 4px 0;
+  background: #fff
+}
+
+.drag-handle {
+  cursor: move
+}
