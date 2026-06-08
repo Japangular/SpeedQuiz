@@ -12,19 +12,16 @@ import {map} from 'rxjs/operators';
 export class BackendSourceService extends AnkiSourceService {
   private apiUrl = `${environment.apiBaseUrl}`;
   private deckId = 'anki-local';
-  private ownerId = crypto.randomUUID(); // TODO temporary — replace with real session later
 
   constructor(private http: HttpClient) {
     super();
   }
 
-  getPage(limit: number = 10, offset: number = 0, questionFilter = ""): Observable<AnkiPage> {
+  getPage(limit = 10, offset = 0, questionFilter = ""): Observable<AnkiPage> {
     const params = new HttpParams()
       .set('limit', limit.toString())
       .set('offset', offset.toString())
-      .set('filter', questionFilter)
-      .set('ownerId', this.ownerId);
-
+      .set('filter', questionFilter);   // ownerId removed
     return this.http.get<DeckPage>(`${this.apiUrl}/quizApi/decks/${this.deckId}/page`, {params})
       .pipe(map(deckPage => this.toAnkiPage(deckPage)));
   }
@@ -36,21 +33,14 @@ export class BackendSourceService extends AnkiSourceService {
   }
 
   persistIgnoredAnkiRows(rowIds: string[]): Observable<string> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
     const states = rowIds.map(id => ({deckId: this.deckId, cardId: id, state: 'ignored'}));
-
-    return this.http.post(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`, states, {params})
+    return this.http.post(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`, states)
       .pipe(map(() => `Persisted ${rowIds.length} rows.`));
   }
 
   getIgnoredAnkiRows(): Observable<UserTableStates> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
-
-    return this.http.get<DeckCardState[]>(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`, {params})
-      .pipe(map(states => ({
-        rowIds: states.map(s => s.cardId),
-        deckname: this.deckId
-      })));
+    return this.http.get<DeckCardState[]>(`${this.apiUrl}/quizApi/decks/${this.deckId}/state`)
+      .pipe(map(states => ({rowIds: states.map(s => s.cardId), deckname: this.deckId})));
   }
 
   private toAnkiPage(deckPage: DeckPage): AnkiPage {

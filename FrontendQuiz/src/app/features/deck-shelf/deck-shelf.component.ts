@@ -66,9 +66,7 @@ export class DeckShelfComponent implements OnInit {
       filter((p): p is LocalProfile => p != null),
       take(1),
       switchMap(profile =>
-        this.deckShelfService.getDeckOverview(
-          profile.token
-        )
+        this.deckShelfService.getDeckOverview( )
       ),
       map(decks => {
         const groups = new Map<string, DeckInfo[]>();
@@ -102,9 +100,7 @@ export class DeckShelfComponent implements OnInit {
 
     this.loadingDeckId = deck.id;
 
-    const ownerId = this.profileService.getToken() ?? '';
-
-    this.deckShelfService.loadDeck(deck.id, ownerId).subscribe({
+    this.deckShelfService.loadDeck(deck.id).subscribe({
       next: (deckContent) => {
         this.loadingDeckId = null;
 
@@ -160,10 +156,9 @@ export class DeckShelfComponent implements OnInit {
     }
 
     this.loadingDeckId = 'multi';
-    const ownerId = this.profileService.getToken() ?? '';
 
     const loads$ = selections.map(sel =>
-      this.deckShelfService.loadDeck(sel.deck.id, ownerId).pipe(
+      this.deckShelfService.loadDeck(sel.deck.id).pipe(
         map(content => ({
           content,
           maxCards: sel.maxCards,

@@ -12,46 +12,32 @@ export class QuizApiService implements QuizApi {
 
   constructor(
     private http: HttpClient,
-    private profile: LocalProfileService,
   ) {}
 
-  private get ownerId(): string {
-    return this.profile.getToken() ?? '';
-  }
-
   listDecks(): Observable<DeckInfo[]> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
-    return this.http.get<DeckInfo[]>(this.apiUrl, {params});
+    return this.http.get<DeckInfo[]>(this.apiUrl);
   }
 
   loadDeck(deckId: string): Observable<DeckContent> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
-    return this.http.get<DeckContent>(`${this.apiUrl}/${deckId}`, {params});
+    return this.http.get<DeckContent>(`${this.apiUrl}/${deckId}`);
   }
 
   browseDeck(deckId: string, limit = 100, offset = 0, filter?: string): Observable<DeckPage> {
-    let params = new HttpParams()
-      .set('ownerId', this.ownerId)
-      .set('limit', limit.toString())
-      .set('offset', offset.toString());
+    let params = new HttpParams().set('limit', limit.toString()).set('offset', offset.toString());
     if (filter) params = params.set('filter', filter);
     return this.http.get<DeckPage>(`${this.apiUrl}/${deckId}/page`, {params});
   }
 
   createDeck(deckName: string, content: DeckContent): Observable<any> {
-    const params = new HttpParams()
-      .set('ownerId', this.ownerId)
-      .set('deckName', deckName);
+    const params = new HttpParams().set('deckName', deckName);
     return this.http.post(this.apiUrl, content, {params});
   }
 
   getCardStates(deckId: string): Observable<DeckCardState[]> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
-    return this.http.get<DeckCardState[]>(`${this.apiUrl}/${deckId}/state`, {params});
+    return this.http.get<DeckCardState[]>(`${this.apiUrl}/${deckId}/state`);
   }
 
   updateCardStates(deckId: string, states: DeckCardState[]): Observable<any> {
-    const params = new HttpParams().set('ownerId', this.ownerId);
-    return this.http.post(`${this.apiUrl}/${deckId}/state`, states, {params});
+    return this.http.post(`${this.apiUrl}/${deckId}/state`, states);
   }
 }

@@ -16,12 +16,7 @@ paths:
       summary: List all available decks
       operationId: listDecks
       parameters:
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
       responses:
         '200':
           description: A list of available decks
@@ -38,12 +33,7 @@ paths:
       summary: Create a new deck
       operationId: createDeck
       parameters:
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
         - name: deckName
           in: query
           required: true
@@ -71,12 +61,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
       responses:
         '200':
           description: Full deck content
@@ -97,12 +82,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
         - name: limit
           in: query
           required: false
@@ -140,12 +120,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
       responses:
         '200':
           description: Card states
@@ -167,12 +142,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: ownerId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - $ref: '#/components/parameters/SessionToken'
       requestBody:
         required: true
         content:
@@ -186,6 +156,13 @@ paths:
           description: States updated
 
 components:
+  parameters:
+    SessionToken:
+      name: X-Session-Token
+      in: header
+      required: true
+      schema:
+        type: string
   schemas:
     DeckInfo:
       type: object

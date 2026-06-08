@@ -2,6 +2,7 @@ package com.japangular.quizzingbydoing.backendspeed.frontendProviders;
 
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.AppSession;
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.SessionRepository;
+import com.japangular.quizzingbydoing.backendspeed.persistence.session.SessionService;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services.AnkiImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +31,7 @@ public class AnkiUploadController {
   private static final long MAX_SIZE = 100L * 1024 * 1024; // 100MB, tune to taste
 
   private final AnkiImportService importService;
-  private final SessionRepository sessionRepository;
+  private final SessionService sessionService;
 
   @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Void> importDeck(
@@ -38,11 +39,10 @@ public class AnkiUploadController {
       @RequestParam("deckName") String deckName,
       @RequestPart("file") MultipartFile file) throws IOException {
 
-    UUID ownerId = resolveOwner(tokenHeader);
     if (file.isEmpty() || file.getSize() > MAX_SIZE) {
       return ResponseEntity.badRequest().build();
     }
-
+    UUID ownerId = sessionService.requireOwner(tokenHeader);
     Path tmp = Files.createTempFile("anki-", ".db");
     try {
       file.transferTo(tmp);
@@ -51,18 +51,6 @@ public class AnkiUploadController {
       return ResponseEntity.status(HttpStatus.CREATED).build();
     } finally {
       Files.deleteIfExists(tmp);
-    }
-  }
-
-  private UUID resolveOwner(String tokenHeader) {
-    if (tokenHeader == null || tokenHeader.isBlank()) return DEV_OWNER;
-    try {
-      UUID token = UUID.fromString(tokenHeader);
-      return sessionRepository.findByToken(token)
-          .map(AppSession::getToken)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-    } catch (IllegalArgumentException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
   }
 

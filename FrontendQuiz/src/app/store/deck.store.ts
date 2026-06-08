@@ -47,9 +47,8 @@ export const DeckStore = signalStore(
         const last = localStorage.getItem('japangular_last_deck');
         if (last && store.cards().length === 0) {
           const { deckId, deckName } = JSON.parse(last);
-          const ownerId = localService.getToken();
-          if (ownerId) {
-            deckShelfService.loadDeck(deckId, ownerId).subscribe(content => {
+          if (localService.getToken()) {
+            deckShelfService.loadDeck(deckId).subscribe(content => {
               store.loadDeck(content, deckName, deckId);
             });
           }

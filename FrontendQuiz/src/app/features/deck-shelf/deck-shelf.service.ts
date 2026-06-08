@@ -12,14 +12,10 @@ export class DeckShelfService {
 
   constructor(private http: HttpClient, private deckApi: DeckService) { }
 
-  getDeckOverview(ownerId: string): Observable<DeckInfo[]> {
-    let params: any = { ownerId };
-    return this.http.get<DeckInfo[]>(`${this.apiUrl}/quizApi/decks`, { params });
+  getDeckOverview(): Observable<DeckInfo[]> {
+    return this.http.get<DeckInfo[]>(`${this.apiUrl}/quizApi/decks`);
   }
-
-  loadDeck(deckId: string, ownerId: string): Observable<DeckContent> {
-    return this.http.get<DeckContent>(`${this.apiUrl}/quizApi/decks/${deckId}`, {
-      params: { ownerId }
-    });
+  loadDeck(deckId: string): Observable<DeckContent> {
+    return this.http.get<DeckContent>(`${this.apiUrl}/quizApi/decks/${deckId}`);
   }
 }

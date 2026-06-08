@@ -10,6 +10,7 @@ import com.japangular.quizzingbydoing.backendspeed.model.DeckInfo;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckPage;
 import com.japangular.quizzingbydoing.backendspeed.persistence.deck.UserDeckSource;
 import com.japangular.quizzingbydoing.backendspeed.persistence.progress.CardProgressService;
+import com.japangular.quizzingbydoing.backendspeed.persistence.session.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,46 +22,39 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 public class DeckController implements DeckApi {
-  private static final UUID DEV_OWNER = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   private final DeckService deckService;
-  private final CardProgressService cardProgressService;
-  private final UserDeckSource userDeckSource;
-  private final ObjectMapper objectMapper;
+  private final SessionService sessionService;
 
-  private UUID resolveOwner(UUID ownerId) {
-    return ownerId != null ? ownerId : DEV_OWNER;
+  @Override
+  public ResponseEntity<List<DeckInfo>> listDecks(String xSessionToken) {
+    return ResponseEntity.ok(deckService.listDecks(sessionService.requireOwner(xSessionToken)));
   }
 
   @Override
-  public ResponseEntity<List<DeckInfo>> listDecks(UUID ownerId) {
-    return ResponseEntity.ok(deckService.listDecks(resolveOwner(ownerId)));
+  public ResponseEntity<DeckContent> loadDeck(String deckId, String xSessionToken) {
+    return ResponseEntity.ok(deckService.loadDeck(deckId, sessionService.requireOwner(xSessionToken)));
   }
 
   @Override
-  public ResponseEntity<DeckContent> loadDeck(String deckId, UUID ownerId) {
-    return ResponseEntity.ok(deckService.loadDeck(deckId, resolveOwner(ownerId)));
+  public ResponseEntity<DeckPage> browseDeck(String deckId, String xSessionToken, Integer limit, Integer offset, String filter) {
+    return ResponseEntity.ok(deckService.browseDeck(deckId, sessionService.requireOwner(xSessionToken), limit, offset, filter));
   }
 
   @Override
-  public ResponseEntity<DeckPage> browseDeck(String deckId, UUID ownerId, Integer limit, Integer offset, String filter) {
-    return ResponseEntity.ok(deckService.browseDeck(deckId, resolveOwner(ownerId), limit, offset, filter));
+  public ResponseEntity<List<DeckCardState>> getCardStates(String deckId, String xSessionToken) {
+    return ResponseEntity.ok(deckService.getCardStates(deckId, sessionService.requireOwner(xSessionToken)));
   }
 
   @Override
-  public ResponseEntity<List<DeckCardState>> getCardStates(String deckId, UUID ownerId) {
-    return ResponseEntity.ok(deckService.getCardStates(deckId, resolveOwner(ownerId)));
-  }
-
-  @Override
-  public ResponseEntity<Void> updateCardStates(String deckId, UUID ownerId, List<DeckCardState> states) {
-    deckService.updateCardStates(deckId, resolveOwner(ownerId), states);
+  public ResponseEntity<Void> updateCardStates(String deckId, String xSessionToken, List<DeckCardState> states) {
+    deckService.updateCardStates(deckId, sessionService.requireOwner(xSessionToken), states);
     return ResponseEntity.ok().build();
   }
 
   @Override
-  public ResponseEntity<Void> createDeck(UUID ownerId, String deckName, DeckContent deckContent) {
-    deckService.createDeck(deckName, resolveOwner(ownerId), deckContent);
+  public ResponseEntity<Void> createDeck(String xSessionToken, String deckName, DeckContent deckContent) {
+    deckService.createDeck(deckName, sessionService.requireOwner(xSessionToken), deckContent);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }
