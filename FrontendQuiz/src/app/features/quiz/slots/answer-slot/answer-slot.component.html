@@ -1,0 +1,18 @@
+@switch (effectiveRenderHint) {
+  @case ('stroke-order') {
+    <app-stroke-order-kanji
+      [japanese]="correctAnswer"
+      [isWrapContent]="false"
+      (emitStrokeOrderComplete)="onStrokeResult($event)">
+    </app-stroke-order-kanji>
+  }
+  @default {
+    <mat-form-field appearance="outline">
+      <mat-label>Enter {{ fieldName }}</mat-label>
+      <input matInput
+             #inputRef
+             [formControl]="control"
+             [placeholder]="'Enter ' + fieldName" />
+    </mat-form-field>
+  }
+}

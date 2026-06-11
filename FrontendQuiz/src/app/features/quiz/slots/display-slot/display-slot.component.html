@@ -1,0 +1,19 @@
+@switch (resolvedHint) {
+  @case ('image') {
+    <img [src]="value" [alt]="fieldName ?? 'question'" class="display-image"/>
+  }
+  @case ('kanji') {
+    <span class="display-kanji"
+          (click)="labelClick.emit({ value, event: $event })">
+          @for (char of characters; track $index) {
+            <span (click)="labelClick.emit({ value: char, event: $event })">{{ char }}</span>
+          }
+        </span>
+  }
+  @default {
+    <span class="display-text"
+          (click)="labelClick.emit({ value, event: $event })">
+          {{ value }}
+        </span>
+  }
+}

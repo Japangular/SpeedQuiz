@@ -17,6 +17,12 @@
 
   <!-- Toolbar: multi-select toggle -->
   <div *ngIf="(deckGroups$ | async)?.length" class="shelf-toolbar">
+    <button mat-stroked-button (click)="importInput.click()">
+      <mat-icon>upload_file</mat-icon>
+      Import deck
+    </button>
+    <input #importInput type="file" accept=".json,application/json"
+           hidden (change)="onImportFile($event)">
     <button mat-stroked-button (click)="toggleMultiSelectMode()">
       <mat-icon>{{ multiSelectMode ? 'close' : 'library_add' }}</mat-icon>
       {{ multiSelectMode ? 'Cancel' : 'Mix decks' }}
@@ -64,6 +70,11 @@
           <span matListItemLine *ngIf="deck.description">{{ deck.description }}</span>
 
           <span matListItemMeta *ngIf="!multiSelectMode" class="deck-actions">
+            <button mat-icon-button
+                    (click)="exportDeck(deck); $event.stopPropagation()"
+                    matTooltip="Export as file">
+              <mat-icon>download</mat-icon>
+            </button>
             <button mat-icon-button
                     (click)="loadDeck(deck); $event.stopPropagation()"
                     [disabled]="loadingDeckId === deck.id">

@@ -1,0 +1,20 @@
+@if (embedUrl) {
+  <div class="player-frame">
+    <iframe [src]="embedUrl"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen></iframe>
+    <button mat-icon-button
+            class="change-btn"
+            aria-label="Change video"
+            (click)="clear()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+} @else {
+  <div class="url-prompt">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Paste a YouTube URL</mat-label>
+      <input matInput [(ngModel)]="rawUrl" (change)="load()"/>
+    </mat-form-field>
+  </div>
+}

@@ -4,13 +4,6 @@
   height: calc(100vh - 64px);
 }
 
-.quizBoard {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
 app-quiz-action-bar,
 app-deck-bar {
   flex-shrink: 0;
@@ -35,4 +28,68 @@ app-card-view {
 
 .drag-handle {
   cursor: move
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MERGE these rules into quiz-board.component.css.
+   Replace your existing .quizBoard rule; keep your other rules
+   (.field-order-list, .empty-quiz-state, ...) as they are.
+
+   The whole height story happens in exactly ONE place: .quizBoard
+   gets a definite height from the viewport. Everything below it is
+   distributed by flexbox — no height: 100% chains anywhere.
+   ════════════════════════════════════════════════════════════════ */
+
+.quizBoard {
+  display: flex;
+  flex-direction: column;
+  /* 64px = mat-toolbar height on desktop. If you have extra chrome
+     above (padding on mat-sidenav-content etc.), add it here too. */
+  height: calc(100dvh - 64px);
+  box-sizing: border-box;
+}
+
+/* The video gets all leftover vertical space.
+   flex: 1 1 0  → grow into the leftovers
+   min-height: 0 → allow shrinking below content size (flex gotcha,
+                   without it the pane refuses to get smaller)
+   container-type: size → lets children measure THIS pane with cqh/cqw
+                   instead of the viewport */
+.video-pane {
+  flex: 1 1 0;
+  min-height: 0;
+  container-type: size;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 16px;
+  box-sizing: border-box;
+}
+
+/* The dock is as wide as the pane allows — unless that would make a
+   16:9 box taller than the pane (100cqh = pane height), in which case
+   the height constraint wins. min() picks whichever is smaller.
+   aspect-ratio derives the height from the chosen width. */
+.video-pane app-youtube-dock {
+  width: min(100%, calc(100cqh * 16 / 9));
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+
+/* The answer fields take only the height they need, pinned at the
+   bottom (because the video pane above grows). When YouTube is off,
+   the slot pane just sits under the deck bar as before. */
+.slot-pane {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  container-type: inline-size;
+  container-name: slot-pane;
+}
+
+/* Optional: when YouTube is on, lay the answer fields in a row so the
+   bottom strip stays short. slot-group's :host is already flex-row. */
+.with-youtube .slot-pane app-slot-group {
+  align-items: center;
+  gap: 16px;
 }

@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 16px;
+  row-gap: 8px;
+  padding: 1rem 2rem;
+}
+
+/* DEFAULT: question on its own line, centered above the inputs */
+app-display-slot {
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Limited vertical space (YouTube on): back to inline row */
+:host-context(.with-youtube) app-display-slot {
+  flex: 0 1 auto;
+  display: block;
+}
+
+/* Limited horizontal space (narrow window): also inline row */
+@container slot-pane (max-width:800px) {
+  app-display-slot {
+    flex: 0 1 auto;
+    display: block;
+  }
+}
+
+.stroke-order-row {
+  flex: 0 0 100%;        /* own line, after the inputs (DOM order) */
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}

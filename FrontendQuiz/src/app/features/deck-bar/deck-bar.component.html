@@ -5,6 +5,22 @@
         <mat-card-title>{{ deckName() }}</mat-card-title>
       </span>
 
+      @if (popoutSupported) {
+        <button mat-icon-button
+                (click)="popoutToggle.emit()"
+                [matTooltip]="popoutActive ? 'Bring quiz back' : 'Float quiz over other windows'">
+          <mat-icon>{{ popoutActive ? 'close_fullscreen' : 'picture_in_picture_alt' }}</mat-icon>
+        </button>
+      }
+
+      <mat-slide-toggle
+        class="youtube-toggle"
+        [checked]="showYoutube"
+        (change)="showYoutubeChange.emit($event.checked)"
+        matTooltip="Show a YouTube player above the quiz">
+        <mat-icon>smart_display</mat-icon>
+      </mat-slide-toggle>
+
       @if (canReorder) {
         <button mat-icon-button
                 (click)="reorderToggle.emit()"

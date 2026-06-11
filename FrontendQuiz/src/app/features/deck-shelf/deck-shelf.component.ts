@@ -15,6 +15,8 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import {MatBadgeModule} from '@angular/material/badge';
 import {DeckContent, DeckInfo} from '../../../generated/api';
 import {DeckStore} from '../../store/deck.store';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {DeckTransferService} from './deck-transfer.service';
 
 export interface DeckSelection {
   deck: DeckInfo;
@@ -53,6 +55,9 @@ export class DeckShelfComponent implements OnInit {
 
   private deckStore = inject(DeckStore);
   private static readonly INITIAL_BATCH_SIZE = 30;
+
+  private deckTransfer = inject(DeckTransferService);
+  private snackBar = inject(MatSnackBar);
 
   constructor(
     private deckShelfService: DeckShelfService,
@@ -220,5 +225,26 @@ export class DeckShelfComponent implements OnInit {
     });
 
     return {properties, cards: allCards};
+  }
+
+  exportDeck(deck: DeckInfo): void {
+    this.deckTransfer.exportDeck(deck).subscribe({
+      error: () => this.snackBar.open('Export failed.', 'OK', {duration: 4000}),
+    });
+  }
+
+  onImportFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';                      // allow re-importing the same file
+    if (!file) return;
+
+    this.deckTransfer.importFile(file).subscribe({
+      next: name => {
+        this.snackBar.open(`Imported "${name}"`, 'OK', {duration: 3000});
+        this.loadDecks();
+      },
+      error: err => this.snackBar.open(err?.message ?? 'Import failed.', 'OK', {duration: 5000}),
+    });
   }
 }

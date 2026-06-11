@@ -6,11 +6,11 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
-import { ValidatorFn, validatorForField } from '../model/validation';
-import { RenderHint } from '../model/slot.model';
+import { ValidatorFn, validatorForField } from '../../model/validation';
+import { RenderHint } from '../../model/slot.model';
 import {
   StrokeOrderKanjiComponent
-} from '../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+} from '../../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
 
 export interface AnswerResult {
   fieldName: string;
@@ -28,30 +28,8 @@ export interface AnswerResult {
     MatInput,
     StrokeOrderKanjiComponent,
   ],
-  template: `
-    @switch (effectiveRenderHint) {
-      @case ('stroke-order') {
-        <app-stroke-order-kanji
-          [japanese]="correctAnswer"
-          [isWrapContent]="false"
-          (emitStrokeOrderComplete)="onStrokeResult($event)">
-        </app-stroke-order-kanji>
-      }
-      @default {
-        <mat-form-field appearance="outline">
-          <mat-label>Enter {{ fieldName }}</mat-label>
-          <input matInput
-                 #inputRef
-                 [formControl]="control"
-                 [placeholder]="'Enter ' + fieldName" />
-        </mat-form-field>
-      }
-    }
-  `,
-  styles: [`
-    :host { display: block; }
-    mat-form-field { width: 300px; }
-  `]
+  templateUrl: './answer-slot.component.html',
+  styleUrl: './answer-slot.component.css'
 })
 export class AnswerSlotComponent implements OnInit, OnDestroy {
   @Input({ required: true }) correctAnswer!: string;

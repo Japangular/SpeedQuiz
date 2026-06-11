@@ -1,58 +1,15 @@
-import {
-  Component, EventEmitter, Input, Output, QueryList,
-  ViewChildren, AfterViewInit, OnChanges
-} from '@angular/core';
-import {Slot} from '../model/slot.model';
-import {DisplaySlotComponent} from './display-slot.component';
-import {AnswerSlotComponent, AnswerResult} from './answer-slot.component';
-import {StrokeOrderKanjiComponent} from '../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+import {AfterViewInit, Component, EventEmitter, Input, OnChanges, Output, QueryList, ViewChildren} from '@angular/core';
+import {Slot} from '../../model/slot.model';
+import {StrokeOrderKanjiComponent} from '../../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+import {DisplaySlotComponent} from '../display-slot/display-slot.component';
+import {AnswerResult, AnswerSlotComponent} from '../answer-slot/answer-slot.component';
 
 @Component({
   selector: 'app-slot-group',
   standalone: true,
-  imports: [DisplaySlotComponent, AnswerSlotComponent, AnswerSlotComponent, StrokeOrderKanjiComponent],
-  template: `
-    @for (slot of slots; track slot.fieldName + slot.value) {
-      @if (slot.role === 'display') {
-        <app-display-slot
-          [value]="slot.value"
-          [renderHint]="slot.renderHint"
-          [fieldName]="slot.fieldName"
-          (labelClick)="onLabelClick($event)"/>
-      } @else {
-        <app-answer-slot
-          [correctAnswer]="slot.value"
-          [fieldName]="slot.fieldName ?? 'answer'"
-          [renderHint]="slot.renderHint"
-          [propertyType]="slot.propertyType"
-          (result)="onAnswerResult($index, $event)"/>
-      }
-    }
-
-    @if (showStrokeOrder && strokeOrderKanji.length > 0) {
-      <div class="stroke-order-row">
-        @for (kanji of strokeOrderKanji; track kanji) {
-          <app-stroke-order-kanji
-            [japanese]="kanji"
-            [isWrapContent]="false"/>
-        }
-      </div>
-    }
-  `,
-  styles: [`
-    :host {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      padding: 1rem 2rem;
-    }
-
-    .stroke-order-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 8px;
-    }
-  `]
+  imports: [DisplaySlotComponent, AnswerSlotComponent, StrokeOrderKanjiComponent],
+  templateUrl: './slot-group.component.html',
+  styleUrl: './slot-group.component.css'
 })
 export class SlotGroupComponent implements AfterViewInit, OnChanges {
   @Input({required: true}) slots: Slot[] = [];

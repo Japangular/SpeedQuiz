@@ -1,8 +1,13 @@
-<div class="quizBoard">
+<div class="quizBoard" [class.with-youtube]="showYoutube">
   <app-deck-bar
     [canReorder]="fieldOrder.length > 1 && currentSlots.length > 0"
     [reorderActive]="showReorder"
-    (reorderToggle)="toggleReorder()" />
+    [showYoutube]="showYoutube"
+    (reorderToggle)="toggleReorder()"
+    (showYoutubeChange)="setShowYoutube($event)"
+    [popoutSupported]="popout.isSupported"
+    [popoutActive]="popout.active()"
+    (popoutToggle)="togglePopout()" />
 
   @if (showReorder && fieldOrder.length > 1) {
     <div class="field-order-list" cdkDropList (cdkDropListDropped)="onReorder($event)">
@@ -16,10 +21,29 @@
   }
 
   @if (currentSlots.length > 0) {
-    <app-slot-group
-      [slots]="currentSlots"
-      (allSolved)="onCardSolved($event)"
-      (labelClicked)="onLabelClicked($event)" />
+    @if (showYoutube) {
+      <div class="video-pane">
+        <app-youtube-dock />
+      </div>
+    }
+    <div class="slot-pane">
+      <div #popoutHost class="popout-host">
+        <app-slot-group
+          [slots]="currentSlots"
+          [showStrokeOrder]="!showYoutube && !popout.active()"
+          (allSolved)="onCardSolved($event)"(labelClicked)="onLabelClicked($event)" />
+      </div>
+      @if (popout.active()) {
+        <p class="popout-hint">Quiz is floating in its own window.</p>
+      }
+      @if (popout.isSupported && popout.active()) {
+        <button mat-icon-button class="popout-btn"
+                (click)="togglePopout()"
+                [matTooltip]="'Bring quiz back'">
+          <mat-icon>{{ popout.active() ? 'close_fullscreen' : 'picture_in_picture_alt' }}</mat-icon>
+        </button>
+      }
+    </div>
   } @else {
     <div class="empty-quiz-state">
       <mat-icon>school</mat-icon>
