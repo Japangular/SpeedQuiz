@@ -21,6 +21,7 @@ import {YoutubeDockComponent} from '../../../widgets/youtube-dock/youtube-dock.c
 import {SlotGroupComponent} from '../slots/slot-group/slot-group.component';
 import {MatTooltip} from '@angular/material/tooltip';
 import {QuizPopoutService} from '../popout/quiz-popout.service';
+import {QuizSettingsService} from '../quiz-settings.service';
 
 const SHOW_YOUTUBE_KEY = 'quiz_show_youtube';
 
@@ -56,12 +57,14 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   /** Default off; remembered across sessions. */
   showYoutube = localStorage.getItem(SHOW_YOUTUBE_KEY) === 'true';
 
+
   private lastDeckId?: string;
   private fieldOrderService = inject(FieldOrderService);
 
   private currentCard?: Card;
   private cardSub?: Subscription;
   private completedSub?: Subscription;
+  private hotkeySub?: Subscription;
 
   private deckStore = inject(DeckStore);
 
@@ -69,17 +72,21 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     private quizEngine: QuizEngine,
     private modal: ModalService,
     private contextPanel: ContextPanelService,
+    private settings: QuizSettingsService,
   ) {
     this.cardSub = this.quizEngine.card$.subscribe(card => {
+      this.modal.closeHint();
       this.currentCard = card;
 
       const deckId = this.deckStore.deckId();
       if (deckId !== this.lastDeckId) {
         this.lastDeckId = deckId;
+        this.settings.attachDeck(deckId);
         this.fieldOrder = this.fieldOrderService.orderedAnswerFields(deckId, this.deckStore.properties());
       }
 
       this.currentSlots = cardToSlots(card, this.buildMode(), this.deckStore.properties());
+      this.hotkeySub = this.popout.keydown.subscribe(e => this.handleHotkeys(e));
     });
 
     this.completedSub = this.quizEngine.deckCompleted$.subscribe(() => {
@@ -100,6 +107,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.cardSub?.unsubscribe();
     this.completedSub?.unsubscribe();
+    this.hotkeySub?.unsubscribe();
     this.contextPanel.clear();
   }
 
@@ -107,7 +115,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.showYoutube = value;
     try {
       localStorage.setItem(SHOW_YOUTUBE_KEY, String(value));
-    } catch { /* storage disabled — preference just won't persist */ }
+    } catch { /* storage disabled — preference just won't persist */
+    }
   }
 
   onCardSolved(result: { exact: boolean }): void {
@@ -123,11 +132,20 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('window:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
+    this.handleHotkeys(event);
+  }
+
+  private handleHotkeys(event: KeyboardEvent): void {
     if (event.ctrlKey && event.code === 'KeyH') {
       event.preventDefault();
+
+      if (this.modal.hasOpenHint()) {       // closes the old
+        this.modal.closeHint();
+      }
       if (this.currentCard) {
         this.quizEngine.useHint();
-        this.modal.openHintModal(this.currentCard).subscribe();
+        const autoCloseMs = this.popout.active() ? this.settings.hintAutoCloseSeconds() * 1000 : 0;                              // in-page: close manually, as before
+        this.modal.openHintModal(this.currentCard, autoCloseMs).subscribe();
       }
     }
   }
