@@ -33,6 +33,14 @@
           </span>
         </div>
 
+        <div *ngIf="parseResult.hasLevels" class="detected-info">
+          <mat-icon color="primary">layers</mat-icon>
+          <span>
+            Detected {{ levelCount }} levels — each card is tagged, and the quiz
+            background shifts as the level changes.
+          </span>
+        </div>
+
         <!-- Adjust skip lines -->
         <div class="control-row">
           <mat-form-field appearance="outline" class="compact-field">

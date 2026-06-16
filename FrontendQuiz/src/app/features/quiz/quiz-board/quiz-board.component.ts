@@ -53,6 +53,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   currentSlots: Slot[] = [];
   fieldOrder: string[] = [];
   showReorder = false;
+  currentLevel = 1;
 
   /** Default off; remembered across sessions. */
   showYoutube = localStorage.getItem(SHOW_YOUTUBE_KEY) === 'true';
@@ -77,6 +78,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       this.modal.closeHint();
       this.currentCard = card;
+      this.currentLevel = card.level;
 
       const deckId = this.deckStore.deckId();
       if (deckId !== this.lastDeckId) {
@@ -173,4 +175,15 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       void this.popout.popOut(this.popoutHost.nativeElement);
     }
   }
+
+  /** True only when the loaded deck actually carries level info. */
+  get deckHasLevels(): boolean {
+    return Object.keys(this.deckStore.properties()).some(k => k.toLowerCase() === 'level');
+  }
+
+  /** Spread-out, deterministic hue per level (stable across reloads). */
+  get levelHue(): number {
+    return ((this.currentLevel || 0) * 47) % 360;
+  }
+
 }

@@ -21,6 +21,8 @@ export interface DeckCard {
   [key: string]: string;
 }
 
+const LEVEL_FIELD = 'Level';
+
 @Component({
   selector: 'app-extract-cards-from-url',
   standalone: true,
@@ -65,6 +67,7 @@ export class ExtractCardsFromUrlComponent {
 
   saving = false;
   saved = false;
+  deckHasLevels = false;
 
   onPasteInput(text: string): void {
     this.pastedText = text;
@@ -137,10 +140,15 @@ export class ExtractCardsFromUrlComponent {
     this.hiraganaKeys = activeColumns.filter(c => c.role === 'hiragana').map(c => c.header);
     this.answerOrder = [...this.answerKeys, ...this.hiraganaKeys];
 
-    this.deckCards = this.parseResult.rows.map(row => {
+    this.deckHasLevels = this.parseResult.hasLevels;
+
+    this.deckCards = this.parseResult.rows.map((row, rowIdx) => {
       const card: DeckCard = {};
       for (const col of activeColumns) {
         card[col.header] = row[col.index] ?? '';
+      }
+      if (this.deckHasLevels) {
+        card[LEVEL_FIELD] = String(this.parseResult!.rowLevels[rowIdx] ?? 1);
       }
       return card;
     });
@@ -249,6 +257,7 @@ export class ExtractCardsFromUrlComponent {
     this.sectionNames.clear();
     this.stepper.reset();
     this.answerOrder = [];
+    this.deckHasLevels = false;
   }
 
   private buildDeckContent() {
@@ -259,6 +268,14 @@ export class ExtractCardsFromUrlComponent {
         ? PropertyType.Hiragana
         : PropertyType.Answer;
     }
+    if (this.deckHasLevels) {
+      properties[LEVEL_FIELD] = PropertyType.Info;
+    }
     return { properties, cards: this.deckCards };
+  }
+
+  get levelCount(): number {
+    if (!this.parseResult?.hasLevels) return 0;
+    return new Set(this.parseResult.rowLevels).size;
   }
 }

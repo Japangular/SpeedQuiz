@@ -33,6 +33,12 @@ export function mapDeck(deck: DeckContent): Card[] {
 
   const firstQuestionKey = questionKeys[0];
 
+  // A "Level" field (declared Info on import) drives the per-level quiz
+  // background. Falls back to the card index when absent.
+  const levelKey =
+    Object.keys(deck.properties).find(k => k.toLowerCase() === 'level') ??
+    (deck.cards[0] ? Object.keys(deck.cards[0]).find(k => k.toLowerCase() === 'level') : undefined);
+
   return deck.cards.map((c, index) => {
     const answers: Record<string, string> = {};
     for (const key of answerKeys) {
@@ -56,12 +62,16 @@ export function mapDeck(deck: DeckContent): Card[] {
     const foundHintKey = hintKeys.find(key => c[key] !== undefined);
     const hint = foundHintKey ? c[foundHintKey] : `${question} → ${Object.values(answers).join(', ')}`;
 
+    const parsedLevel = levelKey ? Number(c[levelKey]) : NaN;
+    const level = Number.isFinite(parsedLevel) ? parsedLevel : index;
+
     const usedKeys = new Set([...questionKeys, ...answerKeys, ...hintKeys]);
+    if (levelKey) usedKeys.add(levelKey);
     const info = Object.entries(c)
       .filter(([key]) => !usedKeys.has(key))
       .map(([key, val]) => `${key}: ${val}`)
-      .join(', ') || `Card with index: ${index}, level: ${index}`;
+      .join(', ') || `Card with index: ${index}, level: ${level}`;
 
-    return {index, level: index, subjectType: 'other', question, answers, hint, info, subjectId: index} as Card;
+    return {index, level, subjectType: 'other', question, answers, hint, info, subjectId: index} as Card;
   });
 }

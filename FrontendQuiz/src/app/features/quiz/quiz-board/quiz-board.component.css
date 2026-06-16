@@ -93,3 +93,25 @@ app-card-view {
   align-items: center;
   gap: 16px;
 }
+
+.popout-host {
+  transition: background .35s ease;
+}
+
+.popout-host.level-theme {
+  background: hsl(var(--level-hue, 0) 70% 55% / 0.14);
+  border-radius: 14px;
+  padding: 1.1rem;
+  box-shadow: inset 4px 0 0 0 hsl(var(--level-hue, 0) 65% 50% / 0.55);
+}
+
+.level-badge {
+  display: inline-block;
+  margin-bottom: .6rem;
+  padding: .15rem .6rem;
+  font-size: .8rem;
+  font-weight: 600;
+  border-radius: 999px;
+  color: hsl(var(--level-hue, 0) 60% 30%);
+  background: hsl(var(--level-hue, 0) 70% 55% / 0.22);
+}

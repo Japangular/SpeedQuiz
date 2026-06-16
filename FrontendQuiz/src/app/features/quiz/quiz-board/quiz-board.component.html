@@ -27,11 +27,16 @@
       </div>
     }
     <div class="slot-pane">
-      <div #popoutHost class="popout-host">
+      <div #popoutHost class="popout-host"
+           [class.level-theme]="deckHasLevels"
+           [style.--level-hue]="levelHue">
+        @if (deckHasLevels) {
+          <div class="level-badge">Level {{ currentLevel }}</div>
+        }
         <app-slot-group
           [slots]="currentSlots"
           [showStrokeOrder]="!showYoutube && !popout.active()"
-          (allSolved)="onCardSolved($event)"(labelClicked)="onLabelClicked($event)" />
+          (allSolved)="onCardSolved($event)" (labelClicked)="onLabelClicked($event)" />
       </div>
       @if (popout.active()) {
         <p class="popout-hint">Quiz is floating in its own window.</p>
