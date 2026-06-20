@@ -105,6 +105,16 @@ export async function mockBackend(page: Page): Promise<void> {
         }
     });
 
+    // GET /quizApi/decks — list of decks (with or without a query string)
+    await page.route(/\/quizApi\/decks(\?|$)/, async (route) => {
+        if (route.request().method() !== 'GET') return route.fallback();
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(MOCK_DECKS),
+        });
+    });
+
     // GET /quizApi/decks — list of decks (ownerId query param is ignored).
     await page.route('**/quizApi/decks?**', async (route) => {
         if (route.request().method() !== 'GET') {
