@@ -19,6 +19,7 @@
       - git
       - gnupg
       - python3-requests   # needed by some ansible modules
+      - python3-passlib
     state: present
     update_cache: true
     cache_valid_time: 3600

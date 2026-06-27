@@ -78,6 +78,16 @@
   when: db_container.stdout | length > 0
   changed_when: true
 
+- name: Generate basic-auth file for the container nginx
+  community.general.htpasswd:
+    path: "{{ app_dir }}/.htpasswd"
+    name: "{{ vault_basic_auth_user }}"
+    password: "{{ vault_basic_auth_password }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0644"          # world-readable so the container's nginx worker (uid 101) can read it
+  no_log: true
+
 - name: Bring stack up (build images on the host, then start)
   ansible.builtin.command: docker compose up -d --build --remove-orphans
   args:
