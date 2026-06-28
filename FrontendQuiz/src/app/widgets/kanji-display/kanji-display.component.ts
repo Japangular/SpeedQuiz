@@ -49,7 +49,7 @@ export class KanjiDisplayComponent implements AfterViewInit, OnDestroy {
 
   getSvgUrl(kanji: string): string {
     const cp = kanjiToKanjiVGFilename(kanji);
-    return `http://localhost/kanjivg/${encodeURIComponent(cp)}`;
+    return `/kanjivg/${encodeURIComponent(cp)}`;
   }
 
   ngAfterViewInit() {
