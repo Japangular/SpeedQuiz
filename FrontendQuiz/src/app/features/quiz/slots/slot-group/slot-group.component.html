@@ -1,4 +1,4 @@
-@for (slot of slots; track slot.fieldName + slot.value) {
+@for (slot of slots; track slot.fieldName) {
   @if (slot.role === 'display') {
     <app-display-slot
       [value]="slot.value"

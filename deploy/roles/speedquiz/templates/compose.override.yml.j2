@@ -32,7 +32,8 @@ services:
   nginx:
     ports: !override
       - "127.0.0.1:{{ backend_public_port }}:80"
-    volumes:
+    volumes: !override
+      - ./KanjiVG/kanji:/usr/share/nginx/html/kanjivg:ro   # SVGs live under kanji/, not the KanjiVG root
       - ./.htpasswd:/etc/nginx/.htpasswd:ro
       - ./nginx-auth-snippet.conf:/etc/nginx/site-snippets/auth.conf:ro
     restart: unless-stopped

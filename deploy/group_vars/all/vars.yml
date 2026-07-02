@@ -21,3 +21,9 @@ postgres_user: "{{ vault_postgres_user }}"
 postgres_password: "{{ vault_postgres_password }}"
 
 cors_allowed_origins: "{{ vault_cors_allowed_origins }}"
+
+# --- KanjiVG stroke-order SVG dataset (pinned) ---
+# Bump kanjivg_date to update; the release tag is always "r" + the date.
+# Releases: https://github.com/KanjiVG/kanjivg/releases
+kanjivg_date: "20250816"
+kanjivg_release: "r{{ kanjivg_date }}"

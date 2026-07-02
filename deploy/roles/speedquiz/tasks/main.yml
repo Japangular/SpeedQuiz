@@ -32,6 +32,31 @@
     creates: "{{ app_dir }}/jmdict_e.xml"
   when: jmdict_download.changed
 
+- name: Ensure unzip is installed (KanjiVG ships its release as a .zip)
+  ansible.builtin.apt:
+    name: unzip
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure KanjiVG target directory exists
+  ansible.builtin.file:
+    path: "{{ app_dir }}/KanjiVG"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+
+- name: Download and extract KanjiVG stroke-order SVGs (pinned, non-variant set)
+  ansible.builtin.unarchive:
+    src: "https://github.com/KanjiVG/kanjivg/releases/download/{{ kanjivg_release }}/kanjivg-{{ kanjivg_date }}-main.zip"
+    dest: "{{ app_dir }}/KanjiVG"
+    remote_src: true
+    creates: "{{ app_dir }}/KanjiVG/kanji"   # extracted layout: KanjiVG/kanji/0xxxx.svg
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  become_user: "{{ deploy_user }}"
+
 - name: Render .env file (secrets from vault)
   ansible.builtin.template:
     src: env.j2
