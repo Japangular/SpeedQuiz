@@ -12,7 +12,11 @@
       <input matInput
              #inputRef
              [formControl]="control"
-             [placeholder]="'Enter ' + fieldName" />
+             [placeholder]="'Enter ' + fieldName"
+             autocapitalize="off"
+             autocorrect="off"
+             autocomplete="off"
+             spellcheck="false" />
     </mat-form-field>
   }
 }
