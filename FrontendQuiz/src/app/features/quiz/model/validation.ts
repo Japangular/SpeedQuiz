@@ -17,9 +17,10 @@ export const levenshteinValidator: ValidatorFn = (input, correctAnswer) => {
     const ansLower = ans.toLowerCase();
     if (trimmedInput === ansLower) return { correct: true, exact: true };
 
-    // Ignore trailing additions (e.g. "to givee")
-    if (trimmedInput.startsWith(ansLower) || ansLower.startsWith(trimmedInput)) {
-      const diff = Math.abs(trimmedInput.length - ansLower.length);
+    // Only tolerate typing a little PAST the correct answer (e.g. "to givee").
+    // Never accept a plain prefix of it — that's just "still typing", not a typo.
+    if (trimmedInput.length >= ansLower.length && trimmedInput.startsWith(ansLower)) {
+      const diff = trimmedInput.length - ansLower.length;
       if (diff <= 2) return { correct: true, exact: true };
     }
 
@@ -28,6 +29,7 @@ export const levenshteinValidator: ValidatorFn = (input, correctAnswer) => {
     if (inputTokens.length !== answerTokens.length) continue;
 
     const allMatch = inputTokens.every((token, i) => {
+      if (token.length < answerTokens[i].length) return false; // still typing this token
       if (token[0] !== answerTokens[i][0]) return false;
       const maxAllowed = answerTokens[i].length <= 4 ? 0 : 1;
       return calculateLevenshtein(token, answerTokens[i]) <= maxAllowed;
