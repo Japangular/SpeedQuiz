@@ -24,6 +24,7 @@ import {QuizPopoutService} from '../popout/quiz-popout.service';
 import {QuizSettingsService} from '../quiz-settings.service';
 
 const SHOW_YOUTUBE_KEY = 'quiz_show_youtube';
+const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
 
 @Component({
   selector: 'app-quiz-board',
@@ -57,7 +58,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   /** Default off; remembered across sessions. */
   showYoutube = localStorage.getItem(SHOW_YOUTUBE_KEY) === 'true';
-
+  showStrokeOrder = localStorage.getItem(SHOW_STROKE_ORDER_KEY) !== 'false';
 
   private lastDeckId?: string;
   private fieldOrderService = inject(FieldOrderService);
@@ -119,6 +120,13 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       localStorage.setItem(SHOW_YOUTUBE_KEY, String(value));
     } catch { /* storage disabled — preference just won't persist */
     }
+  }
+
+  setShowStrokeOrder(value: boolean): void {
+    this.showStrokeOrder = value;
+    try {
+      localStorage.setItem(SHOW_STROKE_ORDER_KEY, String(value));
+    } catch { /* storage disabled — preference just won't persist */ }
   }
 
   onCardSolved(result: { exact: boolean }): void {

@@ -21,6 +21,14 @@
         <mat-icon>smart_display</mat-icon>
       </mat-slide-toggle>
 
+      <mat-slide-toggle
+        class="stroke-order-toggle"
+        [checked]="showStrokeOrder"
+        (change)="showStrokeOrderChange.emit($event.checked)"
+        matTooltip="Show kanji stroke order practice">
+        <mat-icon>draw</mat-icon>
+      </mat-slide-toggle>
+
       @if (canReorder) {
         <button mat-icon-button
                 (click)="reorderToggle.emit()"

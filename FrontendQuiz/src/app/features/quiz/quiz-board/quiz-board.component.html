@@ -5,6 +5,8 @@
     [showYoutube]="showYoutube"
     (reorderToggle)="toggleReorder()"
     (showYoutubeChange)="setShowYoutube($event)"
+    [showStrokeOrder]="showStrokeOrder"
+    (showStrokeOrderChange)="setShowStrokeOrder($event)"
     [popoutSupported]="popout.isSupported"
     [popoutActive]="popout.active()"
     (popoutToggle)="togglePopout()" />
@@ -35,7 +37,7 @@
         }
         <app-slot-group
           [slots]="currentSlots"
-          [showStrokeOrder]="!showYoutube && !popout.active()"
+          [showStrokeOrder]="showStrokeOrder && !showYoutube && !popout.active()"
           (allSolved)="onCardSolved($event)" (labelClicked)="onLabelClicked($event)" />
       </div>
       @if (popout.active()) {

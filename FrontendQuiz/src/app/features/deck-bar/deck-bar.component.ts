@@ -44,6 +44,9 @@ export class DeckBarComponent {
   @Output() reorderToggle = new EventEmitter<void>();
   @Output() showYoutubeChange = new EventEmitter<boolean>();
 
+  @Input() showStrokeOrder = true;
+  @Output() showStrokeOrderChange = new EventEmitter<boolean>();
+
   resetDeck(): void {
     this.quizEngine.resetSession();
   }
