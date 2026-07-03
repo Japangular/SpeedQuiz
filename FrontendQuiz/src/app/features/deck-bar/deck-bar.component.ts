@@ -17,7 +17,6 @@ import {DeckStore} from '../../store/deck.store';
     MatIconModule,
     MatChipsModule,
     MatCard,
-    MatCardTitle,
     MatIconButton,
     MatCardContent,
     MatTooltip,
@@ -46,6 +45,8 @@ export class DeckBarComponent {
 
   @Input() showStrokeOrder = true;
   @Output() showStrokeOrderChange = new EventEmitter<boolean>();
+
+  @Output() hintRequested = new EventEmitter<void>();
 
   resetDeck(): void {
     this.quizEngine.resetSession();

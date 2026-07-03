@@ -1,5 +1,5 @@
 import {
-  Component, ElementRef, EventEmitter, Input, OnDestroy,
+  Component, ElementRef, EventEmitter, inject, Input, OnDestroy,
   OnInit, Output, ViewChild
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -11,6 +11,7 @@ import { RenderHint } from '../../model/slot.model';
 import {
   StrokeOrderKanjiComponent
 } from '../../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
+import {QuizSettingsService} from '../../quiz-settings.service';
 
 export interface AnswerResult {
   fieldName: string;
@@ -45,6 +46,7 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
   control = new FormControl('');
   private subscription?: Subscription;
   private resolved = false;
+  private settings = inject(QuizSettingsService);
 
   get effectiveRenderHint(): RenderHint {
     return this.renderHint ?? 'text';
@@ -65,7 +67,7 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
     const validatorFn = this.validator ?? validatorForField(this.fieldName, this.propertyType);
 
     this.subscription = this.control.valueChanges.pipe(
-      debounceTime(300),
+      debounceTime(Number(this.settings.hiraganaDebounceMs)),
       distinctUntilChanged(),
     ).subscribe(input => {
       if (this.resolved || !input) return;

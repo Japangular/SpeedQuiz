@@ -1,10 +1,6 @@
 @if (hasCards()) {
   <mat-card appearance="outlined">
     <mat-card-content>
-      <span class="title">
-        <mat-card-title>{{ deckName() }}</mat-card-title>
-      </span>
-
       @if (popoutSupported) {
         <button mat-icon-button
                 (click)="popoutToggle.emit()"
@@ -36,6 +32,10 @@
           <mat-icon>{{ reorderActive ? 'check' : 'swap_vert' }}</mat-icon>
         </button>
       }
+
+      <button mat-icon-button (click)="hintRequested.emit()" matTooltip="Show hint (Ctrl+H)">
+        <mat-icon>lightbulb</mat-icon>
+      </button>
 
       <button mat-icon-button (click)="resetDeck()" matTooltip="Reset progress">
         <mat-icon>restart_alt</mat-icon>

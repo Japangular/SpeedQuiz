@@ -28,6 +28,7 @@ export class QuizSettingsService {
   readonly popoutZoom = this.persisted('quiz_popout_zoom', 1);
   readonly questionPosition = this.persisted<'above' | 'inline'>('quiz_question_position', 'above');
   readonly hintAutoCloseSeconds = this.persisted('quiz_hint_autoclose_s', 5);
+  readonly hiraganaDebounceMs = this.persisted('quiz_hiragana_debounce_ms', 500);
 
   private deckId: string | null = null;
 

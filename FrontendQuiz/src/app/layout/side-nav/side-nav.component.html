@@ -100,6 +100,9 @@
             <mat-icon>menu</mat-icon>
           </button>
           <span class="toolbar-title">SpeedQuiz</span>
+          @if (deckStore.hasCards()) {
+            <span class="toolbar-deck-name">{{ deckStore.deckName() }}</span>
+          }
 
           <!-- Desktop: toggle right panel (if a feature registered one) -->
           <button

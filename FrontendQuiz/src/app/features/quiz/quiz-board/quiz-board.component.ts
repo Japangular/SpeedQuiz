@@ -148,15 +148,18 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   private handleHotkeys(event: KeyboardEvent): void {
     if (event.ctrlKey && event.code === 'KeyH') {
       event.preventDefault();
+      this.triggerHint();
+    }
+  }
 
-      if (this.modal.hasOpenHint()) {       // closes the old
-        this.modal.closeHint();
-      }
-      if (this.currentCard) {
-        this.quizEngine.useHint();
-        const autoCloseMs = this.popout.active() ? this.settings.hintAutoCloseSeconds() * 1000 : 0;                              // in-page: close manually, as before
-        this.modal.openHintModal(this.currentCard, autoCloseMs).subscribe();
-      }
+  triggerHint(): void {
+    if (this.modal.hasOpenHint()) {       // closes the old
+      this.modal.closeHint();
+    }
+    if (this.currentCard) {
+      this.quizEngine.useHint();
+      const autoCloseMs = this.popout.active() ? this.settings.hintAutoCloseSeconds() * 1000 : 0;
+      this.modal.openHintModal(this.currentCard, autoCloseMs).subscribe();
     }
   }
 
