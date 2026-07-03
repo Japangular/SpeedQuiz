@@ -23,6 +23,23 @@
     state: present
     update_cache: true
 
+- name: Create nginx SSL directory
+  ansible.builtin.file:
+    path: /etc/nginx/ssl
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy mTLS client CA certificate
+  ansible.builtin.copy:
+    src: speedquiz-ca.crt
+    dest: /etc/nginx/ssl/speedquiz-ca.crt
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
 - name: Create ACME webroot directory
   ansible.builtin.file:
     path: /var/www/letsencrypt
@@ -86,3 +103,10 @@
     name: certbot.timer
     state: started
     enabled: true
+
+- name: Deploy mTLS client CA certificate
+  ansible.builtin.copy:
+    src: speedquiz-ca.crt
+    dest: /etc/nginx/ssl/speedquiz-ca.crt
+    mode: "0644"
+  notify: Reload nginx
