@@ -5,13 +5,14 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
+import {debounceTime, distinctUntilChanged, skip, Subscription} from 'rxjs';
 import { ValidatorFn, validatorForField } from '../../model/validation';
 import { RenderHint } from '../../model/slot.model';
 import {
   StrokeOrderKanjiComponent
 } from '../../../../widgets/kanji-stroke-order-grid/stroke-order-kanji.component';
 import {QuizSettingsService} from '../../quiz-settings.service';
+import {toObservable} from '@angular/core/rxjs-interop';
 
 export interface AnswerResult {
   fieldName: string;
@@ -65,9 +66,10 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
 
   private setupSubscription(): void {
     const validatorFn = this.validator ?? validatorForField(this.fieldName, this.propertyType);
+    const debounceMs = this.settings.hiraganaDebounceMs();
 
     this.subscription = this.control.valueChanges.pipe(
-      debounceTime(Number(this.settings.hiraganaDebounceMs)),
+      debounceTime(debounceMs),
       distinctUntilChanged(),
     ).subscribe(input => {
       if (this.resolved || !input) return;
@@ -81,6 +83,18 @@ export class AnswerSlotComponent implements OnInit, OnDestroy {
       if (result.correct) {
         this.resolved = true;
         this.result.emit({ fieldName: this.fieldName, correct: true, exact: result.exact });
+      }
+    });
+
+    // When the debounce setting changes, rebuild the subscription so the
+    // new value takes effect immediately without needing a card change.
+    toObservable(this.settings.hiraganaDebounceMs).pipe(
+      skip(1),  // skip the initial emission we already consumed above
+      distinctUntilChanged(),
+    ).subscribe(() => {
+      if (!this.resolved) {
+        this.subscription?.unsubscribe();
+        this.setupSubscription();
       }
     });
   }

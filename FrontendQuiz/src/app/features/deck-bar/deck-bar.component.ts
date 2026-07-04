@@ -9,6 +9,10 @@ import {MatSlideToggle} from '@angular/material/slide-toggle';
 
 import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
 import {DeckStore} from '../../store/deck.store';
+import {QuizSettingsService} from '../quiz/quiz-settings.service';
+import {MatSlider, MatSliderThumb} from '@angular/material/slider';
+import {NgIf} from '@angular/common';
+import {FormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-deck-bar',
@@ -21,6 +25,10 @@ import {DeckStore} from '../../store/deck.store';
     MatCardContent,
     MatTooltip,
     MatSlideToggle,
+    MatSlider,
+    MatSliderThumb,
+    NgIf,
+    FormsModule,
   ],
   templateUrl: './deck-bar.component.html',
   styleUrl: './deck-bar.component.css'
@@ -28,9 +36,12 @@ import {DeckStore} from '../../store/deck.store';
 export class DeckBarComponent {
   private deckStore = inject(DeckStore);
   private quizEngine = inject(QuizEngine);
+  protected settings = inject(QuizSettingsService);
 
   deckName = this.deckStore.deckName;
   hasCards = this.deckStore.hasCards;
+
+  showDebounceSlider = false;
 
   @Input() canReorder = false;
   @Input() reorderActive = false;
@@ -50,5 +61,14 @@ export class DeckBarComponent {
 
   resetDeck(): void {
     this.quizEngine.resetSession();
+  }
+
+  get debounceLabel(): string {
+    const ms = this.settings.hiraganaDebounceMs();
+    return `${ms} ms`;
+}
+
+  onDebounceChange(value: number): void {
+    this.settings.hiraganaDebounceMs.set(value);
   }
 }

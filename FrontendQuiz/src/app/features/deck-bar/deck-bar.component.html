@@ -40,7 +40,40 @@
       <button mat-icon-button (click)="resetDeck()" matTooltip="Reset progress">
         <mat-icon>restart_alt</mat-icon>
       </button>
+
+      <!-- Hiragana debounce tuner -->
+      <button mat-icon-button
+              (click)="showDebounceSlider = !showDebounceSlider"
+              [matTooltip]="showDebounceSlider ? 'Hide typing delay setting' : 'Adjust hiragana typing delay (currently ' + debounceLabel + ')'"
+              [class.active-setting]="showDebounceSlider">
+        <mat-icon>timer</mat-icon>
+      </button>
     </mat-card-content>
+
+    <!-- Debounce slider — shown inline below the buttons when toggled -->
+    @if (showDebounceSlider) {
+      <mat-card-content class="debounce-row">
+        <span class="debounce-label">
+          <mat-icon class="debounce-icon">keyboard</mat-icon>
+          Hiragana typing delay
+        </span>
+        <mat-slider
+          [min]="100"
+          [max]="1000"
+          [step]="50"
+          [discrete]="true"
+          class="debounce-slider">
+          <input
+            matSliderThumb
+            [value]="settings.hiraganaDebounceMs()"
+            (valueChange)="onDebounceChange($event)">
+        </mat-slider>
+        <span class="debounce-value">{{ debounceLabel }}</span>
+        <span class="debounce-hint">
+          Increase if fast keys like は (ha) get cut short before you finish typing はち (hachi).
+        </span>
+    </mat-card-content>
+    }
   </mat-card>
 } @else {
   <mat-toolbar class="deck-bar empty">
