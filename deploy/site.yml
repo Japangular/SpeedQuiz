@@ -9,3 +9,10 @@
     - docker      # Docker Engine + compose plugin
     - nginx       # Host nginx as TLS-terminating reverse proxy, certbot
     - speedquiz   # Clone repo, render .env + compose override, docker compose up
+
+  post_tasks:
+    - name: "DEPLOYMENT COMPLETION TIMESTAMP"
+      ansible.builtin.debug:
+        msg: "Finished exactly on: {{ lookup('pipe', 'date \"+%Y-%m-%d %H:%M:%S %Z\"') }}"
+      run_once: true
+      delegate_to: localhost
