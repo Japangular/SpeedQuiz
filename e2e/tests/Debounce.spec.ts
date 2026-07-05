@@ -10,6 +10,7 @@
  * New UX behaviour (level-badge feature):
  *   Answer inputs are CSS-hidden until the user hovers over the quiz card.
  *   Every test must call revealInputs() before asserting input visibility.
+ *   (not sure about that, currently executing await timerButton(page).click(); twice seems to pass the tests locally but not in github actions
  *
  * Mock deck:
  *   Property VALUES must match Angular PropertyType enum strings:
