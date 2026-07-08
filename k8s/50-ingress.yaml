@@ -1,0 +1,44 @@
+# -----------------------------------------------------------------------------
+# Ingress: the cluster's front door.
+#
+# This replaces your HOST nginx from the Ansible setup. The pattern is
+# identical to what you already built by hand:
+#
+#   Ansible world:  internet -> host nginx (TLS) -> container nginx -> apps
+#   K8s world:      internet -> Ingress controller (TLS) -> Services -> pods
+#
+# An Ingress resource is just ROUTING RULES. Something must implement them:
+# an "Ingress controller" (ingress-nginx on minikube, Traefik built into
+# k3s/k3d). Your existing mental model of nginx reverse-proxying transfers
+# 1:1 -- the controller literally generates nginx/Traefik config from this.
+#
+# We route everything to the frontend Service, whose in-image nginx.conf
+# already fans out /api/ -> backend. Minimal change, working system first.
+# LATER EXERCISE: move the /api routing up into the Ingress itself and slim
+# the frontend nginx.conf down to pure static serving. That's the more
+# idiomatic K8s shape (but needs a rewrite annotation since the backend
+# serves at / while the public path is /api/).
+#
+# TLS: on Hetzner, install cert-manager and add a tls: block + an issuer
+# annotation -- that's the K8s replacement for your certbot role, fully
+# automated including renewals.
+# -----------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: speedquiz
+  namespace: speedquiz
+  # For minikube's ingress-nginx addon nothing extra is needed.
+  # For k3s/k3d (Traefik) it also just works.
+spec:
+  rules:
+    - host: speedquiz.local        # add to /etc/hosts (see README)
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

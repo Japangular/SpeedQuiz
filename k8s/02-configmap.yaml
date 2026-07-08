@@ -1,0 +1,23 @@
+# ConfigMap = non-secret configuration, decoupled from the image.
+# Compose analogy: the non-password parts of your .env file.
+#
+# Why split ConfigMap vs Secret? Same mechanism, different intent:
+# Secrets can get extra protection (encryption at rest, RBAC separation),
+# ConfigMaps are freely readable config.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: speedquiz-config
+  namespace: speedquiz
+data:
+  SPRING_PROFILES_ACTIVE: "docker"     # the docker profile already uses host "db",
+                                       # which resolves in K8s too (Service named "db")
+  APP_CORS_ALLOWED_ORIGINS: "http://localhost:8080,http://speedquiz.local"
+  # Start with the dictionary NOT required so the app boots without
+  # JMdict_e.xml. Flip to "true" once you've solved file delivery
+  # (see README section "Getting JMdict_e.xml into the pod").
+  APP_DICTIONARY_REQUIRED: "false"
+  # Once you externalize the MeCab URL in MecabClient.java (see README,
+  # "Required code change"), the backend reads this instead of the
+  # hardcoded http://python_dict:8000 (underscores are illegal in K8s DNS).
+  APP_MECAB_URL: "http://python-dict:8000"

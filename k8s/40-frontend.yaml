@@ -1,0 +1,62 @@
+# -----------------------------------------------------------------------------
+# Frontend (Angular build served by nginx): Deployment + Service
+#
+# Compose equivalent: BOTH the "frontend" and "nginx" services.
+# In your compose file those two are the SAME image (Dockerfile.frontend) run
+# twice -- once on :4200 and once on :80 with KanjiVG mounted. In Kubernetes
+# we collapse them into one Deployment:
+#   - the image's nginx.conf already serves the Angular app AND proxies
+#     /api/ -> http://backend:8080/, which keeps working because our backend
+#     Service is literally named "backend"
+#   - external exposure is the Ingress's job (50-ingress.yaml), so a second
+#     nginx container adds nothing
+#
+# KanjiVG: the compose bind mount ./KanjiVG:/usr/share/nginx/html/kanjivg
+# has no K8s equivalent (host paths don't exist). Easiest durable fix: add
+#   COPY KanjiVG/kanji /usr/share/nginx/html/kanjivg
+# to Dockerfile.frontend's nginx stage. ~10k small SVGs belong in the image.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: speedquiz
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: speedquiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: speedquiz-frontend:dev
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi

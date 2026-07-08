@@ -1,0 +1,107 @@
+# -----------------------------------------------------------------------------
+# PostgreSQL: StatefulSet + Service
+#
+# Compose equivalent:
+#   db:
+#     image: postgres:16
+#     volumes: [db-data:/var/lib/postgresql/data]
+#
+# WHY A STATEFULSET AND NOT A DEPLOYMENT?
+#   - A Deployment treats pods as interchangeable cattle. During a rolling
+#     update it starts the NEW pod before killing the old one -> two postgres
+#     processes could fight over one data volume.
+#   - A StatefulSet gives stable identity (pod name db-0), ordered replacement
+#     (old pod fully gone before new one starts), and per-pod persistent
+#     volumes via volumeClaimTemplates.
+#   - For a single-replica DB the practical difference is small, but this is
+#     the idiomatic pattern and a classic interview/CKA topic.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  # The Service name becomes a DNS name inside the namespace.
+  # We call it "db" ON PURPOSE: your Spring docker profile already says
+  #   jdbc:postgresql://db:5432/speedquizdb
+  # so the backend works with ZERO code changes. Docker-network DNS and
+  # K8s Service DNS behave the same way here.
+  name: db
+  namespace: speedquiz
+spec:
+  # clusterIP service = reachable only inside the cluster.
+  # Equivalent of your production compose override "ports: !reset []" --
+  # the DB is never exposed to the outside world.
+  selector:
+    app: postgres          # routes traffic to pods carrying this label
+  ports:
+    - port: 5432           # port the Service listens on (what clients dial)
+      targetPort: 5432     # port on the container
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: speedquiz
+spec:
+  serviceName: db
+  replicas: 1              # NEVER scale a plain postgres StatefulSet to 2+.
+                           # Replicas are copies of the SAME pod spec, not a
+                           # magically-clustered DB. HA postgres needs an
+                           # operator (CloudNativePG) -- a later lesson.
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          # envFrom pulls EVERY key of the Secret in as env vars.
+          # postgres:16 reads POSTGRES_DB/USER/PASSWORD exactly like in compose.
+          envFrom:
+            - secretRef:
+                name: speedquiz-secrets
+          env:
+            # Subdirectory avoids the "lost+found" problem on fresh PVCs.
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+          # Probes are K8s's built-in health checking -- what your Ansible
+          # "wait for health UP" task did by hand, now declarative & continuous.
+          # readiness = "may traffic be sent to me?" (removed from Service if not)
+          # liveness  = "am I alive at all?" (container restarted if not)
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "speedquiz", "-d", "speedquizdb"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "speedquiz", "-d", "speedquizdb"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:            # scheduler guarantees this much
+              cpu: 100m          # 0.1 CPU core
+              memory: 256Mi
+            limits:              # container is throttled/killed above this
+              memory: 512Mi
+  # volumeClaimTemplates = "each pod of this StatefulSet gets its own PVC".
+  # This replaces the compose named volume "db-data".
+  # On minikube/k3d/kind a default StorageClass provisions local disk
+  # automatically. On Hetzner k3s, local-path does the same; hcloud-csi
+  # gives you real cloud volumes.
+  volumeClaimTemplates:
+    - metadata:
+        name: db-data
+      spec:
+        accessModes: ["ReadWriteOnce"]   # mountable by one node at a time
+        resources:
+          requests:
+            storage: 2Gi

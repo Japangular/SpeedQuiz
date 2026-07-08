@@ -52,3 +52,7 @@ htmlImports/
 collection*.db
 collection-shm
 collection-wal
+
+kubernetes-status.txt
+ingress-status.txt
+repo_master_growth.txt

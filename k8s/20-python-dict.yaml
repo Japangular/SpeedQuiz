@@ -1,0 +1,70 @@
+# -----------------------------------------------------------------------------
+# MeCab service: Deployment + Service
+#
+# Compose equivalent:
+#   python_dict:
+#     build: { dockerfile: PythonDict/Dockerfile.python_dict }
+#     ports: ["8000:8000"]
+#
+# !!! NAMING GOTCHA (this is your one required code change) !!!
+# Kubernetes object names must be valid DNS labels (RFC 1123):
+# lowercase alphanumerics and '-' only. "python_dict" with an underscore is
+# ILLEGAL as a Service name, so the hostname http://python_dict:8000 that is
+# hardcoded in MecabClient.java can never resolve in Kubernetes.
+# Fix: externalize the URL (see README "Required code change") and point it
+# at http://python-dict:8000 via the ConfigMap.
+# This is a valuable general lesson: hardcoded hostnames are the #1 thing
+# that breaks when moving between orchestrators.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-dict
+  namespace: speedquiz
+spec:
+  selector:
+    app: python-dict
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-dict
+  namespace: speedquiz
+spec:
+  replicas: 1        # stateless -> later try "kubectl scale deploy/python-dict
+                     # --replicas=3" and watch the Service load-balance. This
+                     # is the moment K8s starts paying rent vs compose.
+  selector:
+    matchLabels:
+      app: python-dict
+  template:
+    metadata:
+      labels:
+        app: python-dict
+    spec:
+      containers:
+        - name: python-dict
+          # Locally-built image, loaded into the cluster (see README).
+          image: speedquiz-python-dict:dev
+          # Never* pull from a registry -- use the image we side-loaded.
+          # Without this, the kubelet may try to pull "speedquiz-python-dict"
+          # from Docker Hub and fail with ImagePullBackOff.
+          # (*On Hetzner you'll push to a registry and switch to IfNotPresent.)
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /docs        # FastAPI's auto docs endpoint; swap for a
+              port: 8000         # dedicated /health if you add one
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi

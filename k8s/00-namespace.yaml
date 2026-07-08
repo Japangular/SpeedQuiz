@@ -1,0 +1,13 @@
+# A Namespace is a logical partition inside a cluster.
+# Compose analogy: roughly like a compose "project" -- everything in one
+# namespace can find everything else via short DNS names (e.g. "db").
+#
+# Apply with:  kubectl apply -f 00-namespace.yaml
+# Then either add "-n speedquiz" to every kubectl command, or set it as default:
+#   kubectl config set-context --current --namespace=speedquiz
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: speedquiz
+  labels:
+    app.kubernetes.io/part-of: speedquiz

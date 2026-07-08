@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,11 @@ public class MecabClient {
   private final ObjectMapper objectMapper;
   private final RestTemplate restTemplate;
 
+  @Value("${app.mecab.url:http://python_dict:8000}")  // default = old value → compose keeps working
+  private String mecabBaseUrl;
+
   public List<Map<String, Object>> parseJapanese(String input) {
-    String url = "http://python_dict:8000/parse";
+    String url = mecabBaseUrl + "/parse";
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
 

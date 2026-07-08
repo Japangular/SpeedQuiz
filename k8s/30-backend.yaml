@@ -1,0 +1,125 @@
+# -----------------------------------------------------------------------------
+# Spring Boot backend: Deployment + Service
+#
+# Compose equivalent:
+#   backend:
+#     build: { dockerfile: BackendSpeed/Dockerfile.backend }
+#     environment: [...from .env...]
+#     depends_on: [db, python_dict]
+#     volumes:
+#       - ./api.yaml:/app/api.yaml
+#       - ./JMdict_e.xml:/app/jmdict_e.xml
+#       - ./htmlImports:/app/htmlImports:ro
+#       - anki-tmp:/app/anki-tmp
+#
+# KEY MENTAL SHIFTS FROM COMPOSE:
+#
+# 1. There is no depends_on. Kubernetes is eventually-consistent by design:
+#    everything starts at once and crash-loops until its dependencies appear.
+#    A Spring pod that can't reach the DB fails, restarts with backoff, and
+#    eventually succeeds. That "CrashLoopBackOff" you'll see on first apply
+#    is NORMAL and part of the model, not a bug. (You can smooth it with an
+#    initContainer that waits for the DB -- shown below, commented.)
+#
+# 2. There are no host bind mounts. "./JMdict_e.xml" has no meaning when the
+#    pod can land on any node. Files must come from: the image (best for
+#    static data), a ConfigMap (small text <1MiB), a PVC, or an initContainer
+#    that downloads them. See README. For the first deploy we set
+#    APP_DICTIONARY_REQUIRED=false so the app boots without the file.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  # Named "backend" on purpose: the frontend's nginx.conf does
+  # proxy_pass http://backend:8080/ -- resolves unchanged in K8s.
+  name: backend
+  namespace: speedquiz
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: speedquiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      # OPTIONAL polish -- uncomment to avoid the initial crash-loop:
+      # initContainers:
+      #   - name: wait-for-db
+      #     image: postgres:16
+      #     command: ["sh", "-c",
+      #       "until pg_isready -h db -p 5432; do echo waiting for db; sleep 2; done"]
+      containers:
+        - name: backend
+          image: speedquiz-backend:dev   # built locally, side-loaded (README)
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          # Combine both sources; every key becomes an env var, exactly like
+          # compose's env_file + environment.
+          envFrom:
+            - secretRef:
+                name: speedquiz-secrets
+            - configMapRef:
+                name: speedquiz-config
+          env:
+            # Spring Boot's "relaxed binding" maps this env var onto the
+            # spring.datasource.postgresql.username property, same as compose.
+            - name: SPRING_DATASOURCE_POSTGRESQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: speedquiz-secrets
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: speedquiz-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: anki-tmp
+              mountPath: /app/anki-tmp
+          # Spring Boot exposes health at /actuator/health (your Ansible
+          # health-check hit it through nginx as /api/actuator/health;
+          # here we hit the container directly).
+          # startupProbe covers the slow JVM cold start (your Ansible had a
+          # hardcoded "pause 20s" for this -- probes do it properly):
+          # liveness/readiness are suspended until startup succeeds.
+          startupProbe:
+            httpGet:
+              path: /actuator/health/readiness   # was /actuator/health
+              port: 8080
+            failureThreshold: 30    # 30 x 5s = up to 150s to come up
+            periodSeconds: 5
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              memory: 1Gi          # JVM! Consider -XX:MaxRAMPercentage=75
+                                   # in the Dockerfile ENTRYPOINT so the heap
+                                   # respects this cgroup limit.
+      volumes:
+        # emptyDir = scratch space living as long as the POD (not the
+        # container -- survives container restarts, gone when pod is deleted).
+        # Perfect replacement for the anki-tmp named volume.
+        - name: anki-tmp
+          emptyDir: {}
