@@ -22,6 +22,8 @@ import {SlotGroupComponent} from '../slots/slot-group/slot-group.component';
 import {MatTooltip} from '@angular/material/tooltip';
 import {QuizPopoutService} from '../popout/quiz-popout.service';
 import {QuizSettingsService} from '../quiz-settings.service';
+import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
+import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
 
 const SHOW_YOUTUBE_KEY = 'quiz_show_youtube';
 const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
@@ -41,6 +43,7 @@ const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
     YoutubeDockComponent,
     MatTooltip,
     MatIconButton,
+    EmoteOverlayComponent,
   ],
   templateUrl: './quiz-board.component.html',
   styleUrl: './quiz-board.component.css'
@@ -69,6 +72,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   private hotkeySub?: Subscription;
 
   private deckStore = inject(DeckStore);
+  private emotes = inject(EmoteService);
 
   constructor(
     private quizEngine: QuizEngine,
@@ -80,6 +84,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       this.modal.closeHint();
       this.currentCard = card;
       this.currentLevel = card.level;
+      this.emotes.trigger('cardSwitch');   // ← add this line
 
       const deckId = this.deckStore.deckId();
       if (deckId !== this.lastDeckId) {
@@ -99,6 +104,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
         }
       });
     });
+
+    this.quizEngine.reset$.subscribe(() => this.emotes.trigger('reset'));
   }
 
   ngAfterViewInit(): void {
@@ -130,6 +137,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   }
 
   onCardSolved(result: { exact: boolean }): void {
+    this.emotes.trigger('correct');
     this.quizEngine.nextCard(true, result.exact);
   }
 
@@ -157,6 +165,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       this.modal.closeHint();
     }
     if (this.currentCard) {
+      this.emotes.trigger('hint');
       this.quizEngine.useHint();
       const autoCloseMs = this.popout.active() ? this.settings.hintAutoCloseSeconds() * 1000 : 0;
       this.modal.openHintModal(this.currentCard, autoCloseMs).subscribe();

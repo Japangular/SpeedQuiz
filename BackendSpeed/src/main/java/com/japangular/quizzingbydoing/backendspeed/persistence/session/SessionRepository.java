@@ -23,7 +23,7 @@ public class SessionRepository {
   public UUID provision(String displayName) {
     String sql = "INSERT INTO app_session (display_name) VALUES (?) RETURNING token";
     UUID token = jdbcTemplate.queryForObject(sql, UUID.class, displayName);
-    logger.info("Provisioned session for '{}', token: {}", displayName, token);
+    logger.info("Provisioned session for '{}'", displayName);
     return token;
   }
 

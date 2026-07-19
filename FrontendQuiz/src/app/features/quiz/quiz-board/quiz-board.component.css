@@ -96,6 +96,7 @@ app-card-view {
 
 .popout-host {
   transition: background .35s ease;
+  position: relative;
 }
 
 .popout-host.level-theme {

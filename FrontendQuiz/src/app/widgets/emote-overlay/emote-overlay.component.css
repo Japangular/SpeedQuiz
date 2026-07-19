@@ -1,0 +1,50 @@
+:host {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  pointer-events: none; /* never block clicks on the quiz underneath */
+  z-index: 5;
+}
+
+.emote {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  user-select: none;
+}
+
+/* Quick pop for cardSwitch / correct / hint / reset.
+   Duration must match FLASH_MS in emote.service.ts. */
+.emote.flash {
+  animation: emote-pop 1.6s ease forwards;
+}
+
+/* Slow fade-in that stays, for "you're taking a while..." */
+.emote.linger {
+  animation: emote-creep 4s ease-out forwards;
+}
+
+@keyframes emote-pop {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-8deg); }
+  12%  { opacity: 1; transform: scale(1.12) rotate(3deg); }
+  22%  { transform: scale(1) rotate(0deg); }
+  80%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.85) translateY(10px); }
+}
+
+@keyframes emote-creep {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emote.flash  { animation: emote-fade 1.6s linear forwards; }
+  .emote.linger { animation: none; opacity: 1; }
+}
+
+@keyframes emote-fade {
+  0%, 80% { opacity: 1; }
+  100%    { opacity: 0; }
+}

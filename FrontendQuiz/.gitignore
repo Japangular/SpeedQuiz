@@ -43,3 +43,6 @@ Thumbs.db
 
 src/generated
 generated_contexts
+
+public/emotes/shocked.png
+public/emotes/happy.png

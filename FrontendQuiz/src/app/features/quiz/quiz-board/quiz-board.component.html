@@ -33,6 +33,7 @@
       <div #popoutHost class="popout-host"
            [class.level-theme]="deckHasLevels"
            [style.--level-hue]="levelHue">
+        <app-emote-overlay></app-emote-overlay>
         @if (deckHasLevels) {
           <div class="level-badge">Level {{ currentLevel }}</div>
         }

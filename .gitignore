@@ -56,3 +56,6 @@ collection-wal
 kubernetes-status.txt
 ingress-status.txt
 repo_master_growth.txt
+
+./FrontendAngular/public/emotes/
+./deploy/roles/speedquiz/files/emotes/

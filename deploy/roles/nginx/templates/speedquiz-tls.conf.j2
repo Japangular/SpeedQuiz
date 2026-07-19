@@ -26,7 +26,7 @@ server {
     ssl_client_certificate /etc/nginx/ssl/speedquiz-ca.crt;
     ssl_verify_client optional;
 
-    client_max_body_size 64m;
+    client_max_body_size 100m;
 
     location = /api/actuator/health {
         proxy_pass http://127.0.0.1:{{ backend_public_port }}/api/actuator/health;

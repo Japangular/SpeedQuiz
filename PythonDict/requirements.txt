@@ -1,0 +1,6 @@
+# PythonDict/requirements.txt
+# Pinned so image builds are reproducible and Dependabot has a manifest to track.
+# Versions current as of 2026-07-19.
+fastapi==0.139.2
+uvicorn==0.51.0
+mecab-python3==1.0.12

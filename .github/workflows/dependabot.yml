@@ -1,0 +1,94 @@
+# .github/dependabot.yml
+#
+# Weekly dependency updates across all six ecosystems in this repo.
+# Minor/patch bumps are grouped into one PR per ecosystem to keep noise down;
+# major versions arrive as individual PRs so they get deliberate review.
+# Every PR runs the normal CI (Playwright e2e + backend tests), which is what
+# makes these safe to merge.
+
+version: 2
+updates:
+  # --- Spring Boot backend ---------------------------------------------
+  - package-ecosystem: "maven"
+    directory: "/BackendSpeed"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      maven-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # --- Angular SPA ------------------------------------------------------
+  # NOTE: A major Angular bump also requires updating the generated client:
+  # `ngVersion=19.0.0` is hard-coded in FrontendQuiz/Dockerfile.frontend AND
+  # in the CI workflow's openapi-generator call. Treat @angular/* major PRs
+  # as a reminder to do all three together, not as a one-click merge.
+  - package-ecosystem: "npm"
+    directory: "/FrontendQuiz"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      angular:
+        patterns:
+          - "@angular*"
+          - "zone.js"
+          - "rxjs"
+        update-types: ["minor", "patch"]
+      npm-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # --- Playwright e2e suite --------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/e2e"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      e2e-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # --- Python MeCab service --------------------------------------------
+  # Requires PythonDict/requirements.txt to exist (pinned versions).
+  - package-ecosystem: "pip"
+    directory: "/PythonDict"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      pip-minor-patch:
+        update-types: ["minor", "patch"]
+
+  # --- Docker base images (FROM lines) ---------------------------------
+  # Dependabot matches any filename containing "dockerfile", so
+  # Dockerfile.backend / Dockerfile.frontend / Dockerfile.python_dict
+  # are all picked up.
+  - package-ecosystem: "docker"
+    directory: "/BackendSpeed"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+  - package-ecosystem: "docker"
+    directory: "/FrontendQuiz"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+  - package-ecosystem: "docker"
+    directory: "/PythonDict"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+
+  # --- compose.yaml image tags (postgres:16) ----------------------------
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+
+  # --- GitHub Actions (actions/checkout, upload-artifact, ...) ----------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
