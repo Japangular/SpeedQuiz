@@ -1,143 +1,135 @@
-<app-access-gate *ngIf="!siteModeService.hasAccess"></app-access-gate>
+@if (!siteModeService.hasAccess) {
+  <app-access-gate></app-access-gate>
+}
 
-<ng-container *ngIf="siteModeService.hasAccess">
+@if (siteModeService.hasAccess) {
   <!-- Wait for initialization to complete before deciding what to show -->
-  <ng-container *ngIf="profileService.initialized$ | async; else loading">
-
+  @if (profileService.initialized$ | async) {
     <!-- No session → show provisioning screen -->
-    <app-provision *ngIf="!(profileService.profile$ | async)"></app-provision>
-
+    @if (!(profileService.profile$ | async)) {
+      <app-provision></app-provision>
+    }
     <!-- Has session → show normal app -->
-    <mat-sidenav-container *ngIf="profileService.profile$ | async" class="sidenav-container">
-
-      <!-- Left Sidebar (navigation) -->
-      <mat-sidenav
-        #leftDrawer
-        class="sidenav"
-        fixedInViewport
-        [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-        [mode]="(isHandset$ | async) ? 'over' : 'side'"
-        [opened]="(isHandset$ | async) === false"
-        position="start"
-      >
-        <div class="sidebar-container">
-          <mat-toolbar color="accent" class="toolbar">
-            <button
-              mat-icon-button
-              aria-label="Toggle sidenav"
-              (click)="leftDrawer.toggle()"
-            >
-              <mat-icon>menu</mat-icon>
-            </button>
-          </mat-toolbar>
-
-          <mat-nav-list class="nav-list">
-
-            <!-- Top utility -->
-            <a mat-button color="primary" (click)="leftDrawer.toggle()">Hide</a>
-
-            <!-- Main navigation -->
-            <a
-              mat-list-item
-              *ngFor="let item of navItems"
-              [routerLink]="item.path"
-              routerLinkActive="active"
-              [class.bottom-item]="item.data?.['bottom']"
-            >
-              <mat-icon
-                *ngIf="item.data?.['icon']"
-                matListItemIcon
-                color="primary"
-              >
-                {{ item.data?.['icon'] }}
-              </mat-icon>
-
-              <span matListItemTitle>
-              {{ item.data?.['label'] }}
-            </span>
-            </a>
-
-          </mat-nav-list>
-
-          <!-- Profile actions at the bottom of the sidenav -->
-          <app-profile-actions></app-profile-actions>
-        </div>
-      </mat-sidenav>
-
-      <!-- Right Context Panel (desktop only) -->
-      <mat-sidenav
-        #rightDrawer
-        class="context-panel"
-        fixedInViewport
-        [mode]="'side'"
-        [opened]="!!(contextPanel$ | async)?.template && (isHandset$ | async) === false"
-        position="end"
-      >
-        <ng-container *ngIf="(contextPanel$ | async) as panel">
-          <mat-toolbar color="accent" class="context-panel-header">
-            <mat-icon>{{ panel.icon }}</mat-icon>
-            <span>{{ panel.label }}</span>
-            <button mat-icon-button (click)="rightDrawer.close()" aria-label="Close panel">
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-toolbar>
-          <div class="context-panel-body">
-            <ng-container *ngTemplateOutlet="panel.template"></ng-container>
+    @if (profileService.profile$ | async) {
+      <mat-sidenav-container class="sidenav-container">
+        <!-- Left Sidebar (navigation) -->
+        <mat-sidenav
+          #leftDrawer
+          class="sidenav"
+          fixedInViewport
+          [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+          [mode]="(isHandset$ | async) ? 'over' : 'side'"
+          [opened]="(isHandset$ | async) === false"
+          position="start"
+          >
+          <div class="sidebar-container">
+            <mat-toolbar color="accent" class="toolbar">
+              <button
+                mat-icon-button
+                aria-label="Toggle sidenav"
+                (click)="leftDrawer.toggle()"
+                >
+                <mat-icon>menu</mat-icon>
+              </button>
+            </mat-toolbar>
+            <mat-nav-list class="nav-list">
+              <!-- Top utility -->
+              <a mat-button color="primary" (click)="leftDrawer.toggle()">Hide</a>
+              <!-- Main navigation -->
+              @for (item of navItems; track item) {
+                <a
+                  mat-list-item
+                  [routerLink]="item.path"
+                  routerLinkActive="active"
+                  [class.bottom-item]="item.data?.['bottom']"
+                  >
+                  @if (item.data?.['icon']) {
+                    <mat-icon
+                      matListItemIcon
+                      color="primary"
+                      >
+                      {{ item.data?.['icon'] }}
+                    </mat-icon>
+                  }
+                  <span matListItemTitle>
+                    {{ item.data?.['label'] }}
+                  </span>
+                </a>
+              }
+            </mat-nav-list>
+            <!-- Profile actions at the bottom of the sidenav -->
+            <app-profile-actions></app-profile-actions>
           </div>
-        </ng-container>
-      </mat-sidenav>
-
-      <!-- Main Content -->
-      <mat-sidenav-content>
-
-        <mat-toolbar color="accent" class="toolbar">
-          <button
-            *ngIf=!leftDrawer.opened
-            mat-icon-button
-            aria-label="Toggle sidenav"
-            (click)="leftDrawer.toggle()"
+        </mat-sidenav>
+        <!-- Right Context Panel (desktop only) -->
+        <mat-sidenav
+          #rightDrawer
+          class="context-panel"
+          fixedInViewport
+          [mode]="'side'"
+          [opened]="!!(contextPanel$ | async)?.template && (isHandset$ | async) === false"
+          position="end"
           >
-            <mat-icon>menu</mat-icon>
-          </button>
-          <span class="toolbar-title">SpeedQuiz</span>
-          @if (deckStore.hasCards()) {
-            <span class="toolbar-deck-name">{{ deckStore.deckName() }}</span>
+          @if ((contextPanel$ | async); as panel) {
+            <mat-toolbar color="accent" class="context-panel-header">
+              <mat-icon>{{ panel.icon }}</mat-icon>
+              <span>{{ panel.label }}</span>
+              <button mat-icon-button (click)="rightDrawer.close()" aria-label="Close panel">
+                <mat-icon>close</mat-icon>
+              </button>
+            </mat-toolbar>
+            <div class="context-panel-body">
+              <ng-container *ngTemplateOutlet="panel.template"></ng-container>
+            </div>
           }
-
-          <!-- Desktop: toggle right panel (if a feature registered one) -->
-          <button
-            *ngIf="(contextPanel$ | async)?.template && (isHandset$ | async) === false"
-            mat-icon-button
-            aria-label="Toggle context panel"
-            (click)="rightDrawer.toggle()"
-            class="context-toggle-btn"
-          >
-            <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
-          </button>
-        </mat-toolbar>
-
-        <!-- Routed views -->
-        <router-outlet></router-outlet>
-
-        <!-- Mobile: FAB to open bottom sheet (if a feature registered a panel) -->
-        <button
-          *ngIf="(contextPanel$ | async)?.template && (isHandset$ | async) === true"
-          mat-fab
-          class="context-fab"
-          [matTooltip]="(contextPanel$ | async)?.label ?? ''"
-          (click)="openContextSheet()"
-          aria-label="Open context panel"
-        >
-          <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
-        </button>
-
-      </mat-sidenav-content>
-    </mat-sidenav-container>
-
-  </ng-container>
-
-  <!-- Shown while initialize() is still in-flight -->
-  <ng-template #loading>
+        </mat-sidenav>
+        <!-- Main Content -->
+        <mat-sidenav-content>
+          <mat-toolbar color="accent" class="toolbar">
+            @if (!leftDrawer.opened) {
+              <button
+                mat-icon-button
+                aria-label="Toggle sidenav"
+                (click)="leftDrawer.toggle()"
+                >
+                <mat-icon>menu</mat-icon>
+              </button>
+            }
+            <span class="toolbar-title">SpeedQuiz</span>
+            @if (deckStore.hasCards()) {
+              <span class="toolbar-deck-name">{{ deckStore.deckName() }}</span>
+            }
+            <!-- Desktop: toggle right panel (if a feature registered one) -->
+            @if ((contextPanel$ | async)?.template && (isHandset$ | async) === false) {
+              <button
+                mat-icon-button
+                aria-label="Toggle context panel"
+                (click)="rightDrawer.toggle()"
+                class="context-toggle-btn"
+                >
+                <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
+              </button>
+            }
+          </mat-toolbar>
+          <!-- Routed views -->
+          <router-outlet></router-outlet>
+          <!-- Mobile: FAB to open bottom sheet (if a feature registered a panel) -->
+          @if ((contextPanel$ | async)?.template && (isHandset$ | async) === true) {
+            <button
+              mat-fab
+              class="context-fab"
+              [matTooltip]="(contextPanel$ | async)?.label ?? ''"
+              (click)="openContextSheet()"
+              aria-label="Open context panel"
+              >
+              <mat-icon>{{ (contextPanel$ | async)?.icon }}</mat-icon>
+            </button>
+          }
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    }
+  } @else {
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-  </ng-template>
-</ng-container>
+  }
+  <!-- Shown while initialize() is still in-flight -->
+}

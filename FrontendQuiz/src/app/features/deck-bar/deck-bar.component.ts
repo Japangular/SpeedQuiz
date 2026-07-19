@@ -11,7 +11,7 @@ import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
 import {DeckStore} from '../../store/deck.store';
 import {QuizSettingsService} from '../quiz/quiz-settings.service';
 import {MatSlider, MatSliderThumb} from '@angular/material/slider';
-import {NgIf} from '@angular/common';
+
 import {FormsModule} from '@angular/forms';
 
 @Component({
@@ -27,9 +27,8 @@ import {FormsModule} from '@angular/forms';
     MatSlideToggle,
     MatSlider,
     MatSliderThumb,
-    NgIf,
-    FormsModule,
-  ],
+    FormsModule
+],
   templateUrl: './deck-bar.component.html',
   styleUrl: './deck-bar.component.css'
 })

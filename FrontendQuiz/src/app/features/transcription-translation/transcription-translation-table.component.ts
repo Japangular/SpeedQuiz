@@ -12,7 +12,7 @@ import {
   MatTable
 } from '@angular/material/table';
 import {MatSort} from '@angular/material/sort';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {MatCard, MatCardContent} from '@angular/material/card';
 import {EXAMPLE_STREAM_TRANSCRIPT, stream_transcript, transcript_information, transcript_row} from './transcription-translation.model';
 import {TranscriptUploadComponent} from '../../widgets/transcript-upload-component/transcript-upload.component';
@@ -32,12 +32,11 @@ import {MatSnackBar} from '@angular/material/snack-bar';
     MatCell,
     MatHeaderRow,
     MatRow,
-    NgForOf,
     MatRowDef,
     MatCard,
     MatCardContent,
     TranscriptUploadComponent
-  ],
+],
   templateUrl: './transcription-translation-table.component.html',
   styleUrl: './transcription-translation-table.component.css'
 })

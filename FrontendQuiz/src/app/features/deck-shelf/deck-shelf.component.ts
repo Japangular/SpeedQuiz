@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {catchError, forkJoin, Observable, of} from 'rxjs';
 import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
-import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {DeckShelfService} from './deck-shelf.service';
 import {LocalProfile, LocalProfileService} from '../../user-store-management/local-profile.service';
 import {Router} from '@angular/router';
@@ -32,8 +32,6 @@ export interface DeckGroup {
   selector: 'app-deck-shelf',
   imports: [
     AsyncPipe,
-    NgForOf,
-    NgIf,
     MatProgressBarModule,
     MatCardModule,
     MatExpansionModule,
@@ -41,8 +39,8 @@ export interface DeckGroup {
     MatIconModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatBadgeModule,
-  ],
+    MatBadgeModule
+],
   templateUrl: './deck-shelf.component.html',
   styleUrl: './deck-shelf.component.css'
 })

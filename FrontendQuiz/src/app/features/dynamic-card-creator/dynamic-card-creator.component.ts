@@ -2,7 +2,7 @@ import {Component, ElementRef, inject, Inject, OnInit, ViewChild} from '@angular
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatStep, MatStepper} from '@angular/material/stepper';
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
-import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import {MatChip} from '@angular/material/chips';
 import {
   MatCell,
@@ -33,7 +33,6 @@ import {DeckStore} from '../../store/deck.store';
     MatStepper,
     MatStep,
     MatFormField,
-    NgForOf,
     MatChip,
     ReactiveFormsModule,
     TitleCasePipe,
@@ -51,11 +50,10 @@ import {DeckStore} from '../../store/deck.store';
     MatColumnDef,
     MatLabel,
     MatError,
-    NgIf,
     FormsModule,
     MatSelect,
-    MatOption,
-  ],
+    MatOption
+],
   standalone: true,
 })
 export class DynamicCardCreatorComponent implements OnInit {

@@ -1,6 +1,6 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from '@angular/material/dialog';
-import {CommonModule} from '@angular/common';
+
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {MatButtonModule} from '@angular/material/button';
 import {MatInputModule} from '@angular/material/input';
@@ -9,7 +9,7 @@ import {Card} from '../../../features/quiz/model/quiz.model';
 @Component({
   selector: 'app-edit-card-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule],
+  imports: [FormsModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule],
   templateUrl: './edit-card-modal.component.html',
   styleUrls: ['./edit-card-modal.component.css']
 })

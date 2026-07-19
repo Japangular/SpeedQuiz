@@ -1,7 +1,7 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle} from '@angular/material/dialog';
 import {MatButton} from '@angular/material/button';
-import {NgForOf} from '@angular/common';
+
 import {Card} from '../../../features/quiz/model/quiz.model';
 
 @Component({
@@ -10,9 +10,8 @@ import {Card} from '../../../features/quiz/model/quiz.model';
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
-    MatButton,
-    NgForOf
-  ],
+    MatButton
+],
   templateUrl: './deck-completed-modal.component.html',
   styleUrl: './deck-completed-modal.component.css'
 })

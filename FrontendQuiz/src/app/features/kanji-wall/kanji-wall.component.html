@@ -16,14 +16,16 @@
 </form>
 
 <div #kanjiBoard class="kanji-board">
-  <div *ngFor="let wk of wallKanjis">
-    <app-stroke-order-kanji
-      #kanjiRef
-      [japanese]="wk.kanji"
-      [isWrapContent]="false"
-      (emitStrokeOrderComplete)="setWk(wk, $event)"
-      (click)="onKanjiClick($event, wk)"
-    >
-    </app-stroke-order-kanji>
-  </div>
+  @for (wk of wallKanjis; track wk) {
+    <div>
+      <app-stroke-order-kanji
+        #kanjiRef
+        [japanese]="wk.kanji"
+        [isWrapContent]="false"
+        (emitStrokeOrderComplete)="setWk(wk, $event)"
+        (click)="onKanjiClick($event, wk)"
+        >
+      </app-stroke-order-kanji>
+    </div>
+  }
 </div>

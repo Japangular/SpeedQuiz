@@ -6,7 +6,9 @@
       <mat-form-field class="full-width">
         <mat-label>Deck Name</mat-label>
         <input matInput formControlName="deckName" placeholder="Enter Deck Name">
-        <mat-error *ngIf="deckForm().controls['deckName'].hasError('required')">Deck name is required</mat-error>
+        @if (deckForm().controls['deckName'].hasError('required')) {
+          <mat-error>Deck name is required</mat-error>
+        }
       </mat-form-field>
     </form>
     <button mat-raised-button color="primary" (click)="nextStep(1)">Next</button>
@@ -20,14 +22,16 @@
       <mat-form-field class="full-width">
         <mat-label (click)="clearPropertyInput()">Property</mat-label>
         <input matInput #propertyInput (blur)="addProperty(propertyInput.value); clearInput(propertyInput)"
-               placeholder="Enter property name (e.g., question, answer)">
+          placeholder="Enter property name (e.g., question, answer)">
       </mat-form-field>
-      <div *ngFor="let property of properties.controls; let i = index">
-        <!-- Display property as a chip when it's not being edited -->
-        <mat-chip (click)="deleteProperty(i)">
-          {{ property.value }}
-        </mat-chip>
-      </div>
+      @for (property of properties.controls; track property; let i = $index) {
+        <div>
+          <!-- Display property as a chip when it's not being edited -->
+          <mat-chip (click)="deleteProperty(i)">
+            {{ property.value }}
+          </mat-chip>
+        </div>
+      }
     </div>
 
     <!-- Step navigation buttons -->
@@ -38,19 +42,21 @@
   <!-- Step 3: Set Property Types -->
   <mat-step>
     <h3>Select Property Types</h3>
-    <div *ngFor="let property of properties.controls; let i = index">
-      <mat-form-field class="full-width">
-        <mat-label>Select Type for {{ property.value }}</mat-label>
-        <mat-select [(ngModel)]="propertyTypes()[property.value]" (ngModelChange)="setPropertyType(property.value, $event)">
-          <mat-option value="question">Question</mat-option>
-          <mat-option value="answer">Answer</mat-option>
-          <mat-option value="hint">Hint</mat-option>
-          <mat-option value="image">Image</mat-option>
-          <mat-option value="svg">SVG</mat-option>
-          <mat-option value="audiofile">Audio</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+    @for (property of properties.controls; track property; let i = $index) {
+      <div>
+        <mat-form-field class="full-width">
+          <mat-label>Select Type for {{ property.value }}</mat-label>
+          <mat-select [(ngModel)]="propertyTypes()[property.value]" (ngModelChange)="setPropertyType(property.value, $event)">
+            <mat-option value="question">Question</mat-option>
+            <mat-option value="answer">Answer</mat-option>
+            <mat-option value="hint">Hint</mat-option>
+            <mat-option value="image">Image</mat-option>
+            <mat-option value="svg">SVG</mat-option>
+            <mat-option value="audiofile">Audio</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    }
     <button mat-raised-button color="primary" (click)="nextStep(3)">Next</button>
     <button mat-raised-button color="accent" (click)="nextStep(1)">Previous</button>
   </mat-step>
@@ -59,12 +65,14 @@
   <mat-step [stepControl]="deckForm().controls['cards']">
     <h3>Create Cards for Deck</h3>
     <form [formGroup]="deckForm()">
-      <div *ngFor="let property of properties.controls">
-        <mat-form-field class="full-width">
-          <mat-label>{{ property.value | titlecase }}</mat-label>
-          <input matInput [formControlName]="property.value" placeholder="Enter {{ property.value }}">
-        </mat-form-field>
-      </div>
+      @for (property of properties.controls; track property) {
+        <div>
+          <mat-form-field class="full-width">
+            <mat-label>{{ property.value | titlecase }}</mat-label>
+            <input matInput [formControlName]="property.value" placeholder="Enter {{ property.value }}">
+          </mat-form-field>
+        </div>
+      }
       <button mat-raised-button color="primary" (click)="addCard()">Add Card</button>
     </form>
     <button mat-raised-button color="primary" (click)="nextStep(4)">Next</button>
@@ -76,13 +84,15 @@
     <h3>Preview Cards</h3>
 
     <mat-table [dataSource]="cards()">
-      <ng-container *ngFor="let property of displayedColumns()" matColumnDef="{{ property }}">
-        <mat-header-cell *matHeaderCellDef>
-          {{ property | titlecase }}
-          ({{ propertyTypes()[property] || 'unknown' }})  <!-- Show property type here -->
-        </mat-header-cell>
-        <mat-cell *matCellDef="let card">{{ card[property] }}</mat-cell>
-      </ng-container>
+      @for (property of displayedColumns(); track property) {
+        <ng-container matColumnDef="{{ property }}">
+          <mat-header-cell *matHeaderCellDef>
+            {{ property | titlecase }}
+            ({{ propertyTypes()[property] || 'unknown' }})  <!-- Show property type here -->
+          </mat-header-cell>
+          <mat-cell *matCellDef="let card">{{ card[property] }}</mat-cell>
+        </ng-container>
+      }
 
       <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
       <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>

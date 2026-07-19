@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {NgIf} from '@angular/common';
+
 import {MatCardModule} from '@angular/material/card';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
@@ -15,14 +15,13 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   standalone: true,
   imports: [
     FormsModule,
-    NgIf,
     MatCardModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
-    MatProgressBarModule,
-  ],
+    MatProgressBarModule
+],
   templateUrl: './provision.component.html',
   styleUrl: './provision.component.css'
 })

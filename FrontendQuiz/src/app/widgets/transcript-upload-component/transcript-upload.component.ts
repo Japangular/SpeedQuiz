@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {stream_transcript} from '../../features/transcription-translation/transcription-translation.model';
-import {NgIf} from '@angular/common';
+
 import {TranscriptionTranslationService} from '../../features/transcription-translation/transcription-translation.service';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatButton} from '@angular/material/button';
@@ -10,10 +10,9 @@ import {MatIcon} from '@angular/material/icon';
   selector: 'app-transcript-upload',
   templateUrl: './transcript-upload.component.html',
   imports: [
-    NgIf,
     MatIcon,
     MatButton
-  ],
+],
   styles: [`
     .drop-zone {
       border: 2px dashed #999;

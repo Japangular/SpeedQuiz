@@ -1,6 +1,6 @@
 <div class="about-container">
 
-  <ng-container *ngIf="siteModeService.isPortfolio">
+  @if (siteModeService.isPortfolio) {
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">person</mat-icon>
@@ -18,7 +18,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">architecture</mat-icon>
@@ -31,14 +30,12 @@
           a read-only SQLite mount for Anki imports, and a Python FastAPI microservice
           for Japanese text segmentation via MeCab.
         </p>
-
         <h3>Frontend</h3>
         <p>
           Angular 19 with Angular Material. State is managed via RxJS BehaviorSubjects
           in injectable services. The API client is auto-generated from an OpenAPI 3.0
           contract to keep frontend and backend in sync.
         </p>
-
         <h3>Backend</h3>
         <p>
           Spring Boot 3.4 on Java 21. Uses Spring Data JPA with a multi-datasource
@@ -46,14 +43,12 @@
           Anki deck imports. Database migrations are handled via Flyway.
           Session management is lightweight and passwordless, using UUID tokens.
         </p>
-
         <h3>NLP Service</h3>
         <p>
           A Python FastAPI service wrapping MeCab for morphological analysis of Japanese
           text. Called server-to-server from the Spring Boot backend. Containerized
           separately to keep the Java build lean.
         </p>
-
         <h3>Infrastructure</h3>
         <p>
           Docker Compose orchestrates all services. nginx acts as reverse proxy, serving
@@ -62,7 +57,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">featured_play_list</mat-icon>
@@ -91,7 +85,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">link</mat-icon>
@@ -106,7 +99,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <!-- Impressum — only in portfolio mode -->
     <mat-card class="about-card">
       <mat-card-title>
@@ -118,11 +110,9 @@
         <!-- TODO -->
       </mat-card-content>
     </mat-card>
+  }
 
-  </ng-container>
-
-  <ng-container *ngIf="siteModeService.isVtuberFan">
-
+  @if (siteModeService.isVtuberFan) {
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">auto_stories</mat-icon>
@@ -140,7 +130,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">help_outline</mat-icon>
@@ -153,32 +142,27 @@
           and you can type in either romaji or hiragana. Cards you get wrong will come
           back more often.
         </p>
-
         <h3>Dictionary</h3>
         <p>
           Paste any Japanese text and it gets broken down into individual words with
           dictionary lookups. Useful when you catch a word in a stream and want to
           look it up quickly.
         </p>
-
         <h3>Kanji Wall</h3>
         <p>
           A visual grid of kanji. Click any character to see its readings, meanings,
           and animated stroke order.
         </p>
-
         <h3>Transcripts</h3>
         <p>
           Upload stream transcripts and turn them into study material. The app parses
           the Japanese text and makes it searchable.
         </p>
-
         <h3>Anki Table</h3>
         <p>
           If you use Anki, you can browse your existing decks here. Rows you already
           know can be marked as ignored.
         </p>
-
         <h3>Deck Creator</h3>
         <p>
           Build your own flashcard decks with custom properties — questions, answers,
@@ -186,7 +170,6 @@
         </p>
       </mat-card-content>
     </mat-card>
-
     <mat-card class="about-card">
       <mat-card-title>
         <mat-icon color="primary">favorite</mat-icon>
@@ -199,8 +182,7 @@
         </p>
       </mat-card-content>
     </mat-card>
-
-  </ng-container>
+  }
 
   <mat-card class="about-card">
     <mat-card-title>
@@ -214,7 +196,7 @@
         <a href="https://kanjivg.tagaini.net/" target="_blank" rel="noopener noreferrer">KanjiVG</a>,
         a project by Ulrich Apel, licensed under the
         <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener noreferrer">
-          Creative Commons Attribution-Share Alike 3.0 License</a>.
+        Creative Commons Attribution-Share Alike 3.0 License</a>.
       </p>
 
       <h3>KanjiStrokeOrders Font</h3>
@@ -231,7 +213,7 @@
         Dictionary data sourced from the
         <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project" target="_blank" rel="noopener noreferrer">
           JMdict/EDICT project</a> the property of the Electronic Dictionary Research and Development Group (EDRDG), used in accordance with the <a href="https://www.edrdg.org/edrdg/licence.html"  target="_blank" rel="noopener noreferrer">EDRDG License</a> (Creative Commons Attribution-ShareAlike).
-      </p>
-    </mat-card-content>
-  </mat-card>
-</div>
+        </p>
+      </mat-card-content>
+    </mat-card>
+  </div>

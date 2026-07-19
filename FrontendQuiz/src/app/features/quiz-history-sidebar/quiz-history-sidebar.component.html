@@ -5,58 +5,72 @@
 </div>
 
 <div class="history-list" #scrollContainer>
-  <div *ngFor="let entry of visibleHistory; trackBy: trackByIndex"
-       class="history-entry"
-       [class.hint-used]="entry.hintUsed"
-       [class.expanded]="entry.expanded"
-       [class.disabled]="isDisabled(entry)">
-
-    <div class="question-row" (click)="toggle(entry)">
-      <span class="card-index">#{{ entry.card.index }}</span>
-
-      <mat-icon *ngIf="entry.hintUsed" class="hint-used-icon">visibility</mat-icon>
-      <mat-icon *ngIf="!entry.hintUsed && entry.solvedExactly === true" class="exact-icon">check_circle</mat-icon>
-      <mat-icon *ngIf="!entry.hintUsed && entry.solvedExactly === false" class="fuzzy-icon">check_circle_outline</mat-icon>
-
-      <span class="question-text">{{ entry.card.question }}</span>
-      <span class="entry-icons">
-        <mat-icon *ngIf="entry.hintUsed" class="hint-icon" matTooltip="Hint was used">lightbulb</mat-icon>
-        <mat-icon *ngIf="!isDisabled(entry)" class="expand-icon">
-          {{ entry.expanded ? 'expand_less' : 'expand_more' }}
-        </mat-icon>
-        <mat-icon *ngIf="isDisabled(entry)" class="lock-icon" matTooltip="Progress past this card to unlock">lock</mat-icon>
-      </span>
+  @for (entry of visibleHistory; track trackByIndex($index, entry)) {
+    <div
+      class="history-entry"
+      [class.hint-used]="entry.hintUsed"
+      [class.expanded]="entry.expanded"
+      [class.disabled]="isDisabled(entry)">
+      <div class="question-row" (click)="toggle(entry)">
+        <span class="card-index">#{{ entry.card.index }}</span>
+        @if (entry.hintUsed) {
+          <mat-icon class="hint-used-icon">visibility</mat-icon>
+        }
+        @if (!entry.hintUsed && entry.solvedExactly === true) {
+          <mat-icon class="exact-icon">check_circle</mat-icon>
+        }
+        @if (!entry.hintUsed && entry.solvedExactly === false) {
+          <mat-icon class="fuzzy-icon">check_circle_outline</mat-icon>
+        }
+        <span class="question-text">{{ entry.card.question }}</span>
+        <span class="entry-icons">
+          @if (entry.hintUsed) {
+            <mat-icon class="hint-icon" matTooltip="Hint was used">lightbulb</mat-icon>
+          }
+          @if (!isDisabled(entry)) {
+            <mat-icon class="expand-icon">
+              {{ entry.expanded ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          }
+          @if (isDisabled(entry)) {
+            <mat-icon class="lock-icon" matTooltip="Progress past this card to unlock">lock</mat-icon>
+          }
+        </span>
+      </div>
+      @if (entry.expanded && !isDisabled(entry)) {
+        <div class="answers-panel">
+          <!-- Question (copyable) -->
+          <div class="answer-row question-detail">
+            <span class="answer-key">question</span>
+            <span class="answer-value">{{ entry.card.question }}</span>
+          </div>
+          @for (answer of getAnswers(entry.card); track answer) {
+            <div class="answer-row">
+              <span class="answer-key">{{ answer.key }}</span>
+              <span class="answer-value">{{ answer.value }}</span>
+            </div>
+          }
+          @if (entry.card.hint) {
+            <div class="answer-row">
+              <span class="answer-key">hint</span>
+              <span class="answer-value hint-text">{{ entry.card.hint }}</span>
+            </div>
+          }
+          <button mat-button
+            class="jump-btn"
+            (click)="jumpToCard(entry); $event.stopPropagation()">
+            <mat-icon>redo</mat-icon>
+            Jump to this card
+          </button>
+        </div>
+      }
     </div>
+  }
 
-    <div class="answers-panel" *ngIf="entry.expanded && !isDisabled(entry)">
-
-      <!-- Question (copyable) -->
-      <div class="answer-row question-detail">
-        <span class="answer-key">question</span>
-        <span class="answer-value">{{ entry.card.question }}</span>
-      </div>
-
-      <div *ngFor="let answer of getAnswers(entry.card)" class="answer-row">
-        <span class="answer-key">{{ answer.key }}</span>
-        <span class="answer-value">{{ answer.value }}</span>
-      </div>
-
-      <div *ngIf="entry.card.hint" class="answer-row">
-        <span class="answer-key">hint</span>
-        <span class="answer-value hint-text">{{ entry.card.hint }}</span>
-      </div>
-
-      <button mat-button
-              class="jump-btn"
-              (click)="jumpToCard(entry); $event.stopPropagation()">
-        <mat-icon>redo</mat-icon>
-        Jump to this card
-      </button>
+  @if (visibleHistory.length === 0) {
+    <div class="empty-state">
+      <mat-icon>hourglass_empty</mat-icon>
+      <span>Previous cards will appear here as you progress</span>
     </div>
-  </div>
-
-  <div *ngIf="visibleHistory.length === 0" class="empty-state">
-    <mat-icon>hourglass_empty</mat-icon>
-    <span>Previous cards will appear here as you progress</span>
-  </div>
+  }
 </div>

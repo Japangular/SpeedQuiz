@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {AsyncPipe, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatMenuModule} from '@angular/material/menu';
@@ -11,13 +11,12 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   selector: 'app-profile-actions',
   standalone: true,
   imports: [
-    NgIf,
     AsyncPipe,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatDividerModule,
-  ],
+    MatDividerModule
+],
   templateUrl: './profile-actions.component.html',
   styleUrl: './profile-actions.component.css'
 })

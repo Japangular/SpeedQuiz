@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, HostListener, Input, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
 import {AnkiTableService} from './anki-table.service';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import { NgClass } from '@angular/common';
 import {AnkiCard, AnkiPage} from './anki-table.model';
 import {
   MatCell,
@@ -17,14 +17,13 @@ import {
 import {MatSort, MatSortHeader} from '@angular/material/sort';
 import {MatPaginator, PageEvent} from '@angular/material/paginator';
 import {MatCheckbox, MatCheckboxChange} from '@angular/material/checkbox';
-import {MatAnchor} from '@angular/material/button';
+import {MatAnchor, MatButton} from '@angular/material/button';
 import {Router} from '@angular/router';
 import {MatChip} from '@angular/material/chips';
 
 @Component({
   selector: 'app-anki-table',
   imports: [
-    NgIf,
     MatCell,
     MatCellDef,
     MatHeaderCell,
@@ -35,7 +34,6 @@ import {MatChip} from '@angular/material/chips';
     MatSort,
     MatSortHeader,
     MatTable,
-    NgForOf,
     MatColumnDef,
     MatHeaderCellDef,
     MatSort,
@@ -44,6 +42,7 @@ import {MatChip} from '@angular/material/chips';
     MatAnchor,
     MatChip,
     NgClass,
+    MatButton
   ],
   templateUrl: './anki-table.component.html',
   styleUrl: './anki-table.component.css'

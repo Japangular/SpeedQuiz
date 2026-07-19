@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, HostListener, QueryList, ViewChild, ViewChildren} from '@angular/core';
-import {NgForOf} from '@angular/common';
+
 import {DictStateService} from '../../services/dict-state.service';
 import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
@@ -14,14 +14,13 @@ import {MatIcon} from '@angular/material/icon';
   selector: 'app-kanji-wall',
   imports: [
     StrokeOrderKanjiComponent,
-    NgForOf,
     FormsModule,
     MatFormField,
     MatIcon,
     MatInput,
     MatButton,
     MatLabel
-  ],
+],
   templateUrl: './kanji-wall.component.html',
   styleUrl: './kanji-wall.component.css'
 })

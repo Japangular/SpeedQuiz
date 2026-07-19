@@ -5,7 +5,7 @@ import {MatStepper, MatStepperModule} from '@angular/material/stepper';
 import {MatInputModule} from '@angular/material/input';
 import {MatSelectModule} from '@angular/material/select';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {NgForOf, NgIf, SlicePipe} from '@angular/common';
+import { SlicePipe } from '@angular/common';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
 import {MatButtonModule, MatIconButton} from '@angular/material/button';
@@ -27,8 +27,6 @@ const LEVEL_FIELD = 'Level';
   selector: 'app-extract-cards-from-url',
   standalone: true,
   imports: [
-    NgForOf,
-    NgIf,
     SlicePipe,
     MatCardModule,
     MatStepperModule,
@@ -39,8 +37,8 @@ const LEVEL_FIELD = 'Level';
     MatIconModule,
     MatProgressBarModule,
     MatTooltip,
-    DragDropModule,
-  ],
+    DragDropModule
+],
   templateUrl: './extract-cards-from-url.component.html',
   styleUrls: ['./extract-cards-from-url.component.css'],
 })

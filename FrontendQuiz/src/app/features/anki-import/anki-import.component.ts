@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,9 +13,12 @@ import { AnkiImportService } from './anki-import.service';
   selector: 'app-anki-import',
   standalone: true,
   imports: [
-    CommonModule, FormsModule,
-    MatButtonModule, MatFormFieldModule, MatInputModule, MatProgressBarModule,
-  ],
+    FormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatProgressBarModule
+],
   templateUrl: './anki-import.component.html',
   styleUrl: './anki-import.component.css',
 })

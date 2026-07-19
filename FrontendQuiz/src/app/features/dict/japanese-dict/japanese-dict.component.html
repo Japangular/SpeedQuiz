@@ -15,23 +15,30 @@
     </button>
   </mat-form-field>
 
-  <mat-progress-bar *ngIf="loading()" mode="indeterminate"></mat-progress-bar>
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
 
-  <div *ngIf="tableResults()">
-    <mat-table *ngIf="tableResults().length > 0" [dataSource]="tableResults()">
-      <!-- Dynamically create column headers and rows -->
-      <ng-container *ngFor="let column of displayedColumns()" [matColumnDef]="column">
-        <mat-header-cell
-          *matHeaderCellDef
-          (click)="toggleColumnSelection(column)"
-          [class.selected-column]="isColumnSelected(column)">
-          {{ column | titlecase }}
-        </mat-header-cell>
-        <mat-cell *matCellDef="let element">{{ element[column]  }}</mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
-    </mat-table>
-  </div>
+  @if (tableResults()) {
+    <div>
+      @if (tableResults().length > 0) {
+        <mat-table [dataSource]="tableResults()">
+          <!-- Dynamically create column headers and rows -->
+          @for (column of displayedColumns(); track column) {
+            <ng-container [matColumnDef]="column">
+              <mat-header-cell
+                *matHeaderCellDef
+                (click)="toggleColumnSelection(column)"
+                [class.selected-column]="isColumnSelected(column)">
+                {{ column | titlecase }}
+              </mat-header-cell>
+              <mat-cell *matCellDef="let element">{{ element[column]  }}</mat-cell>
+            </ng-container>
+          }
+          <mat-header-row *matHeaderRowDef="displayedColumns()"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedColumns();"></mat-row>
+        </mat-table>
+      }
+    </div>
+  }
 </mat-card>

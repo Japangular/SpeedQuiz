@@ -147,7 +147,7 @@
   opacity: 0.7;
   position: sticky;
   top: 0;
-  background: var(--mdc-elevated-card-container-color, white);
+  background: var(--mat-card-elevated-container-color, white);
   z-index: 1;
 }
 

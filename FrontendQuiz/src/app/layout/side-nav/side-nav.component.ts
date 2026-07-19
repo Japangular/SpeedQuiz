@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {AsyncPipe, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 import {MatAnchor, MatFabButton, MatIconButton} from '@angular/material/button';
 import {MatListItem, MatNavList} from '@angular/material/list';
@@ -38,16 +38,14 @@ import {DeckStore} from '../../store/deck.store';
     RouterLink,
     MatAnchor,
     RouterLinkActive,
-    NgForOf,
-    NgIf,
     NgTemplateOutlet,
     MatProgressBarModule,
     MatTooltipModule,
     MatBottomSheetModule,
     ProvisionComponent,
     ProfileActionsComponent,
-    AccessGateComponent,
-  ],
+    AccessGateComponent
+],
   templateUrl: './side-nav.component.html',
   standalone: true,
   styleUrl: './side-nav.component.scss'

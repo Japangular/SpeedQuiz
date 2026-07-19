@@ -16,8 +16,8 @@ strategies.
 
 | Layer          | Technology                                                    |
 |----------------|---------------------------------------------------------------|
-| Frontend       | Angular 19, Angular Material, RxJS                            |
-| Backend        | Spring Boot 3.4 (Java 21), Spring Data JPA, HikariCP, Lombok  |
+| Frontend       | Angular 21, Angular Material, RxJS                            |
+| Backend        | Spring Boot 3.5 (Java 21), Spring Data JPA, HikariCP, Lombok  |
 | NLP Service    | Python FastAPI, MeCab (Japanese morphological analysis)       |
 | Database       | PostgreSQL 16, SQLite (read-only Anki import)                 |
 | Migrations     | Flyway                                                        |
@@ -275,7 +275,7 @@ ng serve
 │       │   ├── htmlTableImport/       HTML table → deck importer (JLPT lists)
 │       │   └── transcriptCards/       Transcript storage, deduplication, mapping
 │       └── utils/                     HTML parser, JSON batch importer
-├── FrontendQuiz/              Angular 19 SPA
+├── FrontendQuiz/              Angular 21 SPA
 │   └── src/app/
 │       ├── features/
 │       │   ├── anki-table/            Anki card browser (abstract data source pattern)

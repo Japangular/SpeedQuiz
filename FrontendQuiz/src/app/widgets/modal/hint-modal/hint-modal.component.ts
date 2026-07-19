@@ -1,14 +1,14 @@
 import {Component, Inject} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from "@angular/material/button";
-import {CommonModule} from "@angular/common";
+
 import {EditCardModalComponent} from '../edit-card-modal/edit-card-modal.component';
 import {Card} from '../../../features/quiz/model/quiz.model';
 
 @Component({
   selector: 'app-hint-modal',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, CommonModule],
+  imports: [MatDialogModule, MatButtonModule],
   template: `
     <h2 mat-dialog-title>Hint</h2>
     <mat-dialog-content>

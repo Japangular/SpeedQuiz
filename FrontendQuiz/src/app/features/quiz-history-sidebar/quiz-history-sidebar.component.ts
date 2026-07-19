@@ -1,5 +1,5 @@
 import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {NgForOf, NgIf} from '@angular/common';
+
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -21,14 +21,12 @@ interface HistoryEntry {
   selector: 'app-quiz-history-sidebar',
   standalone: true,
   imports: [
-    NgForOf,
-    NgIf,
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
     MatSlideToggleModule,
-    FormsModule,
-  ],
+    FormsModule
+],
   templateUrl: './quiz-history-sidebar.component.html',
   styleUrl: './quiz-history-sidebar.component.css',
 })

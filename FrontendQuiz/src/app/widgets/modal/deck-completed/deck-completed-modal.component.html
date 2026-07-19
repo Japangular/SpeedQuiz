@@ -3,7 +3,9 @@
 <div mat-dialog-content>
   <p><strong>Questions you solved:</strong></p>
   <ul>
-    <li *ngFor="let question of solvedQuestions">{{ question }}</li>
+    @for (question of solvedQuestions; track question) {
+      <li>{{ question }}</li>
+    }
   </ul>
 </div>
 

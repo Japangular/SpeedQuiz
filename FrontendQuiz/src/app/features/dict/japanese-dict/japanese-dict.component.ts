@@ -1,7 +1,7 @@
 import {Component, effect, signal, WritableSignal} from '@angular/core';
 import {MatCard} from '@angular/material/card';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {NgForOf, NgIf, TitleCasePipe} from '@angular/common';
+import { TitleCasePipe } from '@angular/common';
 import {MatInput} from '@angular/material/input';
 import {MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
@@ -28,13 +28,11 @@ import {DictStateService} from '../../../services/dict-state.service';
   imports: [
     MatFormField,
     MatCard,
-    NgForOf,
     MatIcon,
     MatInput,
     MatIconButton,
     MatProgressBar,
     FormsModule,
-    NgIf,
     MatLabel,
     MatTable,
     MatColumnDef,
@@ -48,8 +46,8 @@ import {DictStateService} from '../../../services/dict-state.service';
     MatHeaderCellDef,
     TitleCasePipe,
     MatRadioGroup,
-    MatRadioButton,
-  ],
+    MatRadioButton
+],
   templateUrl: './japanese-dict.component.html',
   styleUrl: './japanese-dict.component.css'
 })

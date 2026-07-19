@@ -8,12 +8,14 @@
     </mat-form-field>
 
     <div formGroupName="answers">
-      <div *ngFor="let key of answerKeys">
-        <mat-form-field appearance="fill" class="w-full">
-          <mat-label>{{ key }}</mat-label>
-          <input matInput [formControlName]="key"/>
-        </mat-form-field>
-      </div>
+      @for (key of answerKeys; track key) {
+        <div>
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>{{ key }}</mat-label>
+            <input matInput [formControlName]="key"/>
+          </mat-form-field>
+        </div>
+      }
     </div>
   </form>
 </div>
