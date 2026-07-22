@@ -135,12 +135,21 @@
     return_content: true
     status_code: 200
   register: health
-  until: >
-    health.status == 200
-    and health.json.status == 'UP'
-    and health.json.components.dictionary.status == 'UP'
+  until: health.status == 200 and health.json.status == 'UP'
   retries: 12
   delay: 5
+
+- name: Verify dictionary component loaded (internal endpoint, not publicly routed)
+  ansible.builtin.command:
+    cmd: docker compose exec -T python_dict curl -sf http://backend:8080/actuator/health/internal
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ deploy_user }}"
+  register: internal_health
+  changed_when: false
+  failed_when: >
+    internal_health.rc != 0
+    or (internal_health.stdout | from_json).components.dictionary.status != 'UP'
 
 - name: Prune dangling Docker images and old build cache
   ansible.builtin.shell: |
