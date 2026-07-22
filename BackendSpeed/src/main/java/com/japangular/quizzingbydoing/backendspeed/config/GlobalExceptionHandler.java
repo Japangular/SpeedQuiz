@@ -1,6 +1,5 @@
 package com.japangular.quizzingbydoing.backendspeed.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.exception.KanjiNotFoundException;
 import com.japangular.quizzingbydoing.backendspeed.persistence.deck.DuplicateDeckException;
 import com.japangular.quizzingbydoing.backendspeed.quizFeatures.exception.DeckNotFoundException;
@@ -13,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import tools.jackson.core.JacksonException;
 
 import java.time.Instant;
 import java.util.stream.Collectors;
@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
     return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
   }
 
-  @ExceptionHandler(JsonProcessingException.class)
-  public ResponseEntity<ApiError> handleJsonProcessing(JsonProcessingException ex) {
+  @ExceptionHandler(JacksonException.class)
+  public ResponseEntity<ApiError> handleJsonProcessing(JacksonException ex) {
     logger.warn("Invalid JSON in request: {}", ex.getOriginalMessage());
     return buildResponse(HttpStatus.BAD_REQUEST, "Invalid JSON format");
   }

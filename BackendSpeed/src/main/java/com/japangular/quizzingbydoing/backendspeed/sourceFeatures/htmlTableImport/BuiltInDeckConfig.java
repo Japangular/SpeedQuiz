@@ -1,6 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.htmlTableImport;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.sourceFeatures.htmlTableImport.model.DeckEntry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.core.JacksonException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
 @Configuration
@@ -43,7 +43,7 @@ public class BuiltInDeckConfig {
                 new HtmlResourceDeckProvider(entry, pkg.getAttribution(), fullPath, importer));
           }
         }
-      } catch (IOException e) {
+      } catch (JacksonException e) {
         throw new RuntimeException(
             "Failed to load deck configs", e);
       }

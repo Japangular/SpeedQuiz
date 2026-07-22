@@ -17,9 +17,9 @@ public class CardProgressRepository {
 
   public List<CardProgress> getStates(String deckId, UUID ownerId) {
     String sql = "SELECT deck_id, card_id, state FROM deck_card_state WHERE deck_id = ? AND owner_id = ?";
-    return jdbcTemplate.query(sql, new Object[]{deckId, ownerId}, (rs, rowNum) ->
+    return jdbcTemplate.query(sql, (rs, rowNum) ->
         new CardProgress(rs.getString("deck_id"), rs.getString("card_id"), rs.getString("state"))
-    );
+    ,deckId, ownerId);
   }
 
   public void saveStates(String deckId, UUID ownerId, List<CardProgress> states) {

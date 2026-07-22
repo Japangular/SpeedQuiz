@@ -1,13 +1,13 @@
 package com.japangular.quizzingbydoing.backendspeed.sourceFeatures.ankiParsing.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.model.PropertyType;
 import com.japangular.quizzingbydoing.backendspeed.persistence.deck.UserDeckSource;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 
 import java.nio.file.Path;
 import java.sql.*;
@@ -67,7 +67,7 @@ public class AnkiImportService {
       String propsJson = objectMapper.writeValueAsString(properties);
       String cardsJson = objectMapper.writeValueAsString(cards);
       userDeckSource.insertDeck(deckName, ownerId, propsJson, cardsJson);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new IllegalArgumentException("Could not serialise deck", e);
     }
 

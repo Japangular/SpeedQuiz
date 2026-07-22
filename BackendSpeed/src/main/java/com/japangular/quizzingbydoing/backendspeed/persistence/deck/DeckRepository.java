@@ -1,8 +1,7 @@
 package com.japangular.quizzingbydoing.backendspeed.persistence.deck;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.model.PropertyType;
 import lombok.RequiredArgsConstructor;
 import org.postgresql.util.PSQLException;
@@ -13,6 +12,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.JacksonException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -34,7 +34,7 @@ public class DeckRepository {
     try {
       propertiesJson = objectMapper.writeValueAsString(deckModel.getProperties());
       cardsJson = objectMapper.writeValueAsString(deckModel.getCards());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.error("JSON serialization error for Deck", e);
       return 0;
     }
@@ -46,8 +46,8 @@ public class DeckRepository {
       return rowsAffected;
     } catch (DuplicateKeyException e) {
       Throwable cause = e.getCause();
-      if (cause instanceof PSQLException) {
-        ServerErrorMessage serverError = ((PSQLException) cause).getServerErrorMessage();
+      if (cause instanceof PSQLException exception) {
+        ServerErrorMessage serverError = exception.getServerErrorMessage();
         if (serverError != null && "unique_deck_content".equals(serverError.getConstraint())) {
           logger.warn("Duplicate deck submission detected for deckName: {} (ignored due to unique_deck_content constraint)", deckModel.getDeckName());
           return 2;
@@ -63,17 +63,17 @@ public class DeckRepository {
 
   public List<DeckModel> getSubmissionDecksByDeckName(String deckName) {
     String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE deck_name = ?";
-    return jdbcTemplate.query(sql, new Object[]{deckName}, (rs, rowNum) -> mapRowToDeck(rs));
+    return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToDeck(rs),deckName);
   }
 
   public List<DeckModel> getSubmissionDecksByOwnerId(UUID ownerId) {
     String sql = "SELECT deck_name, owner_id, properties, cards FROM deck WHERE owner_id = ?";
-    return jdbcTemplate.query(sql, new Object[]{ownerId}, (rs, rowNum) -> mapRowToDeck(rs));
+    return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToDeck(rs),ownerId);
   }
 
   public Optional<DeckModel> findByOwnerIdAndDeckName(UUID ownerId, String deckName) {
     String sql = "SELECT deck_name, owner_id, properties, cards FROM deck WHERE owner_id = ? AND deck_name = ?";
-    List<DeckModel> decks = jdbcTemplate.query(sql, new Object[]{ownerId, deckName}, (rs, rowNum) -> mapRowToDeck(rs));
+    List<DeckModel> decks = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToDeck(rs),ownerId, deckName);
     return decks.isEmpty() ? Optional.empty() : Optional.of(decks.getFirst());
   }
 
@@ -110,7 +110,7 @@ public class DeckRepository {
           rs.getString("cards"), new TypeReference<>() {});
       deck.setProperties(properties);
       deck.setCards(cards);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       logger.error("Failed to deserialize deck '{}'", rs.getString("deck_name"), e);
     }
     return deck;

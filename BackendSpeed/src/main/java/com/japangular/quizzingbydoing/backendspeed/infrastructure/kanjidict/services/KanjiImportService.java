@@ -1,6 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.services;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.entity.Kanji;
 import com.japangular.quizzingbydoing.backendspeed.infrastructure.kanjidict.repository.KanjiRepository;
 import com.japangular.quizzingbydoing.backendspeed.utils.JsonBatchImporter;
@@ -59,14 +59,14 @@ public void init() throws IOException {
 
   private Kanji mapKanji(JsonNode node) {
 
-    String character = node.get(0).asText();
-    String onyomiRaw = node.get(1).asText();
-    String kunyomiRaw = node.get(2).asText();
-    String tag = node.get(3).asText();
+    String character = node.get(0).asString();
+    String onyomiRaw = node.get(1).asString();
+    String kunyomiRaw = node.get(2).asString();
+    String tag = node.get(3).asString();
 
     List<String> meanings = new ArrayList<>();
     for (JsonNode m : node.get(4)) {
-      meanings.add(m.asText());
+      meanings.add(m.asString());
     }
 
     Kanji k = new Kanji();

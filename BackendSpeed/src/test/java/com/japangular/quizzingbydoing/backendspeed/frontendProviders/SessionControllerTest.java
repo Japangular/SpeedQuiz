@@ -2,20 +2,19 @@
 // BackendSpeed/src/test/java/com/japangular/quizzingbydoing/backendspeed/frontendProviders/SessionControllerTest.java
 
 package com.japangular.quizzingbydoing.backendspeed.frontendProviders;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.postgresql.PostgreSQLContainer;
+import tools.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.ProvisionRequest;
 import com.japangular.quizzingbydoing.backendspeed.persistence.session.ProvisionResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,7 +35,7 @@ class SessionControllerTest {
 
   // One throwaway Postgres for the whole class. Flyway runs against it on startup.
   @Container
-  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
+  static final PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:16")
       // One migration hardcodes "speedquizdb", so the container's DB must use that name.
       .withDatabaseName("speedquizdb");
 

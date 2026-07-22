@@ -1,7 +1,8 @@
 package com.japangular.quizzingbydoing.backendspeed.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +22,7 @@ public class JsonBatchImporter {
       int batchSize
   ) throws IOException {
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new JsonMapper();
     JsonNode root = objectMapper.readTree(jsonStream);
 
     List<T> batch = new ArrayList<>();

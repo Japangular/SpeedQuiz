@@ -1,7 +1,6 @@
 package com.japangular.quizzingbydoing.backendspeed.frontendProviders.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckCardState;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckContent;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckInfo;
@@ -13,6 +12,7 @@ import com.japangular.quizzingbydoing.backendspeed.quizFeatures.DeckBrowsingServ
 import com.japangular.quizzingbydoing.backendspeed.quizFeatures.DeckRegistryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +45,7 @@ public class DeckService {
       String propertiesJson = objectMapper.writeValueAsString(deckContent.getProperties());
       String cardsJson = objectMapper.writeValueAsString(deckContent.getCards());
       userDeckSource.insertDeck(deckName, ownerId, propertiesJson, cardsJson);
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       throw new IllegalArgumentException("Invalid deck content: " + e.getOriginalMessage(), e);
     }
   }
