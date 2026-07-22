@@ -68,7 +68,7 @@ services:
     ports:
       - "8000:8000"
   prometheus:
-    image: prom/prometheus:vX.Y.Z      # pin a real tag, never :latest
+    image: prom/prometheus:v3.12.0      # pin a real tag, never :latest
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
@@ -86,7 +86,7 @@ services:
       - backend
 
   grafana:
-    image: grafana/grafana-oss:X.Y.Z   # pin a real tag
+    image: grafana/grafana:13.1.1   # pin a real tag
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?grafana admin password not set}
