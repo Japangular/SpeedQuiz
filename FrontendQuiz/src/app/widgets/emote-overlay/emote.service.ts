@@ -15,11 +15,11 @@ export interface EmoteDisplay {
  * Rename these to match your exported layer names.
  */
 const EMOTE_MAP: Record<EmoteEvent, string> = {
-  cardSwitch: 'emotes/next.png',
+  cardSwitch: 'emotes/waiting.png',
   correct:    'emotes/happy.png',
   hint:       'emotes/shocked.png',
   reset:      'emotes/shocked.png',
-  takingLong: 'emotes/sleepy.png',
+  takingLong: 'emotes/waiting.png',
 };
 
 /** Which events also play the ping. */

@@ -27,3 +27,6 @@ cors_allowed_origins: "{{ vault_cors_allowed_origins }}"
 # Releases: https://github.com/KanjiVG/kanjivg/releases
 kanjivg_date: "20250816"
 kanjivg_release: "r{{ kanjivg_date }}"
+
+grafana_admin_user: "{{ vault_grafana_admin_user }}"
+grafana_admin_password: "{{ vault_grafana_admin_password }}"
