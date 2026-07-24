@@ -33,7 +33,11 @@
         </button>
       }
 
-      <button mat-icon-button (click)="hintRequested.emit()" matTooltip="Show hint (Ctrl+H)">
+      <button mat-icon-button
+              (click)="hintRequested.emit()"
+              (mouseenter)="hintHovered.emit()"
+              (focus)="hintHovered.emit()"
+              matTooltip="Show hint (Ctrl+H)">
         <mat-icon>lightbulb</mat-icon>
       </button>
 

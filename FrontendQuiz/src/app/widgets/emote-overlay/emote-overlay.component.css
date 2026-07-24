@@ -23,7 +23,9 @@
 
 /* Slow fade-in that stays, for "you're taking a while..." */
 .emote.linger {
-  animation: emote-creep 4s ease-out forwards;
+  animation:
+    emote-creep 4s ease-out forwards,
+    emote-drift 14s linear 4s infinite;
 }
 
 @keyframes emote-pop {
@@ -37,6 +39,11 @@
 @keyframes emote-creep {
   from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes emote-drift {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {

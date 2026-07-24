@@ -41,15 +41,6 @@ services:
       - ./htmlImports:/app/htmlImports:ro
       - anki-tmp:/app/anki-tmp
 
-  frontend:
-    build:
-      context: .
-      dockerfile: FrontendQuiz/Dockerfile.frontend
-    ports:
-      - "4200:80"
-    volumes:
-      - ./api.yaml:/app/api.yaml
-
   nginx:
     build:
       context: .
@@ -57,7 +48,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - frontend
+      - backend
     volumes:
       - ./KanjiVG:/usr/share/nginx/html/kanjivg:ro
 

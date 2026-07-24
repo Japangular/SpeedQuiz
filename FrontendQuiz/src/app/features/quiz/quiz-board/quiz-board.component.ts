@@ -3,7 +3,7 @@ import {Subscription} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {MatIcon} from '@angular/material/icon';
-import {MatAnchor, MatIconButton} from '@angular/material/button';
+import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 
 import {DeckBarComponent} from '../../deck-bar/deck-bar.component';
@@ -44,6 +44,7 @@ const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
     MatTooltip,
     MatIconButton,
     EmoteOverlayComponent,
+    MatButton,
   ],
   templateUrl: './quiz-board.component.html',
   styleUrl: './quiz-board.component.css'
@@ -62,6 +63,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   /** Default off; remembered across sessions. */
   showYoutube = localStorage.getItem(SHOW_YOUTUBE_KEY) === 'true';
   showStrokeOrder = localStorage.getItem(SHOW_STROKE_ORDER_KEY) !== 'false';
+  private firstCard = true;
 
   private lastDeckId?: string;
   private fieldOrderService = inject(FieldOrderService);
@@ -84,7 +86,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       this.modal.closeHint();
       this.currentCard = card;
       this.currentLevel = card.level;
-      this.emotes.trigger('cardSwitch');   // ← add this line
+      this.emotes.trigger(this.firstCard ? 'greeting' : 'cardSwitch');
+      this.firstCard = false;
 
       const deckId = this.deckStore.deckId();
       if (deckId !== this.lastDeckId) {
@@ -146,6 +149,10 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       console.log('Comparison requested for:', event.value);
       // TODO: build comparison card from deck data
     }
+  }
+
+  onHintHover(): void {
+    this.emotes.peekHint();
   }
 
   @HostListener('window:keydown', ['$event'])

@@ -17,7 +17,7 @@ strategies.
 | Layer          | Technology                                                    |
 |----------------|---------------------------------------------------------------|
 | Frontend       | Angular 21, Angular Material, RxJS                            |
-| Backend        | Spring Boot 3.5 (Java 21), Spring Data JPA, HikariCP, Lombok  |
+| Backend        | Spring Boot 4.1 (Java 25), Spring Data JPA, HikariCP, Lombok  |
 | NLP Service    | Python FastAPI, MeCab (Japanese morphological analysis)       |
 | Database       | PostgreSQL 16, SQLite (read-only Anki import)                 |
 | Migrations     | Flyway                                                        |
@@ -234,7 +234,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-The app is available at `http://localhost:4200?token=portfolio`. The
+The app is available at `http://localhost?token=portfolio`. The
 `?token=portfolio` query parameter selects portfolio mode at the access gate —
 it is a UI mode switch, not an authentication mechanism (production access is
 enforced separately via mTLS at the reverse proxy). The backend runs on

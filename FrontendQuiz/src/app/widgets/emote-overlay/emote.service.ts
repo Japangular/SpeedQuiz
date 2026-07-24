@@ -1,7 +1,7 @@
 import {inject, Injectable, OnDestroy, signal} from '@angular/core';
 import {SiteModeService} from '../../site-mode/site-mode.service';
 
-export type EmoteEvent = 'cardSwitch' | 'correct' | 'hint' | 'reset' | 'takingLong';
+export type EmoteEvent = 'cardSwitch' | 'correct' | 'hint' | 'reset' | 'takingLong' | 'greeting' | 'hintPeek';
 
 export interface EmoteDisplay {
   src: string;
@@ -15,17 +15,21 @@ export interface EmoteDisplay {
  * Rename these to match your exported layer names.
  */
 const EMOTE_MAP: Record<EmoteEvent, string> = {
+  greeting:   'emotes/greeting.png',
   cardSwitch: 'emotes/waiting.png',
   correct:    'emotes/happy.png',
   hint:       'emotes/shocked.png',
   reset:      'emotes/shocked.png',
   takingLong: 'emotes/waiting.png',
+  hintPeek:   'emotes/mad.png',
 };
 
 /** Which events also play the ping. */
 const PLAY_SOUND: Record<EmoteEvent, boolean> = {
   cardSwitch: true,
   correct:    true,
+  greeting:   true,
+  hintPeek:   false,
   hint:       false,
   reset:      false,
   takingLong: false,   // it creeps in silently — that's the joke
@@ -38,6 +42,9 @@ const TAKING_LONG_MS = 25_000;
 /** A solved card immediately fires cardSwitch too — within this window, 'correct' wins. */
 const SUPPRESS_CARD_SWITCH_MS = 500;
 
+/** Hover is noisy — one peek per this window, shared with the actual hint click. */
+const HINT_COOLDOWN_MS = 3000;
+
 @Injectable({providedIn: 'root'})
 export class EmoteService implements OnDestroy {
 
@@ -48,6 +55,7 @@ export class EmoteService implements OnDestroy {
   private longTimer?: ReturnType<typeof setTimeout>;
   private lastTriggerAt = 0;
   private key = 0;
+  private lastHintAt = 0;
   private audioCtx?: AudioContext;
 
   private siteMode = inject(SiteModeService);
@@ -65,8 +73,10 @@ export class EmoteService implements OnDestroy {
     const mode = event === 'takingLong' ? 'linger' as const : 'flash' as const;
     this.show(EMOTE_MAP[event], mode);
 
+    if (event === 'hint') this.lastHintAt = Date.now();
+
     if (PLAY_SOUND[event]) this.playPing();
-    if (event !== 'takingLong') this.armTakingLongTimer();
+    if (event !== 'takingLong' && event !== 'hintPeek') this.armTakingLongTimer();
   }
 
   /** Hide everything and cancel timers (e.g. when leaving the quiz route). */
@@ -95,6 +105,13 @@ export class EmoteService implements OnDestroy {
   private armTakingLongTimer(): void {
     clearTimeout(this.longTimer);
     this.longTimer = setTimeout(() => this.trigger('takingLong'), TAKING_LONG_MS);
+  }
+
+  /** Call on hover/focus of the hint button. */
+  peekHint(): void {
+    if (Date.now() - this.lastHintAt < HINT_COOLDOWN_MS) return;
+    this.lastHintAt = Date.now();
+    this.trigger('hintPeek');
   }
 
   /**

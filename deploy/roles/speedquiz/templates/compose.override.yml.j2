@@ -25,10 +25,6 @@ services:
     ports: !reset []
     restart: unless-stopped
 
-  frontend:
-    ports: !reset []
-    restart: unless-stopped
-
   nginx:
     ports: !override
       - "127.0.0.1:{{ backend_public_port }}:80"

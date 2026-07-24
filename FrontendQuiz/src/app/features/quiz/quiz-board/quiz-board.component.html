@@ -10,7 +10,9 @@
     [popoutSupported]="popout.isSupported"
     [popoutActive]="popout.active()"
     (popoutToggle)="togglePopout()"
-    (hintRequested)="triggerHint()" />
+    (hintRequested)="triggerHint()"
+    (hintHovered)="onHintHover()"
+  />
 
   @if (showReorder && fieldOrder.length > 1) {
     <div class="field-order-list" cdkDropList (cdkDropListDropped)="onReorder($event)">

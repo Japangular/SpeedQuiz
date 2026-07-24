@@ -57,6 +57,7 @@ export class DeckBarComponent {
   @Output() showStrokeOrderChange = new EventEmitter<boolean>();
 
   @Output() hintRequested = new EventEmitter<void>();
+  @Output() hintHovered = new EventEmitter<void>();
 
   resetDeck(): void {
     this.quizEngine.resetSession();
