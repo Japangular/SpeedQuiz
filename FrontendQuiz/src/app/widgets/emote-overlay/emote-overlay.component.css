@@ -1,9 +1,14 @@
 :host {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
-  pointer-events: none; /* never block clicks on the quiz underneath */
+  right: 0;
+  bottom: 0;
+  width: 140px;          /* room for a 96px square to reach 45° (96·√2 ≈ 136) */
+  height: 140px;
+  display: grid;
+  place-items: center;   /* emote spins in the middle, never touching the edges */
+  pointer-events: none;
   z-index: 5;
+  overflow: clip;        /* insurance — won't actually clip, since the img fits */
 }
 
 .emote {

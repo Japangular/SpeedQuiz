@@ -104,7 +104,7 @@ app-card-view {
   border-radius: 14px;
   padding: 1.1rem;
   box-shadow: inset 4px 0 0 0 hsl(var(--level-hue, 0) 65% 50% / 0.55);
-}
+}emote-overlay.component.css
 
 .level-badge {
   display: inline-block;
