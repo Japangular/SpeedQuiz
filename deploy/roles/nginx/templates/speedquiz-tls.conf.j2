@@ -5,6 +5,8 @@ server {
     listen [::]:80;
     server_name {{ domain_name }};
 
+    access_log off;                 # redirects + ACME challenge only
+
     # Keep ACME path on :80 for renewals.
     location /.well-known/acme-challenge/ {
         root /var/www/letsencrypt;
@@ -27,6 +29,8 @@ server {
     ssl_verify_client optional;
 
     client_max_body_size 100m;
+
+    access_log /var/log/nginx/speedquiz.access.log anon;
 
     location = /api/actuator/health {
         proxy_pass http://127.0.0.1:{{ backend_public_port }}/api/actuator/health;

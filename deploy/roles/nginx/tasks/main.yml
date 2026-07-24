@@ -23,6 +23,15 @@
     state: present
     update_cache: true
 
+- name: Deploy anonymized-IP log format (http-scope, auto-included by main nginx.conf)
+  ansible.builtin.template:
+    src: log-anon.conf.j2
+    dest: /etc/nginx/conf.d/00-log-anon.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
 - name: Create nginx SSL directory
   ansible.builtin.file:
     path: /etc/nginx/ssl

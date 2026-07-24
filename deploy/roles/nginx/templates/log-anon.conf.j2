@@ -1,0 +1,12 @@
+# Managed by Ansible. Anonymized access-log format for SpeedQuiz.
+# Included automatically at http{} scope via /etc/nginx/conf.d/*.conf.
+# IPv4 -> last octet zeroed; IPv6 -> everything after the first two groups dropped.
+map $remote_addr $remote_addr_anon {
+    ~(?<ip>\d+\.\d+\.\d+)\.   ${ip}.0;    # 203.0.113.45      -> 203.0.113.0
+    ~(?<ip6>[^:]+:[^:]+):     ${ip6}::;   # 2001:db8:1234:..  -> 2001:db8::
+    default                   0.0.0.0;
+}
+
+log_format anon '$remote_addr_anon - $remote_user [$time_local] '
+                '"$request" $status $body_bytes_sent '
+                '"$http_referer" "$http_user_agent"';
