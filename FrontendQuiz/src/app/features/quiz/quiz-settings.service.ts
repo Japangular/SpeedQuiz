@@ -1,4 +1,5 @@
 import {Injectable, WritableSignal, effect, signal} from '@angular/core';
+import {RewindRule} from './utils/quiz-session';
 
 /**
  * Quiz settings: global defaults + per-deck overrides.
@@ -30,6 +31,9 @@ export class QuizSettingsService {
   readonly hintAutoCloseSeconds = this.persisted('quiz_hint_autoclose_s', 5);
   readonly hiraganaDebounceMs = this.persisted('quiz_hiragana_debounce_ms', 300);
 
+  readonly rewindRule = this.persisted<RewindRule>('quiz_rewind_rule', 'toAnchor');
+  readonly rewindOncePerLevel = this.persisted('quiz_rewind_once_per_level', true);
+
   private deckId: string | null = null;
 
   constructor() {
@@ -38,6 +42,8 @@ export class QuizSettingsService {
       const snapshot: PerDeckSettings = {
         popoutZoom: this.popoutZoom(),
         questionPosition: this.questionPosition(),
+        rewindRule: this.rewindRule(),
+        rewindOncePerLevel: this.rewindOncePerLevel(),
       };
       if (this.deckId) {
         this.write(DECK_KEY_PREFIX + this.deckId, snapshot);
@@ -89,3 +95,11 @@ export class QuizSettingsService {
     } catch { /* storage disabled */ }
   }
 }
+
+export interface PerDeckSettings {
+  popoutZoom?: number;
+  questionPosition?: 'above' | 'inline';
+  rewindRule?: RewindRule;
+  rewindOncePerLevel?: boolean;
+}
+

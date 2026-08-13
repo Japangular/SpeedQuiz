@@ -24,6 +24,7 @@ import {QuizPopoutService} from '../popout/quiz-popout.service';
 import {QuizSettingsService} from '../quiz-settings.service';
 import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
 import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
+import {REWIND_RULES, rewindLabel, RewindRule} from '../utils/quiz-session';
 
 const SHOW_YOUTUBE_KEY = 'quiz_show_youtube';
 const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
@@ -72,16 +73,19 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   private cardSub?: Subscription;
   private completedSub?: Subscription;
   private hotkeySub?: Subscription;
+  private resetSub?: Subscription;
 
   private deckStore = inject(DeckStore);
   private emotes = inject(EmoteService);
 
   constructor(
-    private quizEngine: QuizEngine,
+    readonly quizEngine: QuizEngine,
     private modal: ModalService,
     private contextPanel: ContextPanelService,
-    private settings: QuizSettingsService,
+    readonly settings: QuizSettingsService,
   ) {
+    this.hotkeySub = this.popout.keydown.subscribe(e => this.handleHotkeys(e));
+    this.resetSub = this.quizEngine.reset$.subscribe(() => this.emotes.trigger('reset'));
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       this.modal.closeHint();
       this.currentCard = card;
@@ -97,7 +101,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       }
 
       this.currentSlots = cardToSlots(card, this.buildMode(), this.deckStore.properties());
-      this.hotkeySub = this.popout.keydown.subscribe(e => this.handleHotkeys(e));
     });
 
     this.completedSub = this.quizEngine.deckCompleted$.subscribe(() => {
@@ -121,8 +124,24 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.cardSub?.unsubscribe();
     this.completedSub?.unsubscribe();
     this.hotkeySub?.unsubscribe();
+    this.resetSub?.unsubscribe();
     this.contextPanel.clear();
   }
+
+  readonly rewindRules = REWIND_RULES;
+
+  labelFor(rule: RewindRule): string {
+    return rewindLabel(rule, this.quizEngine.hasSavePoint);
+  }
+
+  iconFor(rule: RewindRule): string {
+    return rule === 'toAnchor' ? 'first_page'
+      : rule === 'toLevelStart' ? 'restart_alt'
+        : 'trending_flat';
+  }
+
+  saveHere(): void  { this.quizEngine.saveHere(); }
+  clearSave(): void { this.quizEngine.clearSave(); }
 
   setShowYoutube(value: boolean): void {
     this.showYoutube = value;
@@ -203,9 +222,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  /** True only when the loaded deck actually carries level info. */
-  get deckHasLevels(): boolean {
-    return Object.keys(this.deckStore.properties()).some(k => k.toLowerCase() === 'level');
+  get levelRewindAvailable(): boolean {
+    return this.quizEngine.deck.hasLevels;
   }
 
   /** Spread-out, deterministic hue per level (stable across reloads). */

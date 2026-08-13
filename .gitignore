@@ -59,3 +59,7 @@ repo_master_growth.txt
 
 ./FrontendAngular/public/emotes/
 ./deploy/roles/speedquiz/files/emotes/
+/FrontendQuiz/public/emotes/greeting.png
+/FrontendQuiz/public/emotes/waiting.png
+/.env2
+/FrontendQuiz/public/emotes/mad.png

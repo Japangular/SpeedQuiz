@@ -1,7 +1,10 @@
 import {DeckContent, PropertyType} from '../../../models/deck.model';
+import {cardUid} from '../utils/quiz-session/card-uid';
 
 export interface Card {
   index: number;
+  /** Stable content-derived id, set by mapDeck. buildDeck derives one if absent. */
+  uid?: string;
   level: number;
   subjectType: string;
   question: string;
@@ -72,6 +75,16 @@ export function mapDeck(deck: DeckContent): Card[] {
       .map(([key, val]) => `${key}: ${val}`)
       .join(', ') || `Card with index: ${index}, level: ${level}`;
 
-    return {index, level, subjectType: 'other', question, answers, hint, info, subjectId: index} as Card;
+    return {
+      index,
+      uid: cardUid(question, answers),
+      level,
+      subjectType: 'other',
+      question,
+      answers,
+      hint,
+      info,
+      subjectId: index,
+    } as Card;
   });
 }

@@ -26,3 +26,10 @@ export interface DeckCardState {
   cardId: string;
   state: string;
 }
+
+export interface Card {
+  index: number;
+  /** Stable content-derived id. Set by mapDeck; buildDeck derives one if absent. */
+  uid?: string;
+  level: number; // ...unchanged
+}

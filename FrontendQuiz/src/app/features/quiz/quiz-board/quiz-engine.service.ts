@@ -1,25 +1,16 @@
-import {inject, Injectable, OnDestroy} from '@angular/core';
+import {effect, inject, Injectable, OnDestroy} from '@angular/core';
 import {Observable, Subject, Subscription} from 'rxjs';
-import {ModalService} from '../../../widgets/modal/modal.service';
 import {DeckCommand} from '../utils/deck-iterator/deck-iterator.model';
 import {DeckContent} from '../../../models/deck.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {
-  BackToFirstStrategy,
-  ByIndexStrategy,
-  createHintStrategy,
-  createSortStrategy,
-  HintStrategy,
-  HintStrategyName,
-  PersistedSessionState,
-  QuizSession,
-  SessionSyncService,
-  SortStrategy,
-  SortStrategyName
+  ByIndexStrategy, createSortStrategy, DEFAULT_REWIND_RULE, PersistedSessionState,
+  QuizSession, RewindRule, SessionSyncService, SortStrategy, SortStrategyName
 } from '../utils/quiz-session';
 import {Card, mapDeck} from '../model/quiz.model';
 import {DeckStore} from '../../../store/deck.store';
 import {toObservable} from '@angular/core/rxjs-interop';
+import {QuizSettingsService} from '../quiz-settings.service';
 
 @Injectable({
   providedIn: 'root'
@@ -34,16 +25,26 @@ export class QuizEngine implements OnDestroy {
   private session!: QuizSession;
   private deckSub?: Subscription;
 
-  private hintStrategy: HintStrategy = new BackToFirstStrategy();
   private sortStrategy: SortStrategy = new ByIndexStrategy();
   private currentDeckId?: string;
   private deckStore = inject(DeckStore);
+  private settings = inject(QuizSettingsService);
 
   constructor(private sessionSync: SessionSyncService) {
     this.session = new QuizSession([]);
-    this.deckIterator = new DeckIterator(this.session, this.hintStrategy);
+    this.deckIterator = new DeckIterator(this.session, {
+      rewind: this.settings.rewindRule(),
+      rewindOncePerLevel: this.settings.rewindOncePerLevel(),
+    });
     this.card$ = this.deckIterator.getCard$();
     this.deckCompleted$ = this.deckIterator.deckCompleted$;
+
+    // Settings are the single source of truth; the iterator follows them.
+    // Also covers attachDeck() swapping in a deck's stored override.
+    effect(() => {
+      this.deckIterator.setRewindRule(this.settings.rewindRule());
+      this.deckIterator.setRewindOncePerLevel(this.settings.rewindOncePerLevel());
+    });
 
     this.deckSub = toObservable(this.deckStore.deck).subscribe(deck => {
       if (!deck || deck.cards.length === 0) return;
@@ -101,6 +102,12 @@ export class QuizEngine implements OnDestroy {
     return this.session;
   }
 
+  get rewindRule(): RewindRule { return this.settings.rewindRule(); }
+  get hasSavePoint(): boolean  { return this.deckIterator.hasSavePoint(); }
+  get savePointCard(): Card | undefined {
+    return this.hasSavePoint ? this.session.getCard(this.deckIterator.getAnchor()) : undefined;
+  }
+
   private async initSession(deck: DeckContent): Promise<void> {
     this.resetSubject.next();
     const deckId = this.deckStore.deckId() ?? this.deckStore.deckName();
@@ -114,8 +121,7 @@ export class QuizEngine implements OnDestroy {
     }
 
     this.session = new QuizSession(cards, priorState);
-    const resumeIndex = priorState?.currentIndex ?? 0;
-    this.deckIterator.replaceSession(this.session, resumeIndex);
+    this.deckIterator.replaceSession(this.session);
 
     if (deckId) {
       this.sessionSync.startSync(
@@ -123,6 +129,10 @@ export class QuizEngine implements OnDestroy {
       );
     }
   }
+
+  saveHere(): void  { this.deckIterator.setAsStartPoint(); }
+  clearSave(): void { this.deckIterator.clearStartPoint(); }
+  get deck() { return this.session.deck; }
 
   private saveBeforeLeave(): void {
     if (this.currentDeckId && this.session) {

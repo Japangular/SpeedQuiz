@@ -14,6 +14,30 @@
     (hintHovered)="onHintHover()"
   />
 
+  <div class="rewind-picker">
+    @for (rule of rewindRules; track rule) {
+      <button mat-icon-button
+              [class.active]="settings.rewindRule() === rule"
+              [disabled]="rule === 'toLevelStart' && !levelRewindAvailable"
+              [matTooltip]="labelFor(rule)"
+              (click)="settings.rewindRule.set(rule)">
+        <mat-icon>{{ iconFor(rule) }}</mat-icon>
+      </button>
+    }
+
+    <button mat-icon-button
+            [matTooltip]="quizEngine.hasSavePoint ? 'Move save point here' : 'Set save point'"
+            (click)="saveHere()">
+      <mat-icon>{{ quizEngine.hasSavePoint ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+    </button>
+
+    @if (quizEngine.hasSavePoint) {
+      <button mat-icon-button matTooltip="Clear save point" (click)="clearSave()">
+        <mat-icon>bookmark_remove</mat-icon>
+      </button>
+    }
+  </div>
+
   @if (showReorder && fieldOrder.length > 1) {
     <div class="field-order-list" cdkDropList (cdkDropListDropped)="onReorder($event)">
       @for (key of fieldOrder; track key) {
@@ -33,10 +57,10 @@
     }
     <div class="slot-pane">
       <div #popoutHost class="popout-host"
-           [class.level-theme]="deckHasLevels"
+           [class.level-theme]="levelRewindAvailable"
            [style.--level-hue]="levelHue">
         <app-emote-overlay></app-emote-overlay>
-        @if (deckHasLevels) {
+        @if (levelRewindAvailable) {
           <div class="level-badge">Level {{ currentLevel }}</div>
         }
         <app-slot-group
