@@ -10,14 +10,6 @@
       }
 
       <mat-slide-toggle
-        class="youtube-toggle"
-        [checked]="showYoutube"
-        (change)="showYoutubeChange.emit($event.checked)"
-        matTooltip="Show a YouTube player above the quiz">
-        <mat-icon>smart_display</mat-icon>
-      </mat-slide-toggle>
-
-      <mat-slide-toggle
         class="stroke-order-toggle"
         [checked]="showStrokeOrder"
         (change)="showStrokeOrderChange.emit($event.checked)"
@@ -52,6 +44,47 @@
               [class.active-setting]="showDebounceSlider">
         <mat-icon>timer</mat-icon>
       </button>
+
+      <button mat-icon-button
+              [matMenuTriggerFor]="rewindMenu"
+              [matTooltip]="'On hint: ' + ruleLabel(currentRule)">
+        <mat-icon>{{ ruleIcon(currentRule) }}</mat-icon>
+      </button>
+
+      <mat-menu #rewindMenu="matMenu">
+        <div class="menu-caption">After a hint, go back to…</div>
+
+        @for (rule of rewindRules; track rule) {
+          <button mat-menu-item
+                  [class.selected]="rule === currentRule"
+                  [disabled]="rule === 'toLevelStart' && !levelRewindAvailable"
+                  (click)="selectRule(rule)">
+            <mat-icon>{{ ruleIcon(rule) }}</mat-icon>
+            <span>{{ ruleLabel(rule) }}</span>
+            @if (rule === currentRule) {
+              <mat-icon class="trailing">check</mat-icon>
+            }
+          </button>
+        }
+
+        @if (!levelRewindAvailable) {
+          <div class="menu-caption dim">This deck has no level groups.</div>
+        }
+
+        <mat-divider />
+
+        <button mat-menu-item (click)="setSavePoint()">
+          <mat-icon>bookmark_add</mat-icon>
+          <span>{{ hasSavePoint ? 'Move save point here' : 'Set save point here' }}</span>
+        </button>
+
+        @if (hasSavePoint) {
+          <button mat-menu-item (click)="clearSavePoint()">
+            <mat-icon>bookmark_remove</mat-icon>
+            <span>Clear save point</span>
+          </button>
+        }
+      </mat-menu>
     </mat-card-content>
 
     <!-- Debounce slider — shown inline below the buttons when toggled -->

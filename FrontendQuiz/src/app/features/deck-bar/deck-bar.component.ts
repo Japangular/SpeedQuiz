@@ -13,6 +13,9 @@ import {QuizSettingsService} from '../quiz/quiz-settings.service';
 import {MatSlider, MatSliderThumb} from '@angular/material/slider';
 
 import {FormsModule} from '@angular/forms';
+import {REWIND_RULES, rewindLabel, RewindRule} from '../quiz/utils/quiz-session';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {MatDivider} from '@angular/material/list';
 
 @Component({
   selector: 'app-deck-bar',
@@ -27,15 +30,45 @@ import {FormsModule} from '@angular/forms';
     MatSlideToggle,
     MatSlider,
     MatSliderThumb,
-    FormsModule
-],
+    FormsModule,
+    MatMenuTrigger,
+    MatMenu,
+    MatDivider,
+    MatMenuItem
+  ],
   templateUrl: './deck-bar.component.html',
   styleUrl: './deck-bar.component.css'
 })
 export class DeckBarComponent {
   private deckStore = inject(DeckStore);
-  private quizEngine = inject(QuizEngine);
+  protected quizEngine = inject(QuizEngine);   // was private — template needs it
   protected settings = inject(QuizSettingsService);
+
+  readonly rewindRules = REWIND_RULES;
+
+  get currentRule(): RewindRule    { return this.settings.rewindRule(); }
+  get hasSavePoint(): boolean      { return this.quizEngine.hasSavePoint; }
+  get levelRewindAvailable(): boolean { return this.quizEngine.deck.hasLevels; }
+
+  ruleLabel(rule: RewindRule): string {
+    return rewindLabel(rule, this.hasSavePoint);
+  }
+
+  /**
+   * `toAnchor` changes icon once an anchor exists, so the trigger button
+   * doubles as the save-point indicator — no separate marker needed.
+   */
+  ruleIcon(rule: RewindRule): string {
+    switch (rule) {
+      case 'toAnchor':     return this.hasSavePoint ? 'bookmark' : 'first_page';
+      case 'toLevelStart': return 'swipe_left_alt';
+      case 'none':         return 'trending_flat';
+    }
+  }
+
+  selectRule(rule: RewindRule): void { this.settings.rewindRule.set(rule); }
+  setSavePoint(): void   { this.quizEngine.saveHere(); }
+  clearSavePoint(): void { this.quizEngine.clearSave(); }
 
   deckName = this.deckStore.deckName;
   hasCards = this.deckStore.hasCards;
@@ -44,14 +77,12 @@ export class DeckBarComponent {
 
   @Input() canReorder = false;
   @Input() reorderActive = false;
-  @Input() showYoutube = false;
 
   @Input() popoutSupported = false;
   @Input() popoutActive = false;
   @Output() popoutToggle = new EventEmitter<void>();
 
   @Output() reorderToggle = new EventEmitter<void>();
-  @Output() showYoutubeChange = new EventEmitter<boolean>();
 
   @Input() showStrokeOrder = true;
   @Output() showStrokeOrderChange = new EventEmitter<boolean>();

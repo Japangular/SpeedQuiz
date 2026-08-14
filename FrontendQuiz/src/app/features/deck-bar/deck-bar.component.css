@@ -75,3 +75,23 @@ mat-card-content {
 .active-setting {
   color: var(--mat-sys-primary);
 }
+
+.menu-caption {
+  padding: 8px 16px 4px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.menu-caption.dim {
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.mat-mdc-menu-item.selected {
+  font-weight: 500;
+}
+
+.mat-mdc-menu-item .trailing {
+  margin-left: auto;
+  margin-right: 0;
+}

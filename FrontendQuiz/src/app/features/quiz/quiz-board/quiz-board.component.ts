@@ -17,7 +17,6 @@ import {Card} from '../model/quiz.model';
 import {DeckStore} from '../../../store/deck.store';
 import {QuizMode} from '../model/slot.model';
 import {FieldOrderService} from '../model/field-order.service';
-import {YoutubeDockComponent} from '../../../widgets/youtube-dock/youtube-dock.component';
 import {SlotGroupComponent} from '../slots/slot-group/slot-group.component';
 import {MatTooltip} from '@angular/material/tooltip';
 import {QuizPopoutService} from '../popout/quiz-popout.service';
@@ -26,7 +25,6 @@ import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
 import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
 import {REWIND_RULES, rewindLabel, RewindRule} from '../utils/quiz-session';
 
-const SHOW_YOUTUBE_KEY = 'quiz_show_youtube';
 const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
 
 @Component({
@@ -41,7 +39,6 @@ const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
     QuizHistorySidebarComponent,
     SlotGroupComponent,
     DragDropModule,
-    YoutubeDockComponent,
     MatTooltip,
     MatIconButton,
     EmoteOverlayComponent,
@@ -62,7 +59,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   currentLevel = 1;
 
   /** Default off; remembered across sessions. */
-  showYoutube = localStorage.getItem(SHOW_YOUTUBE_KEY) === 'true';
   showStrokeOrder = localStorage.getItem(SHOW_STROKE_ORDER_KEY) !== 'false';
   private firstCard = true;
 
@@ -142,14 +138,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   saveHere(): void  { this.quizEngine.saveHere(); }
   clearSave(): void { this.quizEngine.clearSave(); }
-
-  setShowYoutube(value: boolean): void {
-    this.showYoutube = value;
-    try {
-      localStorage.setItem(SHOW_YOUTUBE_KEY, String(value));
-    } catch { /* storage disabled — preference just won't persist */
-    }
-  }
 
   setShowStrokeOrder(value: boolean): void {
     this.showStrokeOrder = value;
