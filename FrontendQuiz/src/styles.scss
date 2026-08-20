@@ -9,3 +9,10 @@ body { font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.level-themed {
+  --level-tint:        hsl(var(--level-hue, 0) 70% 55% / 0.14);
+  --level-tint-strong: hsl(var(--level-hue, 0) 70% 55% / 0.22);
+  --level-edge:        hsl(var(--level-hue, 0) 65% 50% / 0.55);
+  --level-ink:         hsl(var(--level-hue, 0) 60% 30%);
+}

@@ -1,76 +1,99 @@
-<div class="sort-toggle">
-  <mat-slide-toggle [(ngModel)]="newestFirst" labelPosition="before">
-    <span class="toggle-label">{{ newestFirst ? 'Newest first' : 'Oldest first' }}</span>
-  </mat-slide-toggle>
-</div>
+<div class="panel" [class.level-themed]="hasLevels" [style.--level-hue]="hue">
 
-<div class="history-list" #scrollContainer>
-  @for (entry of visibleHistory; track trackByIndex($index, entry)) {
-    <div
-      class="history-entry"
-      [class.hint-used]="entry.hintUsed"
-      [class.expanded]="entry.expanded"
-      [class.disabled]="isDisabled(entry)">
-      <div class="question-row" (click)="toggle(entry)">
-        <span class="card-index">#{{ entry.card.index }}</span>
-        @if (entry.hintUsed) {
-          <mat-icon class="hint-used-icon">visibility</mat-icon>
-        }
-        @if (!entry.hintUsed && entry.solvedExactly === true) {
-          <mat-icon class="exact-icon">check_circle</mat-icon>
-        }
-        @if (!entry.hintUsed && entry.solvedExactly === false) {
-          <mat-icon class="fuzzy-icon">check_circle_outline</mat-icon>
-        }
-        <span class="question-text">{{ entry.card.question }}</span>
-        <span class="entry-icons">
+  <div class="resume-bar" [class.inactive]="!resume.willRewind"
+       matTooltip="Where a hint sends you back to">
+    <mat-icon class="resume-icon">{{ resumeIcon }}</mat-icon>
+    <div class="resume-text">
+      <span class="resume-label">{{ resume.label }}</span>
+      @if (resume.card) {
+        <span class="resume-detail">#{{ resume.card.index }} · {{ resume.card.question }}</span>
+      } @else if (resume.spentForLevel) {
+        <span class="resume-detail">Level rewind already spent — you'll move on</span>
+      } @else {
+        <span class="resume-detail">You'll move on to the next card</span>
+      }
+    </div>
+  </div>
+
+  <div class="sort-toggle">
+    <mat-slide-toggle [(ngModel)]="newestFirst" labelPosition="before">
+      <span class="toggle-label">{{ newestFirst ? 'Newest first' : 'Oldest first' }}</span>
+    </mat-slide-toggle>
+  </div>
+
+  <div class="history-list" #scrollContainer>
+    @for (entry of visibleHistory; track trackByIndex($index, entry)) {
+      <div class="history-entry"
+           [class.level-themed]="hasLevels"
+           [style.--level-hue]="hueFor(entry.card.level)"
+           [class.hint-used]="entry.hintUsed"
+           [class.expanded]="entry.expanded"
+           [class.resume-point]="isResumeTarget(entry)"
+           [class.disabled]="isDisabled(entry)">
+        <div class="question-row" (click)="toggle(entry)">
+          <span class="card-index">#{{ entry.card.index }}</span>
+          @if (isResumeTarget(entry)) {
+            <mat-icon class="resume-flag" matTooltip="A hint returns you here">flag</mat-icon>
+          }
+          @if (entry.hintUsed) {
+            <mat-icon class="hint-used-icon">visibility</mat-icon>
+          }
+          @if (!entry.hintUsed && entry.solvedExactly === true) {
+            <mat-icon class="exact-icon">check_circle</mat-icon>
+          }
+          @if (!entry.hintUsed && entry.solvedExactly === false) {
+            <mat-icon class="fuzzy-icon">check_circle_outline</mat-icon>
+          }
+          <span class="question-text">{{ entry.card.question }}</span>
+          <span class="entry-icons">
           @if (entry.hintUsed) {
             <mat-icon class="hint-icon" matTooltip="Hint was used">lightbulb</mat-icon>
           }
-          @if (!isDisabled(entry)) {
-            <mat-icon class="expand-icon">
+            @if (!isDisabled(entry)) {
+              <mat-icon class="expand-icon">
               {{ entry.expanded ? 'expand_less' : 'expand_more' }}
             </mat-icon>
-          }
-          @if (isDisabled(entry)) {
-            <mat-icon class="lock-icon" matTooltip="Progress past this card to unlock">lock</mat-icon>
-          }
+            }
+            @if (isDisabled(entry)) {
+              <mat-icon class="lock-icon" matTooltip="Progress past this card to unlock">lock</mat-icon>
+            }
         </span>
-      </div>
-      @if (entry.expanded && !isDisabled(entry)) {
-        <div class="answers-panel">
-          <!-- Question (copyable) -->
-          <div class="answer-row question-detail">
-            <span class="answer-key">question</span>
-            <span class="answer-value">{{ entry.card.question }}</span>
-          </div>
-          @for (answer of getAnswers(entry.card); track answer) {
-            <div class="answer-row">
-              <span class="answer-key">{{ answer.key }}</span>
-              <span class="answer-value">{{ answer.value }}</span>
-            </div>
-          }
-          @if (entry.card.hint) {
-            <div class="answer-row">
-              <span class="answer-key">hint</span>
-              <span class="answer-value hint-text">{{ entry.card.hint }}</span>
-            </div>
-          }
-          <button mat-button
-            class="jump-btn"
-            (click)="jumpToCard(entry); $event.stopPropagation()">
-            <mat-icon>redo</mat-icon>
-            Jump to this card
-          </button>
         </div>
-      }
-    </div>
-  }
+        @if (entry.expanded && !isDisabled(entry)) {
+          <div class="answers-panel">
+            <!-- Question (copyable) -->
+            <div class="answer-row question-detail">
+              <span class="answer-key">question</span>
+              <span class="answer-value">{{ entry.card.question }}</span>
+            </div>
+            @for (answer of getAnswers(entry.card); track answer) {
+              <div class="answer-row">
+                <span class="answer-key">{{ answer.key }}</span>
+                <span class="answer-value">{{ answer.value }}</span>
+              </div>
+            }
+            @if (entry.card.hint) {
+              <div class="answer-row">
+                <span class="answer-key">hint</span>
+                <span class="answer-value hint-text">{{ entry.card.hint }}</span>
+              </div>
+            }
+            <button mat-button
+                    class="jump-btn"
+                    (click)="jumpToCard(entry); $event.stopPropagation()">
+              <mat-icon>redo</mat-icon>
+              Jump to this card
+            </button>
+          </div>
+        }
+      </div>
+    }
 
-  @if (visibleHistory.length === 0) {
-    <div class="empty-state">
-      <mat-icon>hourglass_empty</mat-icon>
-      <span>Previous cards will appear here as you progress</span>
-    </div>
-  }
+    @if (visibleHistory.length === 0) {
+      <div class="empty-state">
+        <mat-icon>hourglass_empty</mat-icon>
+        <span>Previous cards will appear here as you progress</span>
+      </div>
+    }
+  </div>
 </div>

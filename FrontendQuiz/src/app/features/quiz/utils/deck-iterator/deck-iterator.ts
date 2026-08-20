@@ -96,6 +96,7 @@ export class DeckIterator implements DeckCommand {
    *
    * @param withoutHelp explicit `false` marks the answer as hint-assisted even
    *        when no hint modal was opened.
+   * @param exact
    */
   proceed(withoutHelp?: boolean, exact?: boolean): void {
     if (this.session.length === 0) return;
@@ -119,26 +120,6 @@ export class DeckIterator implements DeckCommand {
     this.setIndex(next);
   }
 
-  private computeResume(): number {
-    const level = this.session.deck.levelAt(this.index);
-
-    if (this.rewindOncePerLevel && this.session.hasRewoundLevel(level)) {
-      return this.index;
-    }
-
-    const target = resumeIndex(
-      {cursor: this.index, anchor: this.session.anchor},
-      this.session.deck,
-      this.rewind,
-    );
-
-    if (this.rewindOncePerLevel && target < this.index) {
-      this.session.markLevelRewound(level);
-    }
-
-    return target;
-  }
-
   // ── navigation ──────────────────────────────────────────────────────────
 
   nextCard(): void {
@@ -155,6 +136,38 @@ export class DeckIterator implements DeckCommand {
     if (this.index > this.session.anchor) {
       this.setIndex(this.index - 1);
     }
+  }
+
+  /**
+   * Where a hint-assisted answer would land *right now*, without spending the
+   * once-per-level budget. Returns the current index when nothing would happen.
+   */
+  previewResume(): number {
+    return this.resolveResume(false);
+  }
+
+  private computeResume(): number {
+    return this.resolveResume(true);
+  }
+
+  private resolveResume(commit: boolean): number {
+    const level = this.session.deck.levelAt(this.index);
+
+    if (this.rewindOncePerLevel && this.session.hasRewoundLevel(level)) {
+      return this.index;
+    }
+
+    const target = resumeIndex(
+      {cursor: this.index, anchor: this.session.anchor},
+      this.session.deck,
+      this.rewind,
+    );
+
+    if (commit && this.rewindOncePerLevel && target < this.index) {
+      this.session.markLevelRewound(level);
+    }
+
+    return target;
   }
 
   restart(): void {

@@ -1,4 +1,4 @@
-import {AfterViewChecked, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {AfterViewChecked, Component, effect, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {MatIconModule} from '@angular/material/icon';
 import {MatButtonModule} from '@angular/material/button';
@@ -6,8 +6,11 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FormsModule} from '@angular/forms';
 import {Subscription} from 'rxjs';
-import {QuizEngine} from '../quiz/quiz-board/quiz-engine.service';
+import {QuizEngine, ResumePoint} from '../quiz/quiz-board/quiz-engine.service';
 import {Card} from '../quiz/model/quiz.model';
+import {QuizSettingsService} from '../quiz/quiz-settings.service';
+import {levelHue} from '../quiz/utils/level-theme';
+import {rewindIcon} from '../quiz/utils/quiz-session';
 
 interface HistoryEntry {
   card: Card;
@@ -41,12 +44,28 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef<HTMLElement>;
 
+  currentLevel = 0;
+  resume!: ResumePoint;
+
+  private settings = inject(QuizSettingsService);
+  private saveSub?: Subscription;
+
   constructor(private quizEngine: QuizEngine) {
+    this.resume = this.quizEngine.resumePoint;
+
+    // Rule and once-per-level can change from the deck bar's #rewindMenu
+    // without any card emission, so the banner follows the signals directly.
+    effect(() => {
+      this.settings.rewindRule();
+      this.settings.rewindOncePerLevel();
+      this.refreshResume();
+    });
   }
 
   private historyInitialized = false;
 
   ngOnInit(): void {
+    this.saveSub = this.quizEngine.savePointChanged$.subscribe(() => this.refreshResume());
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       if (!card) return;
 
@@ -127,6 +146,8 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
       }
 
       this.shouldScroll = true;
+      this.currentLevel = card.level;
+      this.refreshResume();
     });
   }
 
@@ -139,6 +160,23 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   ngOnDestroy(): void {
     this.cardSub?.unsubscribe();
+    this.saveSub?.unsubscribe();
+  }
+
+  private refreshResume(): void {
+    this.resume = this.quizEngine.resumePoint;
+  }
+
+  get hue(): number         { return levelHue(this.currentLevel); }
+  get hasLevels(): boolean  { return this.quizEngine.deck.hasLevels; }
+  get resumeIcon(): string  { return rewindIcon(this.resume.rule, this.quizEngine.hasSavePoint); }
+
+  /** Each row carries its own level's hue; the panel carries the current one. */
+  hueFor(level: number): number { return levelHue(level); }
+
+  /** The card in the list a hint would send you back to. */
+  isResumeTarget(entry: HistoryEntry): boolean {
+    return this.resume.willRewind && this.resume.card?.index === entry.card.index;
   }
 
   get visibleHistory(): HistoryEntry[] {

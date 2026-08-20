@@ -9,6 +9,7 @@ export {cardUid, CARD_UID_VERSION} from './card-uid';
 export {
   resumeIndex,
   rewindLabel,
+  rewindIcon,
   isRewindRule,
   REWIND_RULES,
   DEFAULT_REWIND_RULE,

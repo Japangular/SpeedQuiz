@@ -1,9 +1,75 @@
 :host {
+  display: block;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* The panel itself is no longer painted — it only carries --level-hue for the
+   CURRENT level, which the resume bar below reads. Each row overrides the hue
+   with its own level. */
+.panel {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
 }
+
+/* ── Resume banner: where a hint sends you back to ───────────────────────── */
+
+.resume-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  background: var(--level-tint-strong, rgba(0, 0, 0, 0.04));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: inset 3px 0 0 0 var(--level-edge, transparent);
+  transition: background .35s ease;
+}
+
+/* Rule is `none`, already at the target, or the level's rewind is spent. */
+.resume-bar.inactive {
+  opacity: .55;
+}
+
+.resume-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--level-ink, rgba(0, 0, 0, 0.6));
+  flex-shrink: 0;
+}
+
+.resume-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.resume-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.resume-detail {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resume-flag {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--level-ink, rgba(0, 0, 0, 0.6));
+  flex-shrink: 0;
+}
+
+/* ── List chrome ─────────────────────────────────────────────────────────── */
 
 .sort-toggle {
   padding: 8px 12px;
@@ -23,15 +89,33 @@
   padding: 4px 0;
 }
 
+/* ── Entries ─────────────────────────────────────────────────────────────
+   Source order below is load-bearing: :hover, .resume-point and .hint-used
+   all weigh (0,3,0), so ties break on position. Keep them in this order. */
+
 .history-entry {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: var(--level-tint, transparent);
   transition: background-color 0.15s ease, opacity 0.2s ease;
 }
 
+/* Hover darkens ON TOP of the level tint. A background here would replace the
+   row's colour instead, which is what the old rule did. */
 .history-entry:hover:not(.disabled) {
-  background: rgba(0, 0, 0, 0.04);
+  background: var(--level-tint, transparent);
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.04);
 }
 
+/* The card a hint would return you to. The :hover twin is required — without
+   it the hover shadow above wins the tie and covers this stripe. */
+.history-entry.resume-point:not(.disabled),
+.history-entry.resume-point:not(.disabled):hover {
+  background: var(--level-tint-strong, rgba(0, 0, 0, 0.05));
+  box-shadow: inset 3px 0 0 0 var(--level-edge, rgba(0, 0, 0, 0.3));
+}
+
+/* An outside border, so it stacks with the resume-point inset stripe rather
+   than replacing it. */
 .history-entry.hint-used:not(.disabled) {
   border-left: 3px solid #e8a017;
 }
@@ -55,6 +139,7 @@
   min-height: 36px;
 }
 
+/* Compensates for the 3px border above so text stays aligned. */
 .hint-used:not(.disabled) .question-row {
   padding-left: 7px;
 }
@@ -101,6 +186,18 @@
   height: 14px;
   color: rgba(0, 0, 0, 0.25);
 }
+
+.exact-icon {
+  color: #4caf50;
+  font-size: 18px;
+}
+
+.fuzzy-icon {
+  color: #ffc107;
+  font-size: 18px;
+}
+
+/* ── Expanded answers ────────────────────────────────────────────────────── */
 
 .answers-panel {
   padding: 0 10px 8px 40px;
@@ -165,6 +262,8 @@
   margin-right: 4px;
 }
 
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -182,12 +281,13 @@
   height: 24px;
 }
 
-.exact-icon {
-  color: #4caf50;
-  font-size: 18px;
-}
+@media (prefers-reduced-motion: reduce) {
+  .resume-bar,
+  .history-entry {
+    transition: none;
+  }
 
-.fuzzy-icon {
-  color: #ffc107;
-  font-size: 18px;
+  .answers-panel {
+    animation: none;
+  }
 }

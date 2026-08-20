@@ -99,12 +99,12 @@ app-card-view {
   position: relative;
 }
 
-.popout-host.level-theme {
-  background: hsl(var(--level-hue, 0) 70% 55% / 0.14);
+.popout-host.level-themed {
+  background: var(--level-tint);
   border-radius: 14px;
   padding: 1.1rem;
-  box-shadow: inset 4px 0 0 0 hsl(var(--level-hue, 0) 65% 50% / 0.55);
-}emote-overlay.component.css
+  box-shadow: inset 4px 0 0 0 var(--level-edge);
+}
 
 .level-badge {
   display: inline-block;
@@ -113,6 +113,6 @@ app-card-view {
   font-size: .8rem;
   font-weight: 600;
   border-radius: 999px;
-  color: hsl(var(--level-hue, 0) 60% 30%);
-  background: hsl(var(--level-hue, 0) 70% 55% / 0.22);
+  color: var(--level-ink);
+  background: var(--level-tint-strong);
 }

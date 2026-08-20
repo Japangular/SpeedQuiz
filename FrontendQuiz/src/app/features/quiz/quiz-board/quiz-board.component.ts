@@ -23,7 +23,8 @@ import {QuizPopoutService} from '../popout/quiz-popout.service';
 import {QuizSettingsService} from '../quiz-settings.service';
 import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
 import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
-import {REWIND_RULES, rewindLabel, RewindRule} from '../utils/quiz-session';
+
+import {levelHue as hueForLevel} from '../utils/level-theme';
 
 const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
 
@@ -124,21 +125,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.contextPanel.clear();
   }
 
-  readonly rewindRules = REWIND_RULES;
-
-  labelFor(rule: RewindRule): string {
-    return rewindLabel(rule, this.quizEngine.hasSavePoint);
-  }
-
-  iconFor(rule: RewindRule): string {
-    return rule === 'toAnchor' ? 'first_page'
-      : rule === 'toLevelStart' ? 'restart_alt'
-        : 'trending_flat';
-  }
-
-  saveHere(): void  { this.quizEngine.saveHere(); }
-  clearSave(): void { this.quizEngine.clearSave(); }
-
   setShowStrokeOrder(value: boolean): void {
     this.showStrokeOrder = value;
     try {
@@ -215,8 +201,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   }
 
   /** Spread-out, deterministic hue per level (stable across reloads). */
-  get levelHue(): number {
-    return ((this.currentLevel || 0) * 47) % 360;
-  }
+  get levelHue(): number { return hueForLevel(this.currentLevel); }
 
 }

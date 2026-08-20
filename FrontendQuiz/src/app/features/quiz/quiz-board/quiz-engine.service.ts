@@ -5,12 +5,26 @@ import {DeckContent} from '../../../models/deck.model';
 import {DeckIterator} from '../utils/deck-iterator/deck-iterator';
 import {
   ByIndexStrategy, createSortStrategy, DEFAULT_REWIND_RULE, PersistedSessionState,
-  QuizSession, RewindRule, SessionSyncService, SortStrategy, SortStrategyName
+  QuizSession, rewindLabel, RewindRule, SessionSyncService, SortStrategy, SortStrategyName
 } from '../utils/quiz-session';
 import {Card, mapDeck} from '../model/quiz.model';
 import {DeckStore} from '../../../store/deck.store';
 import {toObservable} from '@angular/core/rxjs-interop';
 import {QuizSettingsService} from '../quiz-settings.service';
+
+export interface ResumePoint {
+  rule: RewindRule;
+  /** Rule label, e.g. 'Back to start of level'. */
+  label: string;
+  /** Index a hint-assisted answer would land on. Equals the cursor when nothing happens. */
+  index: number;
+  /** The card at that index — undefined when no rewind would occur. */
+  card?: Card;
+  /** False for `none`, for already-at-target, and for a spent level budget. */
+  willRewind: boolean;
+  /** True when rewindOncePerLevel is on and this level's rewind is already used. */
+  spentForLevel: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -130,8 +144,6 @@ export class QuizEngine implements OnDestroy {
     }
   }
 
-  saveHere(): void  { this.deckIterator.setAsStartPoint(); }
-  clearSave(): void { this.deckIterator.clearStartPoint(); }
   get deck() { return this.session.deck; }
 
   private saveBeforeLeave(): void {
@@ -142,5 +154,38 @@ export class QuizEngine implements OnDestroy {
         this.deckIterator.getCurrentIndex(),
       );
     }
+  }
+
+  /** Fires when the anchor moves — neither card$ nor a signal covers that. */
+  private savePointSubject = new Subject<void>();
+  savePointChanged$ = this.savePointSubject.asObservable();
+
+  saveHere(): void  { this.deckIterator.setAsStartPoint(); this.savePointSubject.next(); }
+  clearSave(): void { this.deckIterator.clearStartPoint(); this.savePointSubject.next(); }
+
+  get resumePoint(): ResumePoint {
+    const rule = this.settings.rewindRule();
+    const deck = this.session.deck;
+    const label = rewindLabel(rule, this.hasSavePoint);
+
+    if (deck.length === 0) {
+      return {rule, label, index: 0, willRewind: false, spentForLevel: false};
+    }
+
+    const cursor = this.deckIterator.getCurrentIndex();
+    const spentForLevel =
+      this.settings.rewindOncePerLevel() && this.session.hasRewoundLevel(deck.levelAt(cursor));
+
+    const index = this.deckIterator.previewResume();
+    const willRewind = index < cursor;
+
+    return {
+      rule,
+      label,
+      index,
+      card: willRewind ? this.session.getCard(index) : undefined,
+      willRewind,
+      spentForLevel,
+    };
   }
 }

@@ -82,6 +82,15 @@ export function rewindLabel(rule: RewindRule, hasSavePoint: boolean): string {
   }
 }
 
+/** Icon counterpart to rewindLabel. `toAnchor` flips once a save point exists. */
+export function rewindIcon(rule: RewindRule, hasSavePoint: boolean): string {
+  switch (rule) {
+    case 'toAnchor':     return hasSavePoint ? 'bookmark' : 'first_page';
+    case 'toLevelStart': return 'swipe_left_alt';
+    case 'none':         return 'trending_flat';
+  }
+}
+
 function clamp(value: number, min: number, max: number): number {
   if (Number.isNaN(value)) return min;
   return Math.min(Math.max(value, min), max);

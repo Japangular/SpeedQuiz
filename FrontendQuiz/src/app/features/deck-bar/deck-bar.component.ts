@@ -13,7 +13,7 @@ import {QuizSettingsService} from '../quiz/quiz-settings.service';
 import {MatSlider, MatSliderThumb} from '@angular/material/slider';
 
 import {FormsModule} from '@angular/forms';
-import {REWIND_RULES, rewindLabel, RewindRule} from '../quiz/utils/quiz-session';
+import {REWIND_RULES, rewindIcon, rewindLabel, RewindRule} from '../quiz/utils/quiz-session';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatDivider} from '@angular/material/list';
 
@@ -54,16 +54,8 @@ export class DeckBarComponent {
     return rewindLabel(rule, this.hasSavePoint);
   }
 
-  /**
-   * `toAnchor` changes icon once an anchor exists, so the trigger button
-   * doubles as the save-point indicator — no separate marker needed.
-   */
   ruleIcon(rule: RewindRule): string {
-    switch (rule) {
-      case 'toAnchor':     return this.hasSavePoint ? 'bookmark' : 'first_page';
-      case 'toLevelStart': return 'swipe_left_alt';
-      case 'none':         return 'trending_flat';
-    }
+    return rewindIcon(rule, this.hasSavePoint);
   }
 
   selectRule(rule: RewindRule): void { this.settings.rewindRule.set(rule); }
