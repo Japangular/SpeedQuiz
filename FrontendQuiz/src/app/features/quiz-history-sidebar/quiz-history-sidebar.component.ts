@@ -13,6 +13,7 @@ import {levelHue} from '../quiz/utils/level-theme';
 import {rewindIcon} from '../quiz/utils/quiz-session';
 
 interface HistoryEntry {
+  uid: string;
   card: Card;
   expanded: boolean;
   hintUsed: boolean;
@@ -35,7 +36,12 @@ interface HistoryEntry {
 })
 export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterViewChecked {
   history: HistoryEntry[] = [];
-  newestFirst = false;
+
+  get newestFirst(): boolean { return this.settings.historyNewestFirst(); }
+  set newestFirst(v: boolean) {
+    this.settings.historyNewestFirst.set(v);
+    this.shouldScroll = true;     // re-pin to the correct edge
+  }
 
   private currentIndex = -1;
   private visitedIndices = new Set<number>();
@@ -49,6 +55,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   private settings = inject(QuizSettingsService);
   private saveSub?: Subscription;
+  private resetSub?: Subscription;
 
   constructor(private quizEngine: QuizEngine) {
     this.resume = this.quizEngine.resumePoint;
@@ -57,7 +64,6 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
     // without any card emission, so the banner follows the signals directly.
     effect(() => {
       this.settings.rewindRule();
-      this.settings.rewindOncePerLevel();
       this.refreshResume();
     });
   }
@@ -66,6 +72,11 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
   ngOnInit(): void {
     this.saveSub = this.quizEngine.savePointChanged$.subscribe(() => this.refreshResume());
+    this.resetSub = this.quizEngine.reset$.subscribe(() => {
+      this.history = [];
+      this.visitedIndices.clear();
+      this.historyInitialized = false;
+    });
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       if (!card) return;
 
@@ -75,6 +86,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
         for (const entry of session.getAllEntries()) {
           if (entry.solvedAt && entry.card.index !== card.index) {
             this.history.push({
+              uid: entry.uid,
               card: entry.card,
               expanded: false,
               hintUsed: entry.hintUsed,
@@ -88,11 +100,6 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
           if (e.card.index <= card.index) {
             this.visitedIndices.add(e.card.index);
           }
-        });
-        this.quizEngine.reset$.subscribe(() => {
-          this.history = [];
-          this.visitedIndices.clear();
-          this.historyInitialized = false;
         });
       }
 
@@ -113,7 +120,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
 
       const session = this.quizEngine.getSession();
       for (const entry of this.history) {
-        const sessionEntry = session.getEntry(entry.card.index);
+        const sessionEntry = session.getEntryByUid(entry.uid);
         if (sessionEntry) {
           entry.hintUsed = sessionEntry.hintUsed;
           if (sessionEntry.solvedExactly !== undefined) {
@@ -134,15 +141,17 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
         existing.timestamp = Date.now();
         this.history.push(existing);
       } else {
-        const session = this.quizEngine.getSession();
-        const sessionEntry = session?.getEntry(card.index);
-
-        this.history.push({
-          card,
-          expanded: false,
-          hintUsed: sessionEntry?.hintUsed ?? false,
-          timestamp: Date.now(),
-        });
+        const entry = this.quizEngine.currentEntry;
+        if (entry) {
+          this.history.push({
+            uid: entry.uid,
+            card,
+            expanded: false,
+            hintUsed: entry.hintUsed,
+            solvedExactly: entry.solvedExactly,
+            timestamp: Date.now(),
+          });
+        }
       }
 
       this.shouldScroll = true;
@@ -161,6 +170,7 @@ export class QuizHistorySidebarComponent implements OnInit, OnDestroy, AfterView
   ngOnDestroy(): void {
     this.cardSub?.unsubscribe();
     this.saveSub?.unsubscribe();
+    this.resetSub?.unsubscribe();
   }
 
   private refreshResume(): void {

@@ -39,8 +39,6 @@ export interface PersistedSessionState {
   anchorUid: string | null;
   /** Whether a hint was taken on the current visit to the cursor card. */
   hintUsedHere: boolean;
-  /** Level values already rewound to, when rewindOncePerLevel is in effect. */
-  rewoundLevels: number[];
   cards: PersistedCardState[];
 }
 
@@ -59,7 +57,6 @@ export class QuizSession {
   private _cursor = 0;
   private _anchor = 0;
   private _hintUsedHere = false;
-  private _rewoundLevels = new Set<number>();
 
   private _restoredCursor?: number;
   private _restoredAnchor?: number;
@@ -157,24 +154,6 @@ export class QuizSession {
     this.markDirty();
   }
 
-  // ── rewind loop guard ───────────────────────────────────────────────────
-
-  hasRewoundLevel(level: number): boolean {
-    return this._rewoundLevels.has(level);
-  }
-
-  markLevelRewound(level: number): void {
-    if (this._rewoundLevels.has(level)) return;
-    this._rewoundLevels.add(level);
-    this.markDirty();
-  }
-
-  clearRewoundLevels(): void {
-    if (this._rewoundLevels.size === 0) return;
-    this._rewoundLevels.clear();
-    this.markDirty();
-  }
-
   // ── progress ────────────────────────────────────────────────────────────
 
   recordHintUsed(index: number): void {
@@ -219,7 +198,6 @@ export class QuizSession {
       cursorUid: this.uidAtOrNull(this._cursor),
       anchorUid: this._anchor > 0 ? this.uidAtOrNull(this._anchor) : null,
       hintUsedHere: this._hintUsedHere,
-      rewoundLevels: [...this._rewoundLevels],
       cards: this.entries
         // Only cards with something to say. Keeps payloads small on big decks.
         .filter(e => e.attempts > 0 || e.hintUsed || e.solvedAt !== undefined)
@@ -266,7 +244,6 @@ export class QuizSession {
     }
 
     this._hintUsedHere = state.hintUsedHere ?? false;
-    this._rewoundLevels = new Set(state.rewoundLevels ?? []);
   }
 
   private uidAtOrNull(index: number): string | null {

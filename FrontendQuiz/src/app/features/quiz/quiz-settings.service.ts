@@ -16,11 +16,6 @@ import {RewindRule} from './utils/quiz-session';
  * changes (the lastDeckId check), BEFORE building slots.
  */
 
-export interface PerDeckSettings {
-  popoutZoom?: number;
-  questionPosition?: 'above' | 'inline';
-}
-
 const DECK_KEY_PREFIX = 'quiz_settings_deck:';
 
 @Injectable({providedIn: 'root'})
@@ -32,7 +27,7 @@ export class QuizSettingsService {
   readonly hiraganaDebounceMs = this.persisted('quiz_hiragana_debounce_ms', 300);
 
   readonly rewindRule = this.persisted<RewindRule>('quiz_rewind_rule', 'toAnchor');
-  readonly rewindOncePerLevel = this.persisted('quiz_rewind_once_per_level', true);
+  readonly historyNewestFirst = this.persisted('quiz_history_newest_first', false);
 
   private deckId: string | null = null;
 
@@ -43,7 +38,6 @@ export class QuizSettingsService {
         popoutZoom: this.popoutZoom(),
         questionPosition: this.questionPosition(),
         rewindRule: this.rewindRule(),
-        rewindOncePerLevel: this.rewindOncePerLevel(),
       };
       if (this.deckId) {
         this.write(DECK_KEY_PREFIX + this.deckId, snapshot);
@@ -58,6 +52,7 @@ export class QuizSettingsService {
       const o = this.read<PerDeckSettings>(DECK_KEY_PREFIX + deckId);
       if (o?.popoutZoom != null) this.popoutZoom.set(o.popoutZoom);
       if (o?.questionPosition) this.questionPosition.set(o.questionPosition);
+      if (o?.rewindRule) this.rewindRule.set(o.rewindRule);
     }
     this.deckId = deckId ? deckId : null;
   }
@@ -100,6 +95,5 @@ export interface PerDeckSettings {
   popoutZoom?: number;
   questionPosition?: 'above' | 'inline';
   rewindRule?: RewindRule;
-  rewindOncePerLevel?: boolean;
 }
 

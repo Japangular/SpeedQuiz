@@ -12,6 +12,14 @@
     (hintHovered)="onHintHover()"
   />
 
+  @if (quizEngine.lockStatus() === 'follower') {
+    <div class="tab-lock-banner" role="status">
+      <mat-icon>tab_duplicate</mat-icon>
+      <span>This deck is open in another tab. Nothing you do here is being saved.</span>
+      <button mat-button (click)="takeOver()">Continue here</button>
+    </div>
+  }
+
   @if (showReorder && fieldOrder.length > 1) {
     <div class="field-order-list" cdkDropList (cdkDropListDropped)="onReorder($event)">
       @for (key of fieldOrder; track key) {

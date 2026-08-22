@@ -6,6 +6,7 @@ export type EmoteEvent = 'cardSwitch' | 'correct' | 'hint' | 'reset' | 'takingLo
 export interface EmoteDisplay {
   src: string;
   mode: 'flash' | 'linger';
+  event: EmoteEvent;
   /** Changes every trigger so the overlay recreates the <img> and restarts the CSS animation. */
   key: number;
 }
@@ -56,6 +57,7 @@ export class EmoteService implements OnDestroy {
   private lastTriggerAt = 0;
   private key = 0;
   private lastHintAt = 0;
+  private lastActivityAt = 0;
   private audioCtx?: AudioContext;
 
   private siteMode = inject(SiteModeService);
@@ -71,7 +73,7 @@ export class EmoteService implements OnDestroy {
     this.lastTriggerAt = Date.now();
 
     const mode = event === 'takingLong' ? 'linger' as const : 'flash' as const;
-    this.show(EMOTE_MAP[event], mode);
+    this.show(EMOTE_MAP[event], mode, event);
 
     if (event === 'hint') this.lastHintAt = Date.now();
 
@@ -93,13 +95,10 @@ export class EmoteService implements OnDestroy {
 
   // ---------------------------------------------------------------- internals
 
-  private show(src: string, mode: 'flash' | 'linger'): void {
+  private show(src: string, mode: 'flash' | 'linger', event: EmoteEvent): void {
     clearTimeout(this.hideTimer);
-    this.current.set({src, mode, key: ++this.key});
-    if (mode === 'flash') {
-      this.hideTimer = setTimeout(() => this.current.set(null), FLASH_MS);
-    }
-    // 'linger' stays until the next trigger() or clear().
+    this.current.set({src, mode, event, key: ++this.key});
+    if (mode === 'flash') this.hideTimer = setTimeout(() => this.current.set(null), FLASH_MS);
   }
 
   private armTakingLongTimer(): void {
@@ -112,6 +111,18 @@ export class EmoteService implements OnDestroy {
     if (Date.now() - this.lastHintAt < HINT_COOLDOWN_MS) return;
     this.lastHintAt = Date.now();
     this.trigger('hintPeek');
+  }
+
+  /** Any sign of life: keystroke, stroke on the kanji canvas, etc. */
+  notifyActivity(): void {
+    if (!this.siteMode.isVtuberFan) return;
+
+    if (this.current()?.event === 'takingLong') this.current.set(null);   // #3
+
+    const now = Date.now();
+    if (now - this.lastActivityAt < 1000) return;   // cheap throttle
+    this.lastActivityAt = now;
+    this.armTakingLongTimer();                       // #4
   }
 
   /**

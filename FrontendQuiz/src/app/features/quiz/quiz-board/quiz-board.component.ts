@@ -52,6 +52,10 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('historyPanel') historyPanel!: TemplateRef<any>;
   @ViewChild('popoutHost') popoutHost!: ElementRef<HTMLElement>;
 
+  @HostListener('document:keydown')
+  @HostListener('document:pointerdown')
+  onUserActivity(): void { this.emotes.notifyActivity(); }
+
   popout = inject(QuizPopoutService);
 
   currentSlots: Slot[] = [];
@@ -81,7 +85,10 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     private contextPanel: ContextPanelService,
     readonly settings: QuizSettingsService,
   ) {
-    this.hotkeySub = this.popout.keydown.subscribe(e => this.handleHotkeys(e));
+    this.hotkeySub = this.popout.keydown.subscribe(e => {
+      this.handleHotkeys(e);
+      this.emotes.notifyActivity();
+    });
     this.resetSub = this.quizEngine.reset$.subscribe(() => this.emotes.trigger('reset'));
     this.cardSub = this.quizEngine.card$.subscribe(card => {
       this.modal.closeHint();
@@ -107,8 +114,6 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
         }
       });
     });
-
-    this.quizEngine.reset$.subscribe(() => this.emotes.trigger('reset'));
   }
 
   ngAfterViewInit(): void {
@@ -187,6 +192,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       this.currentSlots = cardToSlots(this.currentCard, this.buildMode(), this.deckStore.properties());
     }
   }
+
+  takeOver(): void { void this.quizEngine.takeOverDeck(); }
 
   togglePopout(): void {
     if (this.popout.active()) {

@@ -7,8 +7,6 @@
       <span class="resume-label">{{ resume.label }}</span>
       @if (resume.card) {
         <span class="resume-detail">#{{ resume.card.index }} · {{ resume.card.question }}</span>
-      } @else if (resume.spentForLevel) {
-        <span class="resume-detail">Level rewind already spent — you'll move on</span>
       } @else {
         <span class="resume-detail">You'll move on to the next card</span>
       }

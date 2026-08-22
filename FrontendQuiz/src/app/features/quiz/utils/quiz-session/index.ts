@@ -26,3 +26,5 @@ export {
 export type {SortStrategy, SortStrategyName} from './sort-strategy';
 
 export {SessionSyncService} from './session-sync.service';
+
+export {DeckLockService} from './deck-lock.service';

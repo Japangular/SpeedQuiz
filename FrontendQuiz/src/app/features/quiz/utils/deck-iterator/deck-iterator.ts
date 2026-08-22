@@ -9,14 +9,6 @@ export interface DeckIteratorOptions {
   rewind?: RewindRule;
   /** Initial anchor / save point. Defaults to 0 (deck start). */
   anchor?: number;
-  /**
-   * Rewind into any given level at most once per session.
-   *
-   * Without this, `toLevelStart` on a 40-card level replays 40 cards every
-   * time a hint is taken near the end of it, which is a soft lock the user
-   * cannot escape without restarting.
-   */
-  rewindOncePerLevel?: boolean;
 }
 
 export class DeckIterator implements DeckCommand {
@@ -28,14 +20,12 @@ export class DeckIterator implements DeckCommand {
 
   private index = 0;
   private rewind: RewindRule;
-  private rewindOncePerLevel: boolean;
 
   constructor(
     private session: QuizSession,
     options: DeckIteratorOptions = {},
   ) {
     this.rewind = options.rewind ?? DEFAULT_REWIND_RULE;
-    this.rewindOncePerLevel = options.rewindOncePerLevel ?? false;
 
     this.index = clamp(options.anchor ?? 0, 0, Math.max(0, session.length - 1));
     this.session.setCursor(this.index);
@@ -107,7 +97,7 @@ export class DeckIterator implements DeckCommand {
     // A resume target equal to the current index means "nothing to rewind
     // to" — advance instead. The old code jumped to it unconditionally, which
     // is why NoRewindStrategy pinned the user on the same card forever.
-    const target = usedHint ? this.computeResume() : this.index;
+    const target = usedHint ? this.previewResume() : this.index;
     const next = target < this.index ? target : this.index + 1;
 
     this.session.setHintUsedHere(false);
@@ -142,20 +132,17 @@ export class DeckIterator implements DeckCommand {
    * Where a hint-assisted answer would land *right now*, without spending the
    * once-per-level budget. Returns the current index when nothing would happen.
    */
+  /** Where a hint-assisted answer would land right now. Equals the cursor when nothing happens. */
   previewResume(): number {
-    return this.resolveResume(false);
-  }
-
-  private computeResume(): number {
-    return this.resolveResume(true);
+    return resumeIndex(
+      {cursor: this.index, anchor: this.session.anchor},
+      this.session.deck,
+      this.rewind,
+    );
   }
 
   private resolveResume(commit: boolean): number {
     const level = this.session.deck.levelAt(this.index);
-
-    if (this.rewindOncePerLevel && this.session.hasRewoundLevel(level)) {
-      return this.index;
-    }
 
     const target = resumeIndex(
       {cursor: this.index, anchor: this.session.anchor},
@@ -163,16 +150,11 @@ export class DeckIterator implements DeckCommand {
       this.rewind,
     );
 
-    if (commit && this.rewindOncePerLevel && target < this.index) {
-      this.session.markLevelRewound(level);
-    }
-
     return target;
   }
 
   restart(): void {
     this.session.setHintUsedHere(false);
-    this.session.clearRewoundLevels();
     this.setIndex(this.session.anchor);
   }
 
@@ -191,13 +173,11 @@ export class DeckIterator implements DeckCommand {
   /** Drop a save point on the current card. */
   setAsStartPoint(): void {
     this.session.setAnchor(this.index);
-    this.session.clearRewoundLevels();
   }
 
   /** Remove the save point; the anchor falls back to deck start. */
   clearStartPoint(): void {
     this.session.setAnchor(0);
-    this.session.clearRewoundLevels();
   }
 
   getAnchor(): number {
@@ -212,12 +192,6 @@ export class DeckIterator implements DeckCommand {
 
   setRewindRule(rule: RewindRule): void {
     this.rewind = rule;
-    this.session.clearRewoundLevels();
-  }
-
-  setRewindOncePerLevel(value: boolean): void {
-    this.rewindOncePerLevel = value;
-    if (!value) this.session.clearRewoundLevels();
   }
 
   /** Not implemented. Kept so existing template bindings keep compiling. */
