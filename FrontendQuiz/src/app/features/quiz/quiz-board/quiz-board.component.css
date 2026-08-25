@@ -127,3 +127,40 @@ app-card-view {
 }
 .tab-lock-banner mat-icon { flex-shrink: 0; opacity: .75; }
 .tab-lock-banner span { flex: 1; min-width: 0; }
+
+
+.level-row {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: .5rem; margin-bottom: .6rem; min-height: 1.9rem;
+}
+.level-row .level-badge { margin-bottom: 0; }
+
+.hint-flash {
+  display: flex; gap: .4rem; flex-wrap: wrap; min-width: 0;
+  animation: hint-flash var(--flash-duration, 2500ms) ease forwards;
+}
+
+.hint-chip {
+  display: inline-flex; align-items: baseline; gap: .35rem;
+  padding: .15rem .6rem; border-radius: 999px;
+  max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: hsl(var(--level-hue, 0) 60% 28%);
+  background: hsl(var(--level-hue, 0) 70% 55% / 0.28);
+  box-shadow: inset 0 0 0 1px hsl(var(--level-hue, 0) 65% 45% / 0.45);
+}
+.hint-chip-label {
+  font-size: .66rem; font-weight: 500; opacity: .7;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.hint-chip-value { font-size: 1rem; font-weight: 600; }
+
+@keyframes hint-flash {
+  0%   { opacity: 0; transform: translateY(-4px) scale(.96); }
+  8%   { opacity: 1; transform: none; }
+  82%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hint-flash { animation: none; }
+}

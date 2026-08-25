@@ -35,11 +35,25 @@
     <div class="slot-pane">
       <div #popoutHost class="popout-host"
            [class.level-themed]="levelRewindAvailable"
-           [style.--level-hue]="levelHue">
+           [style.--level-hue]="levelHue"
+           [style.--flash-duration.ms]="flashMs">
         <app-emote-overlay></app-emote-overlay>
-        @if (levelRewindAvailable) {
-          <div class="level-badge">Level {{ currentLevel }}</div>
-        }
+
+        <div class="level-row">
+          @if (levelRewindAvailable) {
+            <div class="level-badge">Level {{ currentLevel }}</div>
+          }
+          @for (flash of hintFlashList(); track flash.key) {
+            <div class="hint-flash">
+              @for (item of flash.items; track item.label) {
+                <span class="hint-chip">
+            <span class="hint-chip-label">{{ item.label }}</span>
+            <span class="hint-chip-value">{{ item.value }}</span>
+          </span>
+              }
+            </div>
+          }
+        </div>
         <app-slot-group
           [slots]="currentSlots"
           [showStrokeOrder]="showStrokeOrder && !popout.active()"

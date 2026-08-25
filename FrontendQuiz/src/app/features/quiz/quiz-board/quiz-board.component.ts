@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild, inject, ElementRef} from '@angular/core';
+import {AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild, inject, ElementRef, signal, computed, NgZone} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
@@ -25,6 +25,8 @@ import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
 import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
 
 import {levelHue as hueForLevel} from '../utils/level-theme';
+
+interface HintFlash { items: { label: string; value: string }[]; key: number; }
 
 const SHOW_STROKE_ORDER_KEY = 'quiz_show_stroke_order';
 
@@ -56,6 +58,8 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @HostListener('document:pointerdown')
   onUserActivity(): void { this.emotes.notifyActivity(); }
 
+  private zone = inject(NgZone);
+
   popout = inject(QuizPopoutService);
 
   currentSlots: Slot[] = [];
@@ -78,6 +82,13 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   private deckStore = inject(DeckStore);
   private emotes = inject(EmoteService);
+
+  readonly hintFlash = signal<HintFlash | null>(null);
+  /** @for + track key restarts the CSS animation on repeat hints — same trick as EmoteOverlay. */
+  readonly hintFlashList = computed(() => { const f = this.hintFlash(); return f ? [f] : []; });
+
+  private flashKey = 0;
+  private flashTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     readonly quizEngine: QuizEngine,
@@ -130,6 +141,27 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.contextPanel.clear();
   }
 
+  get flashMs(): number { return Math.max(1200, this.settings.hintAutoCloseSeconds() * 1000); }
+
+  private flashAnswers(): void {
+    const items = this.currentSlots
+      .filter(s => s.role === 'answer')
+      .map(s => ({ label: s.fieldName ?? 'answer', value: s.value }));
+    if (!items.length) return;
+
+    clearTimeout(this.flashTimer);
+    this.hintFlash.set({ items, key: ++this.flashKey });
+    this.flashTimer = setTimeout(
+      () => this.zone.run(() => this.hintFlash.set(null)),
+      this.flashMs,
+    );
+  }
+
+  private clearFlash(): void {
+    clearTimeout(this.flashTimer);
+    this.hintFlash.set(null);
+  }
+
   setShowStrokeOrder(value: boolean): void {
     this.showStrokeOrder = value;
     try {
@@ -166,14 +198,16 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   }
 
   triggerHint(): void {
-    if (this.modal.hasOpenHint()) {       // closes the old
-      this.modal.closeHint();
-    }
-    if (this.currentCard) {
-      this.emotes.trigger('hint');
-      this.quizEngine.useHint();
-      const autoCloseMs = this.popout.active() ? this.settings.hintAutoCloseSeconds() * 1000 : 0;
-      this.modal.openHintModal(this.currentCard, autoCloseMs).subscribe();
+    if (this.modal.hasOpenHint()) this.modal.closeHint();
+    if (!this.currentCard) return;
+
+    this.emotes.trigger('hint');
+    this.quizEngine.useHint();
+
+    if (this.popout.active()) {
+      this.flashAnswers();
+    } else {
+      this.modal.openHintModal(this.currentCard, 0).subscribe();
     }
   }
 

@@ -82,12 +82,13 @@ export class RomajiHiraganaConverter {
           } else if (checkLen == 1) {
             if (["?", ".", "!"].includes(checkStr)) {
               resultString += "。";
-            } else if (!(this.alphabet.includes(checkStr))) {
-              resultString += checkStr;
-            } else if (i + 1 < romaji.length) {
-              if (checkStr == romaji.substring(i + 1, i + 2)) {
-                resultString += currentAlphabet == "hiragana" ? this.hiragana.sakuon : this.katakana.sakuon;
-              }
+            } else if (!this.alphabet.includes(checkStr)) {
+              resultString += checkStr;                      // kana / kanji pass through
+            } else if (checkStr == romaji.substring(i + 1, i + 2)) {
+              resultString += currentAlphabet == "hiragana"  // kk / tt / pp → っ
+                ? this.hiragana.sakuon : this.katakana.sakuon;
+            } else {
+              resultString += checkStr;                      // NEW: keep half-typed romaji
             }
             i++;
             break;
