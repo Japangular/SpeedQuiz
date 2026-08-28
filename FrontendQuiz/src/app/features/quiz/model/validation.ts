@@ -41,9 +41,19 @@ export const levenshteinValidator: ValidatorFn = (input, correctAnswer) => {
   return { correct: false };
 };
 
+const KATAKANA = /[\u30a1-\u30f6]/;
+const HIRAGANA = /[\u3041-\u3096]/;
+
+/** Script of the first kana in the answer. Mixed answers (サボる) follow their head. */
+export function scriptOf(answer: string): "hiragana" | "katakana" {
+  const first = [...answer].find(ch => KATAKANA.test(ch) || HIRAGANA.test(ch));
+  return first && KATAKANA.test(first) ? "katakana" : "hiragana";
+}
+
 export const exactHiraganaValidator: ValidatorFn = (input, correctAnswer) => {
   const answers = normalizeAnswers(correctAnswer);
-  const transformed = RomajiHiraganaConverter.romajiToJapanese(input.trim().toLowerCase());
+  const start = scriptOf(answers[0] ?? '');
+  const transformed = RomajiHiraganaConverter.romajiToJapanese(input.trim().toLowerCase(), start);
   const correct = answers.some(ans => transformed === ans);
   return { correct, exact: correct, transformedInput: transformed };
 };

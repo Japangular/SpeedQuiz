@@ -1,13 +1,17 @@
 export class RomajiHiraganaConverter {
-  static romajiToJapanese(romaji: string | undefined): string {
+  static romajiToJapanese(
+    romaji: string | undefined,
+    startAlphabet: "hiragana" | "katakana" = "hiragana"
+  ): string {
     if (!romaji || romaji == "") {
       console.log("romaji was empty");
       return "";
     }
 
-    let currentAlphabet = "hiragana";
-    let hiraganaIsCurrent = true;
+    let currentAlphabet: string = startAlphabet;
+    let hiraganaIsCurrent = startAlphabet == "hiragana";
     let resultString = "";
+
 
     let i = 0;
     while (i < romaji.length) {
@@ -23,6 +27,25 @@ export class RomajiHiraganaConverter {
         }
         i++;
 
+        // long vowel mark (chouonpu)
+      } else if (romaji[i] == "-" || romaji[i] == "ß" || romaji[i] == "ー") {
+        resultString += this.katakana.pause;
+        i++;
+
+        // already-converted katakana: keep it and re-sync the current alphabet
+      } else if (romaji[i] >= "\u30a0" && romaji[i] <= "\u30ff") {
+        currentAlphabet = "katakana";
+        hiraganaIsCurrent = false;
+        resultString += romaji[i];
+        i++;
+
+        // already-converted hiragana: same, the other way round
+      } else if (romaji[i] >= "\u3040" && romaji[i] <= "\u309f") {
+        currentAlphabet = "hiragana";
+        hiraganaIsCurrent = true;
+        resultString += romaji[i];
+        i++;
+
         //checks wa rule
       } else if (romaji[i] == " ") {
         if (i + 3 < romaji.length && romaji.substring(i, i + 4) == "wa") {
@@ -36,14 +59,11 @@ export class RomajiHiraganaConverter {
         // n rule
       } else if (
         i + 2 < romaji.length && romaji[i] == "n" && romaji.substring(i + 1, i + 2) == "n" &&
-        (currentAlphabet == "hiragana" && !(romaji.substring(i + 1, i + 3) in this.hiragana)) ||
-        (currentAlphabet == "katakana" && !(romaji.substring(i + 1, i + 3) in this.katakana))
+        ((currentAlphabet == "hiragana" && !(romaji.substring(i + 1, i + 3) in this.hiragana)) ||
+          (currentAlphabet == "katakana" && !(romaji.substring(i + 1, i + 3) in this.katakana)))
       ) {
-        resultString += currentAlphabet == "hiragana" ? this.hiragana.sakuon : this.katakana.sakuon;
-        i++;
-
-
-
+        resultString += currentAlphabet == "hiragana" ? this.hiragana.n : this.katakana.n;
+        i += 2;
 
       } else {
         if(!romaji)
