@@ -129,7 +129,6 @@ export class QuizEngine implements OnDestroy {
   }
 
   private async initSession(deck: DeckContent): Promise<void> {
-    this.resetSubject.next();
     const deckId = this.deckStore.deckId() ?? this.deckStore.deckName();
     this.currentDeckId = deckId;
     const cards = this.sortStrategy.sort(mapDeck(deck));
@@ -143,6 +142,12 @@ export class QuizEngine implements OnDestroy {
 
     // Everyone gets a readable deck — a follower is read-only, not blank.
     this.session = new QuizSession(cards, priorState);
+    // Must come after the assignment and before the emission: the sidebar
+    // clears on reset and rebuilds from getSession() on the next card. Firing
+    // it at the top of this method instead lets a component that mounts during
+    // the await build its history from the previous deck's session and then
+    // latch historyInitialized, so the real session never reaches it.
+    this.resetSubject.next();
     this.deckIterator.replaceSession(this.session);
 
     if (!deckId) return;
