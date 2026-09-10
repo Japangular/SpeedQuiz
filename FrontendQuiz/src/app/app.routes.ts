@@ -14,6 +14,7 @@ import {AnkiTableService} from './features/anki-table/anki-table.service';
 import {DeckShelfComponent} from './features/deck-shelf/deck-shelf.component';
 import {inject} from '@angular/core';
 import {AnkiImportComponent} from './features/anki-import/anki-import.component';
+import {SettingsComponent} from './features/settings/settings.component';
 
 export const routes: Routes = [
   {
@@ -83,6 +84,12 @@ export const routes: Routes = [
         component: AnkiImportComponent,
         title: 'Import Anki',
         data: { label: 'Anki Import', icon: 'cloud_upload' }
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent,
+        title: 'Settings',
+        data: {label: 'Settings', bottom: true, icon: 'settings'}
       },
       {
         path: 'about',

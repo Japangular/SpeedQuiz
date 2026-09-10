@@ -61,6 +61,16 @@ public class DeckRepository {
     }
   }
 
+  public int updateDeck(String deckName, UUID ownerId, String propertiesJson, String cardsJson) {
+    String sql = """
+        UPDATE deck
+        SET properties = ?::jsonb, cards = ?::jsonb
+        WHERE owner_id = ? AND deck_name = ?
+        """;
+    logger.info("Updating deck '{}' for owner {}", deckName, ownerId);
+    return jdbcTemplate.update(sql, propertiesJson, cardsJson, ownerId, deckName);
+  }
+
   public List<DeckModel> getSubmissionDecksByDeckName(String deckName) {
     String sql = "SELECT deck_name, username, properties, cards FROM deck WHERE deck_name = ?";
     return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToDeck(rs),deckName);

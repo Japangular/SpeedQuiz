@@ -199,7 +199,10 @@ export class ExtractCardsFromUrlComponent {
 
     const deck = this.buildDeckContent();
     this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste');
-    this.quizApi.createDeck('Imported Deck', deck).subscribe();
+    this.quizApi.createDeck('Imported Deck', deck).subscribe({
+      next: created => this.deckStore.loadDeck(deck, created.name, created.id),
+      error: () => this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste'),
+    });
 
     setTimeout(() => {
       this.saving = false;

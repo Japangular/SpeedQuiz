@@ -4,6 +4,7 @@ import com.japangular.quizzingbydoing.backendspeed.model.DeckInfo;
 import com.japangular.quizzingbydoing.backendspeed.model.DeckContent;
 import com.japangular.quizzingbydoing.backendspeed.persistence.deck.DeckRepository;
 import com.japangular.quizzingbydoing.backendspeed.persistence.deck.DeckModel;
+import com.japangular.quizzingbydoing.backendspeed.quizFeatures.exception.DeckNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -38,13 +39,17 @@ public class UserDeckAdapter {
   private final DeckRepository repository;
   private static final String ID_PREFIX = "user:";
 
+  public DeckInfo describe(String deckName) {
+    return new DeckInfo()
+        .id(ID_PREFIX + deckName)
+        .name(deckName)
+        .description("User-created deck")
+        .attribution("user");
+  }
+
   public List<DeckInfo> listDecks(UUID ownerId) {
     return repository.getSubmissionDecksByOwnerId(ownerId).stream()
-        .map(deck -> new DeckInfo()
-            .id(ID_PREFIX + deck.getDeckName())
-            .name(deck.getDeckName())
-            .description("User-created deck")
-            .attribution("user"))
+        .map(deck -> describe(deck.getDeckName()))
         .toList();
   }
 
@@ -62,5 +67,13 @@ public class UserDeckAdapter {
   public int deleteDeck(String deckId, UUID ownerId) {
     String deckName = deckId.substring(ID_PREFIX.length());
     return repository.deleteByOwnerIdAndDeckName(ownerId, deckName);
+  }
+
+  public DeckInfo update(String deckId, UUID ownerId, String propertiesJson, String cardsJson) {
+    String deckName = deckId.substring(ID_PREFIX.length());
+    if (repository.updateDeck(deckName, ownerId, propertiesJson, cardsJson) == 0) {
+      throw new DeckNotFoundException(deckId);
+    }
+    return describe(deckName);
   }
 }

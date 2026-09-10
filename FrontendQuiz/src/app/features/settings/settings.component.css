@@ -1,0 +1,266 @@
+/* Wider than deck-shelf's 720px because the linking and transfer sections are
+   two-column on desktop; the type column inside each stays comfortable. */
+.settings-container {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 0 16px 48px;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin: 0 0 20px;
+}
+
+.section {
+  padding: 20px 24px 24px;
+  margin-bottom: 20px;
+}
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+}
+
+.section-intro {
+  color: rgba(0, 0, 0, 0.6);
+  margin: 4px 0 20px;
+  max-width: 68ch;
+  line-height: 1.55;
+}
+
+h3 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin: 0 0 6px;
+}
+
+.hint {
+  display: block;
+  color: rgba(0, 0, 0, 0.55);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.error-text {
+  color: #b3261e;
+  font-size: 0.85rem;
+  margin: 8px 0 0;
+}
+
+.full-width { width: 100%; }
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.secondary-actions { margin-top: 16px; }
+
+/* ── device linking ──────────────────────────────────────────────────── */
+
+.link-columns,
+.transfer-columns {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.link-column,
+.transfer-column {
+  min-width: 0;   /* lets the textarea shrink instead of blowing out the grid */
+}
+
+/* The code is the one thing on this page someone reads off a screen from a
+   distance, so it gets the size and the tracking. Everything else stays quiet. */
+.code-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 14px 0 4px;
+  padding: 14px 18px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.code-value {
+  font-family: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.code-countdown {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.55);
+  font-variant-numeric: tabular-nums;
+}
+
+.code-display.expired {
+  border-color: rgba(179, 38, 30, 0.35);
+  background: rgba(179, 38, 30, 0.04);
+}
+
+.code-display.expired .code-value {
+  color: rgba(0, 0, 0, 0.32);
+  text-decoration: line-through;
+}
+
+.code-display.expired .code-countdown {
+  color: #b3261e;
+}
+
+.code-input {
+  width: 100%;
+  max-width: 260px;
+  margin-top: 14px;
+}
+
+.code-input input {
+  font-family: ui-monospace, "SFMono-Regular", "Roboto Mono", monospace;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── quiz defaults ───────────────────────────────────────────────────── */
+
+.setting-row {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.07);
+}
+
+.setting-row:first-of-type { border-top: none; }
+
+.setting-label > span:first-child {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.setting-control { width: 100%; }
+
+/* Material form fields reserve space for a hint line that these rows do not
+   use; without this the rows drift out of vertical alignment. */
+.setting-control.mat-mdc-form-field {
+  margin-bottom: -1.25em;
+}
+
+.slider-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-control mat-slider { flex: 1; min-width: 0; }
+
+.slider-value {
+  min-width: 4.5em;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* ── responsive ──────────────────────────────────────────────────────── */
+
+@media (max-width: 800px) {
+  .link-columns,
+  .transfer-columns {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* A vertical rule between stacked columns is meaningless; a horizontal one
+     still separates them. */
+  .link-columns mat-divider,
+  .transfer-columns mat-divider {
+    display: none;
+  }
+
+  .link-column + .link-column,
+  .transfer-column + .transfer-column {
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+  }
+
+  .setting-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .setting-control { max-width: 100%; }
+
+  .settings-container { margin: 12px auto; }
+
+  .section { padding: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ── import preview ──────────────────────────────────────────────────── */
+
+.preview {
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.preview-line {
+  margin: 0 0 6px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.preview-line:last-of-type { margin-bottom: 0; }
+
+/* Amber, not red: merging is still safe here. Only replace would lose work,
+   and that is what the text says. */
+.preview-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #b06000;
+  border-radius: 0 4px 4px 0;
+  background: rgba(176, 96, 0, 0.06);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  max-width: 56ch;
+}
+
+.preview-warning mat-icon {
+  color: #b06000;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mode-toggle {
+  margin-top: 12px;
+}
+
+@media (max-width: 800px) {
+  .mode-toggle { width: 100%; }
+  .mode-toggle mat-button-toggle { flex: 1; }
+}

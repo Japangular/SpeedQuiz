@@ -38,12 +38,23 @@ export class QuizSettingsService {
         popoutZoom: this.popoutZoom(),
         questionPosition: this.questionPosition(),
         rewindRule: this.rewindRule(),
+        hintAutoCloseSeconds: this.hintAutoCloseSeconds(),
+        hiraganaDebounceMs: this.hiraganaDebounceMs(),
+        historyNewestFirst: this.historyNewestFirst(),
       };
       if (this.deckId) {
         this.write(DECK_KEY_PREFIX + this.deckId, snapshot);
       }
     });
   }
+
+  /**
+   * How long the quiz sits idle before flushing progress to the server.
+   * Was a hardcoded 5000 in SessionSyncService. Lower means less lost on a
+   * hard crash and more requests; higher means the opposite. Below ~1000 the
+   * request rate starts to matter on a fast typist's answer streak.
+   */
+  readonly sessionSyncDebounceMs = this.persisted('quiz_sync_debounce_ms', 5_000);
 
   /** Apply a deck's stored overrides (falls back to current globals). */
   attachDeck(deckId: string | null | undefined): void {
@@ -53,6 +64,9 @@ export class QuizSettingsService {
       if (o?.popoutZoom != null) this.popoutZoom.set(o.popoutZoom);
       if (o?.questionPosition) this.questionPosition.set(o.questionPosition);
       if (o?.rewindRule) this.rewindRule.set(o.rewindRule);
+      if (o?.hintAutoCloseSeconds != null) this.hintAutoCloseSeconds.set(o.hintAutoCloseSeconds);
+      if (o?.hiraganaDebounceMs != null) this.hiraganaDebounceMs.set(o.hiraganaDebounceMs);
+      if (o?.historyNewestFirst != null) this.historyNewestFirst.set(o.historyNewestFirst);
     }
     this.deckId = deckId ? deckId : null;
   }
@@ -95,5 +109,7 @@ export interface PerDeckSettings {
   popoutZoom?: number;
   questionPosition?: 'above' | 'inline';
   rewindRule?: RewindRule;
+  hintAutoCloseSeconds?: number;
+  hiraganaDebounceMs?: number;
+  historyNewestFirst?: boolean;
 }
-

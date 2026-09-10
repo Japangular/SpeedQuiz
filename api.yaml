@@ -48,6 +48,12 @@ paths:
       responses:
         '201':
           description: Deck created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckInfo'
+        '409':
+          description: A deck with that name already exists for this owner
 
   /quizApi/decks/{deckId}:
     get:
@@ -86,6 +92,33 @@ paths:
           description: Deck deleted
         '404':
           description: Deck not found
+    put:
+      tags:
+        - deck
+      summary: Replace the contents of a user-created deck
+      operationId: updateDeck
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/SessionToken'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckContent'
+      responses:
+        '200':
+          description: Deck updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckInfo'
+        '404':
+          description: Deck not found, or not owned by this session
 
   /quizApi/decks/{deckId}/page:
     get:

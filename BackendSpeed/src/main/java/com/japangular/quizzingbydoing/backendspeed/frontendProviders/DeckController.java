@@ -48,14 +48,20 @@ public class DeckController implements DeckApi {
   }
 
   @Override
-  public ResponseEntity<Void> createDeck(String xSessionToken, String deckName, DeckContent deckContent) {
-    deckService.createDeck(deckName, sessionService.requireOwner(xSessionToken), deckContent);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
+  public ResponseEntity<DeckInfo> createDeck(String xSessionToken, String deckName, DeckContent deckContent) {
+    DeckInfo created = deckService.createDeck(deckName, sessionService.requireOwner(xSessionToken), deckContent);
+    return ResponseEntity.status(HttpStatus.CREATED).body(created);
   }
 
   @Override
   public ResponseEntity<Void> deleteDeck(String deckId, String xSessionToken) {
     deckService.deleteDeck(deckId, sessionService.requireOwner(xSessionToken));
     return ResponseEntity.noContent().build();
+  }
+
+  @Override
+  public ResponseEntity<DeckInfo> updateDeck(String deckId, String xSessionToken, DeckContent deckContent) {
+    return ResponseEntity.ok(
+        deckService.updateDeck(deckId, sessionService.requireOwner(xSessionToken), deckContent));
   }
 }

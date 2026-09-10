@@ -10,6 +10,7 @@ export interface QuizApi {
   createDeck(deckName: string, content: DeckContent): Observable<any>;
   getCardStates(deckId: string): Observable<DeckCardState[]>;
   updateCardStates(deckId: string, states: DeckCardState[]): Observable<any>;
+  updateDeck(deckId: string, content: DeckContent): Observable<DeckInfo>;
 }
 
 export const QUIZ_API_TOKEN = new InjectionToken<QuizApi>('QUIZ_API');

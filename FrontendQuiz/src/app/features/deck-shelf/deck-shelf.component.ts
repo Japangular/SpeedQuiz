@@ -226,7 +226,7 @@ export class DeckShelfComponent implements OnInit {
   }
 
   exportDeck(deck: DeckInfo): void {
-    this.deckTransfer.exportDeck(deck).subscribe({
+    this.deckTransfer.exportToFile(deck).subscribe({
       error: () => this.snackBar.open('Export failed.', 'OK', {duration: 4000}),
     });
   }
@@ -238,8 +238,8 @@ export class DeckShelfComponent implements OnInit {
     if (!file) return;
 
     this.deckTransfer.importFile(file).subscribe({
-      next: name => {
-        this.snackBar.open(`Imported "${name}"`, 'OK', {duration: 3000});
+      next: result => {
+        this.snackBar.open(`Imported "${result.name}"`, 'OK', {duration: 3000});
         this.loadDecks();
       },
       error: err => this.snackBar.open(err?.message ?? 'Import failed.', 'OK', {duration: 5000}),

@@ -5,6 +5,7 @@ import {environment} from '../environments/environment';
 import {DeckInfo, DeckContent, DeckPage, DeckCardState} from '../models/deck.model';
 import {QuizApi} from '../interfaces/quiz-api';
 import {LocalProfileService} from '../user-store-management/local-profile.service';
+import {filter} from 'rxjs/operators';
 
 @Injectable({providedIn: 'root'})
 export class QuizApiService implements QuizApi {
@@ -39,5 +40,9 @@ export class QuizApiService implements QuizApi {
 
   updateCardStates(deckId: string, states: DeckCardState[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/${deckId}/state`, states);
+  }
+
+  updateDeck(deckId: string, content: DeckContent): Observable<DeckInfo> {
+    return this.http.put<DeckInfo>(`${this.apiUrl}/${encodeURIComponent(deckId)}`, content);
   }
 }

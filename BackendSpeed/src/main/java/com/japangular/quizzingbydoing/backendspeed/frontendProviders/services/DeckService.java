@@ -40,11 +40,12 @@ public class DeckService {
     return deckBrowsingService.getPage(content, limit, offset, filter);
   }
 
-  public void createDeck(String deckName, UUID ownerId, DeckContent deckContent) {
+  public DeckInfo createDeck(String deckName, UUID ownerId, DeckContent deckContent) {
     try {
       String propertiesJson = objectMapper.writeValueAsString(deckContent.getProperties());
       String cardsJson = objectMapper.writeValueAsString(deckContent.getCards());
       userDeckSource.insertDeck(deckName, ownerId, propertiesJson, cardsJson);
+      return deckRegistry.describeUserDeck(deckName);
     } catch (JacksonException e) {
       throw new IllegalArgumentException("Invalid deck content: " + e.getOriginalMessage(), e);
     }
@@ -78,5 +79,15 @@ public class DeckService {
 
   private CardProgress toEntity(DeckCardState dto) {
     return new CardProgress(dto.getDeckId(), dto.getCardId(), dto.getState());
+  }
+
+  public DeckInfo updateDeck(String deckId, UUID ownerId, DeckContent deckContent) {
+    try {
+      String propertiesJson = objectMapper.writeValueAsString(deckContent.getProperties());
+      String cardsJson = objectMapper.writeValueAsString(deckContent.getCards());
+      return deckRegistry.updateDeck(deckId, ownerId, propertiesJson, cardsJson);
+    } catch (JacksonException e) {
+      throw new IllegalArgumentException("Invalid deck content: " + e.getOriginalMessage(), e);
+    }
   }
 }

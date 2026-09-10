@@ -63,5 +63,17 @@ public class DeckRegistryService {
       throw new DeckNotFoundException(deckId);   // wrong owner or already gone
     }
   }
+
+  /** DeckInfo for a user deck by name. No database read: the id is derived from the name. */
+  public DeckInfo describeUserDeck(String deckName) {
+    return userDeckAdapter.describe(deckName);
+  }
+
+  public DeckInfo updateDeck(String deckId, UUID ownerId, String propertiesJson, String cardsJson) {
+    if (!userDeckAdapter.handles(deckId)) {
+      throw new DeckNotFoundException(deckId);   // built-in decks are read-only
+    }
+    return userDeckAdapter.update(deckId, ownerId, propertiesJson, cardsJson);
+  }
 }
 

@@ -79,6 +79,26 @@ export class LocalProfileService {
     )
   }
 
+  /**
+   * Installs a session that arrived from somewhere other than /provision —
+   * currently the device-link flow. Validates before storing, so a token that
+   * has since been cleared on the server cannot leave this device stranded
+   * with a profile that never resolves.
+   */
+  adopt(token: string, displayName: string): Observable<LocalProfile> {
+    const profile: LocalProfile = {token, displayName};
+    return this.validate(token).pipe(
+      map(valid => {
+        if (!valid) {
+          throw new Error('That session no longer exists on the server.');
+        }
+        this.saveToStorage(profile);
+        this.profileSubject.next(profile);
+        return profile;
+      }),
+    );
+  }
+
   getToken(): string | null {
     return this.profileSubject.value?.token ?? null;
   }

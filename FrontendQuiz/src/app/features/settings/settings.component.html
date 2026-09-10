@@ -1,0 +1,388 @@
+<div class="settings-container">
+
+  <h1 class="page-title">Settings</h1>
+
+  <!-- ═══ This device ═══════════════════════════════════════════════════ -->
+  <mat-card class="section">
+    <mat-card-title>
+      <mat-icon color="primary">devices</mat-icon>
+      This device
+    </mat-card-title>
+
+    @if (profileService.profile$ | async; as profile) {
+      <p class="section-intro">
+        Signed in as <strong>{{ profile.displayName }}</strong>. Decks and progress belong
+        to this identity, so a device that does not share it starts from nothing.
+      </p>
+
+      <div class="link-columns">
+
+        <div class="link-column">
+          <h3>Add another device</h3>
+          <p class="hint">
+            Generate a code here, then type it on the other device within five minutes.
+          </p>
+
+          @if (linkCode(); as code) {
+            <div class="code-display" [class.expired]="codeExpired()">
+              <span class="code-value">{{ code.code }}</span>
+              <span class="code-countdown">{{ countdownLabel() }}</span>
+            </div>
+            <div class="button-row">
+              <button mat-stroked-button (click)="copyCode()" [disabled]="codeExpired()">
+                <mat-icon>content_copy</mat-icon>
+                Copy code
+              </button>
+              <button mat-button (click)="generateCode()" [disabled]="generating()">
+                New code
+              </button>
+            </div>
+          } @else {
+            <button mat-flat-button color="primary"
+                    (click)="generateCode()" [disabled]="generating()">
+              <mat-icon>add_to_home_screen</mat-icon>
+              Generate a code
+            </button>
+          }
+
+          @if (generating()) {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          }
+        </div>
+
+        <mat-divider [vertical]="true"></mat-divider>
+
+        <div class="link-column">
+          <h3>Use a code from another device</h3>
+          <p class="hint">
+            This replaces the identity on this device. Anything created here under a
+            different identity stays on the server but stops appearing.
+          </p>
+
+          <mat-form-field appearance="outline" class="code-input">
+            <mat-label>Six-character code</mat-label>
+            <input matInput
+                   [ngModel]="claimInput()"
+                   (ngModelChange)="claimInput.set($event)"
+                   (keyup.enter)="claimCode()"
+                   placeholder="K7P-M42"
+                   autocapitalize="characters"
+                   autocorrect="off"
+                   autocomplete="off"
+                   spellcheck="false"
+                   maxlength="16" />
+          </mat-form-field>
+
+          <button mat-flat-button color="primary"
+                  (click)="claimCode()"
+                  [disabled]="claiming() || !claimInput().trim()">
+            <mat-icon>login</mat-icon>
+            Use this code
+          </button>
+
+          @if (claiming()) {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          }
+          @if (claimError()) {
+            <p class="error-text">{{ claimError() }}</p>
+          }
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <div class="button-row secondary-actions">
+        <button mat-stroked-button (click)="downloadProfile()">
+          <mat-icon>save</mat-icon>
+          Download a backup file
+        </button>
+        <button mat-stroked-button color="warn" (click)="clearSession()">
+          <mat-icon>logout</mat-icon>
+          Clear this session
+        </button>
+      </div>
+    } @else {
+      <p class="section-intro">
+        No session on this device yet. Pick a display name first, or use a code from a
+        device that already has one.
+      </p>
+    }
+  </mat-card>
+
+  <!-- ═══ Move a deck ═══════════════════════════════════════════════════ -->
+  <mat-card class="section">
+    <mat-card-title>
+      <mat-icon color="primary">swap_horiz</mat-icon>
+      Move a deck between deployments
+    </mat-card-title>
+
+    <p class="section-intro">
+      Copies the cards and your progress together. Progress is matched by card content,
+      so it lands correctly even though the deck has a different id on each side.
+    </p>
+
+    <div class="transfer-columns">
+
+      <!-- Out -->
+      <div class="transfer-column">
+        <h3>Copy out</h3>
+
+        @if (decksLoading()) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        } @else if (decks().length === 0) {
+          <p class="hint">No decks of your own yet. Import one from a paste to get started.</p>
+        } @else {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Deck</mat-label>
+            <mat-select [ngModel]="selectedDeckId()" (ngModelChange)="selectedDeckId.set($event)">
+              @for (deck of decks(); track deck.id) {
+                <mat-option [value]="deck.id">{{ deck.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div class="button-row">
+            <button mat-flat-button color="primary"
+                    (click)="copyDeck()"
+                    [disabled]="!selectedDeck() || exporting()">
+              <mat-icon>content_copy</mat-icon>
+              Copy to clipboard
+            </button>
+            <button mat-stroked-button
+                    (click)="downloadDeck()"
+                    [disabled]="!selectedDeck() || exporting()">
+              <mat-icon>download</mat-icon>
+              Download file
+            </button>
+          </div>
+
+          @if (exporting()) {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          }
+        }
+      </div>
+
+      <mat-divider [vertical]="true"></mat-divider>
+
+      <!-- In -->
+      <div class="transfer-column">
+        <h3>Paste in</h3>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Deck JSON</mat-label>
+          <textarea matInput
+                    rows="6"
+                    [ngModel]="pasteInput()"
+                    (ngModelChange)="onPasteChange($event)"
+                    placeholder="Paste what you copied from the other tab"
+                    spellcheck="false"></textarea>
+          <mat-hint>A deck with the same name is updated. Progress from both sides is kept.</mat-hint>
+        </mat-form-field>
+
+        @if (inspecting()) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        }
+
+        @if (inspection(); as check) {
+          <div class="preview">
+
+            @if (check.existing && check.preview; as _) {
+              <p class="preview-line">
+                <strong>{{ check.file.name }}</strong> is already here with
+                {{ check.preview!.cardsHere }} cards, {{ ago(check.preview!.studiedHereAt) }}.
+                The paste has {{ check.file.content.cards.length }} cards,
+                {{ ago(check.preview!.studiedIncomingAt) }}.
+              </p>
+              <p class="preview-line">
+                Merging adds {{ check.preview!.cardsGained }} and updates
+                {{ check.preview!.cardsUpdated }}.
+              </p>
+
+              @if (check.preview!.incomingIsOlder) {
+                <p class="preview-warning">
+                  <mat-icon inline>info</mat-icon>
+                  What you pasted is older than what is here. Merging keeps the newer
+                  progress on both sides; replacing would discard the study done here since.
+                </p>
+              }
+            } @else if (check.existing) {
+              <p class="preview-line">
+                <strong>{{ check.file.name }}</strong> is already here. The paste carries no
+                progress, so only the cards change.
+              </p>
+            } @else {
+              <p class="preview-line">
+                New deck: <strong>{{ check.freeName }}</strong>,
+                {{ check.file.content.cards.length }} cards,
+                {{ check.state ? 'with progress' : 'no progress attached' }}.
+              </p>
+            }
+
+            @if (check.existing) {
+              <mat-button-toggle-group class="mode-toggle"
+                                       [ngModel]="importMode()"
+                                       (ngModelChange)="importMode.set($event)"
+                                       aria-label="What to do with the existing deck">
+                <mat-button-toggle value="merge">Merge</mat-button-toggle>
+                <mat-button-toggle value="replace">Replace</mat-button-toggle>
+                <mat-button-toggle value="new">Keep both</mat-button-toggle>
+              </mat-button-toggle-group>
+            }
+          </div>
+        }
+
+        <div class="button-row">
+          <button mat-flat-button color="primary"
+                  (click)="applyImport()"
+                  [disabled]="!canApply()">
+            <mat-icon>input</mat-icon>
+            {{ applyLabel() }}
+          </button>
+
+          <button mat-stroked-button (click)="fileInput.click()" [disabled]="importing()">
+            <mat-icon>upload_file</mat-icon>
+            From a file
+          </button>
+          <input #fileInput type="file" accept=".json,application/json"
+                 hidden (change)="onImportFile($event)" />
+        </div>
+
+        @if (importing()) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        }
+        @if (importError()) {
+          <p class="error-text">{{ importError() }}</p>
+        }
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- ═══ Quiz defaults ═════════════════════════════════════════════════ -->
+  <mat-card class="section">
+    <mat-card-title>
+      <mat-icon color="primary">tune</mat-icon>
+      Quiz defaults
+    </mat-card-title>
+
+    <p class="section-intro">
+      These apply to decks you have not adjusted individually. Changing a setting while
+      a deck is open saves it against that deck.
+    </p>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>After a hint</span>
+        <span class="hint">Where the deck resumes once you answer a card you took a hint on.</span>
+      </div>
+      <mat-form-field appearance="outline" class="setting-control">
+        <mat-select [ngModel]="settings.rewindRule()"
+                    (ngModelChange)="settings.rewindRule.set($event)">
+          @for (rule of rewindRules; track rule) {
+            <mat-option [value]="rule">{{ ruleLabel(rule) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Kana input delay</span>
+        <span class="hint">
+          How long typing pauses before romaji converts. Raise it if fast typing turns
+          into the wrong kana.
+        </span>
+      </div>
+      <div class="setting-control slider-control">
+        <mat-slider min="0" max="1000" step="50" discrete>
+          <input matSliderThumb
+                 [ngModel]="settings.hiraganaDebounceMs()"
+                 (ngModelChange)="settings.hiraganaDebounceMs.set($event)" />
+        </mat-slider>
+        <span class="slider-value">{{ settings.hiraganaDebounceMs() }} ms</span>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Hint stays open for</span>
+        <span class="hint">Seconds before a hint closes itself.</span>
+      </div>
+      <div class="setting-control slider-control">
+        <mat-slider min="1" max="30" step="1" discrete>
+          <input matSliderThumb
+                 [ngModel]="settings.hintAutoCloseSeconds()"
+                 (ngModelChange)="settings.hintAutoCloseSeconds.set($event)" />
+        </mat-slider>
+        <span class="slider-value">{{ settings.hintAutoCloseSeconds() }} s</span>
+      </div>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Question placement</span>
+        <span class="hint">Above the answer fields, or on the same line.</span>
+      </div>
+      <mat-form-field appearance="outline" class="setting-control">
+        <mat-select [ngModel]="settings.questionPosition()"
+                    (ngModelChange)="settings.questionPosition.set($event)">
+          <mat-option value="above">Above</mat-option>
+          <mat-option value="inline">Inline</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Newest answers first</span>
+        <span class="hint">Which end of the history sidebar the most recent card appears at.</span>
+      </div>
+      <mat-slide-toggle class="setting-control"
+                        [ngModel]="settings.historyNewestFirst()"
+                        (ngModelChange)="settings.historyNewestFirst.set($event)">
+      </mat-slide-toggle>
+    </div>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Pop-out zoom</span>
+        <span class="hint">Applies live to an open pop-out window.</span>
+      </div>
+      <div class="setting-control slider-control">
+        <mat-slider min="0.5" max="4" step="0.1" discrete>
+          <input matSliderThumb
+                 [ngModel]="settings.popoutZoom()"
+                 (ngModelChange)="settings.popoutZoom.set($event)" />
+        </mat-slider>
+        <span class="slider-value">{{ settings.popoutZoom() }}×</span>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- ═══ Sync ══════════════════════════════════════════════════════════ -->
+  <mat-card class="section">
+    <mat-card-title>
+      <mat-icon color="primary">sync</mat-icon>
+      Saving progress
+    </mat-card-title>
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Save after a pause of</span>
+        <span class="hint">
+          How long the quiz sits idle before progress goes to the server. Shorter loses
+          less if a tab dies; longer means fewer requests. Closing a tab always saves
+          immediately, whatever this is set to.
+        </span>
+      </div>
+      <div class="setting-control slider-control">
+        <mat-slider min="1" max="30" step="1" discrete>
+          <input matSliderThumb
+                 [ngModel]="syncSeconds"
+                 (ngModelChange)="setSyncSeconds($event)" />
+        </mat-slider>
+        <span class="slider-value">{{ syncSeconds }} s</span>
+      </div>
+    </div>
+  </mat-card>
+
+</div>
