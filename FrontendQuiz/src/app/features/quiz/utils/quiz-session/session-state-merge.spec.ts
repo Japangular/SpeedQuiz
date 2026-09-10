@@ -1,12 +1,16 @@
 import {mergeSessionStates, previewMerge} from './session-state-merge';
-import {SESSION_STATE_VERSION} from './quiz-session';
+import {PersistedCardState, SESSION_STATE_VERSION} from './quiz-session';
 import type {StampedSessionState} from './session-sync.service';
 
-function card(uid: string, solvedAt?: number, attempts = 1) {
+function card(uid: string, solvedAt?: number, attempts = 1): PersistedCardState {
   return {uid, hintUsed: false, attempts, solvedWithoutHint: true, solvedAt};
 }
 
-function state(savedAt: number, cards: ReturnType<typeof card>[], cursorUid: string | null = null): StampedSessionState {
+function state(
+  savedAt: number,
+  cards: PersistedCardState[],
+  cursorUid: string | null = null,
+): StampedSessionState {
   return {
     version: SESSION_STATE_VERSION,
     cursorUid,
