@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {BehaviorSubject, catchError, from, Observable, of} from 'rxjs';
 import {map, switchMap, tap} from 'rxjs/operators';
 import {environment} from '../environments/environment';
@@ -19,6 +19,8 @@ interface ProvisionResponse {
   token: string;
   displayName: string;
 }
+
+type TokenCheck = 'valid' | 'invalid' | 'unreachable';
 
 const PROFILE_STORAGE_KEY = 'japangular_profile';
 
@@ -45,14 +47,14 @@ export class LocalProfileService {
       this.profileSubject.next(stored);
       this.initializedSubject.next(true);
 
-      // Validate in the background — if the token is dead, kick back to provision.
-      return this.validate(stored.token).pipe(
-        tap(valid => {
-          if (!valid) {
+      return this.check(stored.token).pipe(
+        tap(result => {
+          if (result === 'invalid') {
             console.warn('Stored token is no longer valid, clearing profile');
             this.clearProfile();
           }
-        })
+        }),
+        map(result => result !== 'invalid'),
       );
     }
 
@@ -214,15 +216,18 @@ export class LocalProfileService {
     );
   }
 
+  private check(token: string): Observable<TokenCheck> {
+    return this.http.get<ProvisionResponse>(`${this.apiUrl}/validate`, {
+      headers: {'X-Session-Token': token}
+    }).pipe(
+      map(() => 'valid' as const),
+      catchError((err: HttpErrorResponse) =>
+        of(err.status === 0 || err.status >= 500 ? 'unreachable' as const : 'invalid' as const)),
+    );
+  }
+
   private validate(token: string): Observable<boolean> {
-    return this.http
-      .get<ProvisionResponse>(`${this.apiUrl}/validate`, {
-        headers: {'X-Session-Token': token}
-      })
-      .pipe(
-        map(() => true),
-        catchError(() => of(false))
-      );
+    return this.check(token).pipe(map(r => r === 'valid'));
   }
 
   private saveToStorage(profile: LocalProfile): void {

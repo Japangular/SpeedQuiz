@@ -1,5 +1,5 @@
 import {inject, Injectable, OnDestroy} from '@angular/core';
-import {debounce, filter, Observable, Subscription, switchMap, tap, timer, map, of} from 'rxjs';
+import {debounce, filter, Observable, Subscription, switchMap, tap, timer, map, of, catchError} from 'rxjs';
 
 import {QuizSession, PersistedSessionState} from './quiz-session';
 import {QuizApiService} from '../../../../services/quiz-api.service';
@@ -90,7 +90,7 @@ export class SessionSyncService implements OnDestroy {
       // whatever value was current when startSync ran.
       debounce(() => timer(this.settings.sessionSyncDebounceMs())),
       tap(() => this.writeLocal(deckId, this.stamp(session, getCurrentIndex()))),
-      switchMap(() => this.save(deckId, this.stamp(session, getCurrentIndex()))),
+      switchMap(() => this.save(deckId, this.stamp(session, getCurrentIndex())).pipe(catchError(() => of(null)))),
     ).subscribe({
       next: () => session.markClean(),
       error: err => console.error('SessionSync: auto-save failed', err),
