@@ -6,6 +6,7 @@ import {QuizApiService} from '../../../../services/quiz-api.service';
 import {QuizSettingsService} from '../../quiz-settings.service';
 import {LocalProfileService} from '../../../../user-store-management/local-profile.service';
 import {environment} from '../../../../environments/environment';
+import {OfflineModeService} from '../../../../services/offline-mode.service';
 
 /**
  * A state blob plus when it was written. `savedAt` is additive and optional,
@@ -25,6 +26,7 @@ export class SessionSyncService implements OnDestroy {
 
   private settings = inject(QuizSettingsService);
   private profile = inject(LocalProfileService);
+  private offlineMode = inject(OfflineModeService);
 
   private readonly beforeUnloadHandler = () => this.saveOnUnload();
 
@@ -165,6 +167,8 @@ export class SessionSyncService implements OnDestroy {
 
     const state = this.stamp(this.currentSession, this.currentIndexFn());
     this.writeLocal(this.currentDeckId, state);
+
+    if (this.offlineMode.offline()) return;
 
     const token = this.profile.getToken();
     if (!token) return;

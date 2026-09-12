@@ -2,6 +2,8 @@
   <app-access-gate></app-access-gate>
 }
 
+@if (offlineMode.forced()) { <mat-icon matTooltip="Offline mode">cloud_off</mat-icon> }
+
 @if (siteModeService.hasAccess) {
   <!-- Wait for initialization to complete before deciding what to show -->
   @if (profileService.initialized$ | async) {

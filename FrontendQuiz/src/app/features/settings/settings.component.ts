@@ -28,6 +28,8 @@ import {DeviceLinkService, LinkCode} from '../../user-store-management/device-li
 import {LocalProfileService} from '../../user-store-management/local-profile.service';
 import {QuizSettingsService} from '../quiz/quiz-settings.service';
 import {REWIND_RULES, RewindRule, rewindLabel} from '../quiz/utils/quiz-session';
+import {OfflinePrefetchService} from '../deck-shelf/offline-prefetch.service';
+import {OfflineModeService} from '../../services/offline-mode.service';
 
 @Component({
   selector: 'app-settings',
@@ -59,6 +61,10 @@ export class SettingsComponent {
   private deckTransfer = inject(DeckTransferService);
   private snackBar = inject(MatSnackBar);
   private destroyRef = inject(DestroyRef);
+
+  protected prefetching = signal(false);
+  protected prefetchProgress = signal<{done: number; total: number} | null>(null);
+
 
   constructor() {
     // One ticker for the whole page rather than a timer per code.
@@ -381,4 +387,45 @@ export class SettingsComponent {
       .onAction()
       .subscribe(() => window.location.reload());
   }
+
+  private prefetch = inject(OfflinePrefetchService);
+  protected offlineMode = inject(OfflineModeService);
+
+  private static readonly LAST_PREFETCH_KEY = 'japangular_offline_prefetch_at';
+
+  protected lastPrefetch = signal<string | null>(
+    localStorage.getItem(SettingsComponent.LAST_PREFETCH_KEY),
+  );
+
+  protected prefetchPercent = computed(() => {
+    const p = this.prefetchProgress();
+    return p ? Math.round((p.done / p.total) * 100) : 0;
+  });
+
+  saveAllOffline(): void {
+    this.prefetching.set(true);
+    this.prefetchProgress.set(null);
+
+    this.prefetch.prefetchAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: p => this.prefetchProgress.set(p),
+        complete: () => {
+          this.prefetching.set(false);
+          const stamp = new Date().toISOString();
+          localStorage.setItem(SettingsComponent.LAST_PREFETCH_KEY, stamp);
+          this.lastPrefetch.set(stamp);
+          this.snackBar.open(
+            `${this.prefetchProgress()?.total ?? 0} decks available offline.`,
+            'OK', {duration: 3000});
+        },
+        error: () => {
+          this.prefetching.set(false);
+          this.snackBar.open(
+            'Could not reach the server. Run this while you still have signal.',
+            'OK', {duration: 4000});
+        },
+      });
+  }
+
 }

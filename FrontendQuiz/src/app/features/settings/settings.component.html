@@ -385,4 +385,53 @@
     </div>
   </mat-card>
 
+  <!-- ═══ Offline ═══════════════════════════════════════════════════════ -->
+  <mat-card class="section">
+    <mat-card-title>
+      <mat-icon color="primary">cloud_download</mat-icon>
+      Offline
+    </mat-card-title>
+
+    <p class="section-intro">
+      Downloads every deck to this device so the quiz keeps working without a
+      connection. Run it while you still have signal. Progress is saved locally
+      either way and syncs back when you are online again.
+    </p>
+
+    <button mat-stroked-button (click)="saveAllOffline()" [disabled]="prefetching() || offlineMode.forced">
+      <mat-icon>cloud_download</mat-icon>
+      @if (prefetching()) {
+        @if (prefetchProgress(); as p) { Saving {{ p.done }} / {{ p.total }}… }
+        @else { Reading deck list… }
+      } @else {
+        Save all decks offline
+      }
+    </button>
+
+    @if (prefetching()) {
+      <mat-progress-bar class="prefetch-bar"
+                        [mode]="prefetchProgress() ? 'determinate' : 'indeterminate'"
+                        [value]="prefetchPercent()">
+      </mat-progress-bar>
+    }
+
+    @if (lastPrefetch(); as at) {
+      <p class="hint">Last saved {{ at | date:'medium' }}</p>
+    }
+
+    <div class="setting-row">
+      <div class="setting-label">
+        <span>Offline mode</span>
+        <span class="hint">
+      Stops the app touching the network even when a connection exists. Decks come
+      from what you saved above; progress stays on this device until you switch it off.
+    </span>
+      </div>
+      <mat-slide-toggle class="setting-control"
+                        [ngModel]="offlineMode.forced()"
+                        (ngModelChange)="offlineMode.setForced($event)">
+      </mat-slide-toggle>
+    </div>
+  </mat-card>
+
 </div>

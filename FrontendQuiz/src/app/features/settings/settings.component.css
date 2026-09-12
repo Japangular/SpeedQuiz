@@ -264,3 +264,5 @@ h3 {
   .mode-toggle { width: 100%; }
   .mode-toggle mat-button-toggle { flex: 1; }
 }
+
+.prefetch-bar { margin-top: 14px; border-radius: 4px; }

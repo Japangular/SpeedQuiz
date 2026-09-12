@@ -11,6 +11,7 @@ import {TokenInterceptorService} from './user-store-management/token-interceptor
 import {ErrorInterceptor} from './interceptor/ErrorInterceptor';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import { provideServiceWorker } from '@angular/service-worker';
+import {OfflineModeInterceptor} from './interceptor/OfflineModeInterceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,7 @@ export const appConfig: ApplicationConfig = {
       provide: BASE_PATH,
       useValue: environment.apiBaseUrl
     },
+    { provide: HTTP_INTERCEPTORS, useClass: OfflineModeInterceptor, multi: true },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: LoggerInterceptor,

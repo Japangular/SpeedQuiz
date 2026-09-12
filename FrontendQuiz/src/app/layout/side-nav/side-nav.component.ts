@@ -20,6 +20,7 @@ import {AccessGateComponent} from '../../site-mode/access-gate/access-gate.compo
 import {ContextPanelService, ContextPanelState} from './panel.service';
 import {ContextSheet} from './context-sheet.component';
 import {DeckStore} from '../../store/deck.store';
+import {OfflineModeService} from '../../services/offline-mode.service';
 
 @Component({
   selector: 'app-side-nav',
@@ -61,6 +62,7 @@ export class SideNavComponent {
   profileService = inject(LocalProfileService);
   siteModeService = inject(SiteModeService);
   deckStore = inject(DeckStore);
+  offlineMode = inject(OfflineModeService);
 
   isHandset$ = this.breakpointObserver
     .observe(Breakpoints.Handset)
