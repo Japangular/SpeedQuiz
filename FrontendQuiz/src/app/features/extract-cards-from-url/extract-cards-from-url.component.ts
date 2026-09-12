@@ -1,4 +1,4 @@
-import {Component, inject, ViewChild} from '@angular/core';
+import {Component, inject, signal, ViewChild} from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import {MatIconModule} from '@angular/material/icon';
 import {MatStepper, MatStepperModule} from '@angular/material/stepper';
@@ -192,23 +192,19 @@ export class ExtractCardsFromUrlComponent {
     this.router.navigate(['/quiz']);
   }
 
+  deckName = signal('');
+
   saveDeck(): void {
-    if (this.deckCards.length === 0 || this.saving) return;
-
-    this.saving = true;
-
+    const name = this.deckName().trim() || `Imported ${new Date().toISOString().slice(0, 10)}`;
     const deck = this.buildDeckContent();
-    this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste');
-    this.quizApi.createDeck('Imported Deck', deck).subscribe({
+    this.quizApi.createDeck(name, deck).subscribe({
       next: created => this.deckStore.loadDeck(deck, created.name, created.id),
-      error: () => this.deckStore.loadDeck(deck, 'Imported Deck', 'imported-paste'),
+      error: err => this.snackBar.open(
+        err?.status === 409
+          ? `A deck called "${name}" already exists. Pick another name.`
+          : 'Could not save the deck.',
+        'OK', {duration: 5000}),
     });
-
-    setTimeout(() => {
-      this.saving = false;
-      this.saved = true;
-      this.snackBar.open('Deck saved!', 'OK', {duration: 3000});
-    }, 1000);
   }
 
   splitsAfter = new Set<number>();
