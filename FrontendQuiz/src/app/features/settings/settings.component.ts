@@ -1,6 +1,6 @@
 import {Component, DestroyRef, computed, inject, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {AsyncPipe} from '@angular/common';
+import {AsyncPipe, DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Subject, debounceTime, interval} from 'rxjs';
 
@@ -48,6 +48,7 @@ import {OfflineModeService} from '../../services/offline-mode.service';
     MatSelectModule,
     MatSlideToggleModule,
     MatSliderModule,
+    DatePipe,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
