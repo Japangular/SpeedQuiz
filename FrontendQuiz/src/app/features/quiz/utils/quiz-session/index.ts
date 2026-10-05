@@ -21,10 +21,19 @@ export {
   ByHiraganaStrategy,
   RandomStrategy,
   WeakCardsFirstStrategy,
+  SeededShuffleStrategy,
   createSortStrategy,
+  strategyForOrder,
+  newOrderSeed,
+  isCardOrderMode,
+  cardOrderLabel,
+  cardOrderIcon,
+  CARD_ORDER_MODES,
+  DEFAULT_CARD_ORDER,
 } from './sort-strategy';
-export type {SortStrategy, SortStrategyName} from './sort-strategy';
+export type {SortStrategy, SortStrategyName, CardOrderMode} from './sort-strategy';
 
 export {SessionSyncService} from './session-sync.service';
 
 export {DeckLockService} from './deck-lock.service';
+

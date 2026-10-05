@@ -1,2 +1,14 @@
 :host { display: block; }
 mat-form-field { width: 300px; }
+
+/* A wrong attempt fades out over exactly the clear delay, then the field
+   empties. The transition is declared on the class only, so removing the class
+   (the user typed again, or the field was cleared) snaps back instantly. */
+input.wrong-fading {
+  opacity: .2;
+  transition: opacity var(--clear-ms, 1500ms) ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  input.wrong-fading { transition: none; opacity: .5; }
+}

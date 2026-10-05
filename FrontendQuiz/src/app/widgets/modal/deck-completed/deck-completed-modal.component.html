@@ -1,12 +1,60 @@
 <h1 mat-dialog-title>Deck completed</h1>
 
 <div mat-dialog-content>
-  <p><strong>Questions you solved:</strong></p>
-  <ul>
-    @for (question of solvedQuestions; track question) {
-      <li>{{ question }}</li>
+  @if (run; as run) {
+    <div class="run-result" [class.is-best]="run.isBest">
+      <div class="run-time">{{ time(run.ms) }}</div>
+
+      @if (run.isBest) {
+        <div class="run-verdict best">
+          <mat-icon>emoji_events</mat-icon>
+          @if (run.previousBestMs !== undefined) {
+            <span>New best — {{ delta }} on {{ time(run.previousBestMs) }}</span>
+          } @else {
+            <span>First time on the clock. This is the one to beat.</span>
+          }
+        </div>
+      } @else if (run.counted && run.previousBestMs !== undefined) {
+        <div class="run-verdict">
+          <span>{{ delta }} off your best of {{ time(run.previousBestMs) }}</span>
+        </div>
+      } @else if (!run.counted) {
+        <div class="run-verdict dim">
+          <span>
+            Not recorded: {{ run.solved }} of {{ run.cards }} cards were answered in this run.
+            Restart to set a time.
+          </span>
+        </div>
+      }
+
+      <div class="run-meta">
+        {{ run.cards }} cards ·
+        {{ run.hints === 0 ? 'no hints' : run.hints === 1 ? '1 hint' : run.hints + ' hints' }}
+      </div>
+    </div>
+
+    @if (run.recent.length > 1) {
+      <table class="run-history">
+        <caption>Recent runs</caption>
+        @for (record of run.recent; track record.finishedAt) {
+          <tr [class.current]="isThisRun(record)">
+            <td class="when">{{ record.finishedAt | date:'MMM d, HH:mm' }}</td>
+            <td class="what">{{ record.cards }} cards · {{ orderLabel(record) }}</td>
+            <td class="ms">{{ time(record.ms) }}</td>
+          </tr>
+        }
+      </table>
     }
-  </ul>
+  }
+
+  @if (solvedQuestions.length > 0) {
+    <p><strong>Questions you solved:</strong></p>
+    <ul>
+      @for (question of solvedQuestions; track question) {
+        <li>{{ question }}</li>
+      }
+    </ul>
+  }
 </div>
 
 <div mat-dialog-actions align="end">

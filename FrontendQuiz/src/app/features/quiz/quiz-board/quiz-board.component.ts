@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, HostListener, OnDestroy, TemplateRef, ViewChild, inject, ElementRef, signal, computed, NgZone} from '@angular/core';
-import {Subscription} from 'rxjs';
-import {FormsModule} from '@angular/forms';
-import {RouterLink} from '@angular/router';
-import {MatIcon} from '@angular/material/icon';
-import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
 import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
-
+import {AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, TemplateRef, ViewChild, computed, inject, signal} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {MatTooltip} from '@angular/material/tooltip';
+import {RouterLink} from '@angular/router';
+import {Subscription} from 'rxjs';
 import {DeckBarComponent} from '../../deck-bar/deck-bar.component';
 import {QuizHistorySidebarComponent} from '../../quiz-history-sidebar/quiz-history-sidebar.component';
 import {ContextPanelService} from '../../../layout/side-nav/panel.service';
@@ -18,11 +18,11 @@ import {DeckStore} from '../../../store/deck.store';
 import {QuizMode} from '../model/slot.model';
 import {FieldOrderService} from '../model/field-order.service';
 import {SlotGroupComponent} from '../slots/slot-group/slot-group.component';
-import {MatTooltip} from '@angular/material/tooltip';
 import {QuizPopoutService} from '../popout/quiz-popout.service';
 import {QuizSettingsService} from '../quiz-settings.service';
 import {EmoteService} from '../../../widgets/emote-overlay/emote.service';
 import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overlay.component';
+import {DeckTimerService} from '../deck-timer.service';
 
 import {levelHue as hueForLevel} from '../utils/level-theme';
 
@@ -54,9 +54,14 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('historyPanel') historyPanel!: TemplateRef<any>;
   @ViewChild('popoutHost') popoutHost!: ElementRef<HTMLElement>;
 
+  // 'input' as well: some mobile keyboards deliver text without a usable keydown.
   @HostListener('document:keydown')
   @HostListener('document:pointerdown')
-  onUserActivity(): void { this.emotes.notifyActivity(); }
+  @HostListener('document:input')
+  onUserActivity(): void {
+    this.emotes.notifyActivity();
+    this.timer.notifyActivity();
+  }
 
   private zone = inject(NgZone);
 
@@ -82,6 +87,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   private deckStore = inject(DeckStore);
   private emotes = inject(EmoteService);
+  private timer = inject(DeckTimerService);
 
   readonly hintFlash = signal<HintFlash | null>(null);
   /** @for + track key restarts the CSS animation on repeat hints — same trick as EmoteOverlay. */
@@ -96,9 +102,13 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     private contextPanel: ContextPanelService,
     readonly settings: QuizSettingsService,
   ) {
+    // The deck clock only runs while the board is on screen.
+    this.timer.setBoardActive(true);
+
     this.hotkeySub = this.popout.keydown.subscribe(e => {
       this.handleHotkeys(e);
       this.emotes.notifyActivity();
+      this.timer.notifyActivity();   // typing in the floating window counts too
     });
     this.resetSub = this.quizEngine.reset$.subscribe(() => this.emotes.trigger('reset'));
     this.cardSub = this.quizEngine.card$.subscribe(card => {
@@ -118,10 +128,12 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       this.currentSlots = cardToSlots(card, this.buildMode(), this.deckStore.properties());
     });
 
-    this.completedSub = this.quizEngine.deckCompleted$.subscribe(() => {
-      this.modal.openDeckCompletedModal([]).subscribe(result => {
+    this.completedSub = this.quizEngine.deckCompleted$.subscribe(run => {
+      this.modal.openDeckCompletedModal([], run).subscribe(result => {
         if (result === 'restart') {
-          this.quizEngine.getDeckCommand().restart();
+          // Through the engine rather than the iterator: a restart is also a
+          // new timed run, and in "reshuffled every run" mode a new shuffle.
+          this.quizEngine.restartRun();
         }
       });
     });
@@ -138,6 +150,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     this.completedSub?.unsubscribe();
     this.hotkeySub?.unsubscribe();
     this.resetSub?.unsubscribe();
+    this.timer.setBoardActive(false);
     this.contextPanel.clear();
   }
 
@@ -245,3 +258,4 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   get levelHue(): number { return hueForLevel(this.currentLevel); }
 
 }
+

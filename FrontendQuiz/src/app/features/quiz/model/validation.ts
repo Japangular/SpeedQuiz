@@ -84,6 +84,25 @@ export function validatorForField(fieldName: string, propertyType?: string): Val
   }
 }
 
+/**
+ * True while `shown` could still grow into a correct answer: the user has
+ * paused mid-word, which is different from having typed something wrong.
+ * Used to decide whether a field that failed validation should be emptied.
+ *
+ * `shown` is what the field displays, i.e. AFTER romaji conversion. A trailing
+ * run of latin letters on a kana string ("たb" on the way to たべる) is romaji
+ * that has not resolved yet, so it is ignored rather than held against the user.
+ */
+export function isAnswerPrefix(shown: string, correctAnswer: string): boolean {
+  let typed = shown.trim().toLowerCase();
+  if (KATAKANA.test(typed) || HIRAGANA.test(typed)) {
+    typed = typed.replace(/[a-z]+$/, '');
+  }
+  if (!typed) return false;
+
+  return normalizeAnswers(correctAnswer).some(ans => ans.toLowerCase().startsWith(typed));
+}
+
 // ── Helpers (copied from your existing code) ────────────
 
 function normalizeAnswers(raw: string): string[] {
@@ -93,3 +112,4 @@ function normalizeAnswers(raw: string): string[] {
     .map(ans => ans.trim())
     .filter(Boolean);
 }
+

@@ -51,6 +51,53 @@
         <mat-icon>{{ ruleIcon(currentRule) }}</mat-icon>
       </button>
 
+      <button mat-icon-button
+              [matMenuTriggerFor]="orderMenu"
+              [matTooltip]="'Card order: ' + orderLabel(currentOrder)">
+        <mat-icon>{{ orderIcon(currentOrder) }}</mat-icon>
+      </button>
+
+      <mat-menu #orderMenu="matMenu">
+        <div class="menu-caption">Card order</div>
+
+        @for (mode of cardOrders; track mode) {
+          <button mat-menu-item
+                  [class.selected]="mode === currentOrder"
+                  (click)="selectOrder(mode)">
+            <mat-icon>{{ orderIcon(mode) }}</mat-icon>
+            <span>{{ orderLabel(mode) }}</span>
+            @if (mode === currentOrder) {
+              <mat-icon class="trailing">check</mat-icon>
+            }
+          </button>
+        }
+
+        <div class="menu-caption dim">Changing the order starts a new run. Card progress is kept.</div>
+
+        @if (currentOrder !== 'original') {
+          <mat-divider />
+          <button mat-menu-item (click)="reshuffle()">
+            <mat-icon>autorenew</mat-icon>
+            <span>Shuffle again now</span>
+          </button>
+        }
+      </mat-menu>
+
+      <!-- Run clock. Deliberately NOT a button and not a "timer" icon: the e2e
+           suite finds the typing-delay button by exactly that combination. -->
+      @if (timer.attached()) {
+        <div class="run-clock"
+             [class.paused]="timer.paused()"
+             [class.finished]="timer.finished()"
+             [matTooltip]="timerTooltip">
+          <mat-icon class="run-clock-icon">{{ timer.paused() && !timer.finished() ? 'pause_circle' : 'schedule' }}</mat-icon>
+          <span class="run-clock-value">{{ elapsedLabel }}</span>
+          @if (bestLabel) {
+            <span class="run-clock-best">best {{ bestLabel }}</span>
+          }
+        </div>
+      }
+
       <mat-menu #rewindMenu="matMenu">
         <div class="menu-caption">After a hint, go back to…</div>
 
@@ -110,6 +157,31 @@
           Increase if fast keys like は (ha) get cut short before you finish typing はち (hachi).
         </span>
     </mat-card-content>
+
+      <!-- Own row and own class: the e2e suite addresses the slider above as
+           '.debounce-row mat-slider', which must keep matching exactly one. -->
+      <mat-card-content class="clear-row">
+        <span class="debounce-label">
+          <mat-icon class="debounce-icon">backspace</mat-icon>
+          Clear wrong answer after
+        </span>
+        <mat-slider
+          [min]="0"
+          [max]="5000"
+          [step]="250"
+          [discrete]="true"
+          class="debounce-slider">
+          <input
+            matSliderThumb
+            [value]="settings.wrongAnswerClearMs()"
+            (valueChange)="onClearDelayChange($event)">
+        </mat-slider>
+        <span class="debounce-value">{{ clearLabel }}</span>
+        <span class="debounce-hint">
+          A wrong attempt fades and the field empties by itself, ready for your next guess.
+          Counted from the moment the answer was checked; typing again cancels it. 0 turns it off.
+        </span>
+      </mat-card-content>
     }
   </mat-card>
 } @else {
@@ -118,3 +190,4 @@
     <span>No deck loaded</span>
   </mat-toolbar>
 }
+

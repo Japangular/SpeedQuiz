@@ -66,11 +66,18 @@ export function mergeSessionStates(
 
   const newer = incomingSavedAt >= baseSavedAt ? incoming : base;
 
+  // The cursor is only meaningful in the order it was recorded in, so the seed
+  // follows the cursor: both come from the newer blob. Falls back to the other
+  // side's seed so a "shuffled once" order is not forgotten by a merge.
+  const older = newer === incoming ? base : incoming;
+  const orderSeed = newer.orderSeed ?? older.orderSeed;
+
   return {
     version: SESSION_STATE_VERSION,
     cursorUid: newer.cursorUid,
     anchorUid: newer.anchorUid,
     hintUsedHere: newer.hintUsedHere,
+    ...(orderSeed !== undefined ? {orderSeed} : {}),
     cards: [...merged.values()],
     savedAt: Math.max(baseSavedAt, incomingSavedAt),
   };
@@ -122,3 +129,4 @@ export function previewMerge(
     incomingIsOlder: baseSavedAt > 0 && incomingSavedAt > 0 && incomingSavedAt < baseSavedAt,
   };
 }
+

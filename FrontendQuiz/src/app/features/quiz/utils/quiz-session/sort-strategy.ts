@@ -1,4 +1,5 @@
 import {Card} from '../../model/quiz.model';
+import {cardUid} from './card-uid';
 
 export interface SortStrategy {
   readonly name: string;
@@ -77,4 +78,104 @@ export function createSortStrategy(name: SortStrategyName): SortStrategy {
     default:
       throw new Error(`Unknown sort strategy: ${name}. 'weakCardsFirst' requires session data — construct it directly.`);
   }
+}
+
+// ── card order (deck bar → "Card order") ────────────────────────────────────
+
+/**
+ * How the deck is laid out for a run.
+ *
+ *   original         the order the deck was authored in
+ *   shuffledFixed    shuffled once; the same shuffled order on every run until
+ *                    the user asks for a new one ("Shuffle again")
+ *   shuffledEachRun  a new shuffle whenever a run starts (restart after
+ *                    finishing the deck, reset progress)
+ *
+ * Both shuffled modes are the same mechanism — a seeded shuffle — and differ
+ * only in when the seed is replaced. The seed travels with the session state,
+ * so a reload (or another device) lands in the same order mid-run instead of
+ * reshuffling under the user's feet.
+ */
+export type CardOrderMode = 'original' | 'shuffledFixed' | 'shuffledEachRun';
+
+export const CARD_ORDER_MODES: readonly CardOrderMode[] = ['original', 'shuffledFixed', 'shuffledEachRun'];
+
+export const DEFAULT_CARD_ORDER: CardOrderMode = 'original';
+
+export function isCardOrderMode(value: unknown): value is CardOrderMode {
+  return typeof value === 'string' && (CARD_ORDER_MODES as readonly string[]).includes(value);
+}
+
+export function cardOrderLabel(mode: CardOrderMode): string {
+  switch (mode) {
+    case 'original':        return 'Original order';
+    case 'shuffledFixed':   return 'Shuffled once, then fixed';
+    case 'shuffledEachRun': return 'Reshuffled every run';
+  }
+}
+
+export function cardOrderIcon(mode: CardOrderMode): string {
+  switch (mode) {
+    case 'original':        return 'format_list_numbered';
+    case 'shuffledFixed':   return 'shuffle';
+    case 'shuffledEachRun': return 'casino';
+  }
+}
+
+/** A fresh 32-bit seed. Never 0, so "no seed yet" and "seed" cannot be confused. */
+export function newOrderSeed(): number {
+  return (Math.floor(Math.random() * 0xffffffff) + 1) >>> 0;
+}
+
+/**
+ * Deterministic shuffle: the same seed and the same cards always give the same
+ * order.
+ *
+ * Each card gets a sort key hashed from (seed, uid), rather than the deck being
+ * run through Fisher-Yates. The difference shows when a deck changes: with
+ * per-card keys, appending or removing a row leaves every other card's relative
+ * order untouched, whereas a positional shuffle would rearrange the whole deck.
+ *
+ * `index` is rewritten to the card's POSITION in the new order. Identity lives
+ * in `uid` (progress, cursor and save point are all keyed on it), while `index`
+ * is what the history sidebar compares to tell "before" from "after" — so it
+ * has to follow the order the user is actually playing.
+ */
+export class SeededShuffleStrategy implements SortStrategy {
+  readonly name = 'seededShuffle';
+
+  constructor(private readonly seed: number) {
+  }
+
+  sort(cards: Card[]): Card[] {
+    return cards
+      .map(card => ({
+        card,
+        key: seededKey(this.seed, card.uid ?? cardUid(card.question, card.answers)),
+      }))
+      // Ties only happen for genuine duplicate rows; original index keeps them stable.
+      .sort((a, b) => a.key - b.key || a.card.index - b.card.index)
+      .map(({card}, position) => ({...card, index: position}));
+  }
+}
+
+/** `seed` is ignored for 'original', and required for the shuffled modes. */
+export function strategyForOrder(mode: CardOrderMode, seed: number | undefined): SortStrategy {
+  if (mode === 'original' || seed === undefined) return new ByIndexStrategy();
+  return new SeededShuffleStrategy(seed);
+}
+
+/** FNV-1a over the uid, seeded, then murmur3's finaliser to spread similar uids apart. */
+function seededKey(seed: number, uid: string): number {
+  let h = (0x811c9dc5 ^ seed) >>> 0;
+  for (let i = 0; i < uid.length; i++) {
+    h ^= uid.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b) >>> 0;
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35) >>> 0;
+  h ^= h >>> 16;
+  return h >>> 0;
 }

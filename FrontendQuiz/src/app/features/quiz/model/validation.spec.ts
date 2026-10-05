@@ -5,6 +5,7 @@ import {
   levenshteinValidator,
   exactHiraganaValidator,
   validatorForField,
+  isAnswerPrefix,
 } from './validation';
 
 describe('levenshteinValidator', () => {
@@ -81,5 +82,30 @@ describe('validatorForField', () => {
 
   it('falls back to the levenshtein validator otherwise', () => {
     expect(validatorForField('back')).toBe(levenshteinValidator);
+  });
+});
+
+describe('isAnswerPrefix', () => {
+  it('treats the start of an answer as "still typing"', () => {
+    expect(isAnswerPrefix('to g', 'to give')).toBeTrue();
+    expect(isAnswerPrefix('たべ', 'たべる')).toBeTrue();
+  });
+
+  it('checks every alternative of a multi-answer field', () => {
+    expect(isAnswerPrefix('rig', 'correct, right')).toBeTrue();
+  });
+
+  it('ignores romaji that has not resolved into kana yet', () => {
+    expect(isAnswerPrefix('たb', 'たべる')).toBeTrue();
+  });
+
+  it('does not protect a wrong guess', () => {
+    expect(isAnswerPrefix('give', 'to give')).toBeFalse();
+    expect(isAnswerPrefix('のむ', 'たべる')).toBeFalse();
+  });
+
+  it('does not protect empty input', () => {
+    expect(isAnswerPrefix('', 'たべる')).toBeFalse();
+    expect(isAnswerPrefix('   ', 'water')).toBeFalse();
   });
 });

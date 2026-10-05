@@ -40,6 +40,13 @@ export interface PersistedSessionState {
   /** Whether a hint was taken on the current visit to the cursor card. */
   hintUsedHere: boolean;
   cards: PersistedCardState[];
+  /**
+   * Seed of the shuffled card order, when the deck has ever been shuffled.
+   * Additive and optional (like `savedAt`), so SESSION_STATE_VERSION stays put.
+   * It lives here rather than in the settings because the cursor only means
+   * something relative to an order — the two have to travel together.
+   */
+  orderSeed?: number;
 }
 
 /**
@@ -64,7 +71,16 @@ export class QuizSession {
   private _dirty$ = new BehaviorSubject<boolean>(false);
   dirty$: Observable<boolean> = this._dirty$.asObservable();
 
-  constructor(cards: readonly Card[], priorState?: PersistedSessionState) {
+  /**
+   * @param orderSeed seed the caller used to lay out `cards`. The session does
+   *        not sort anything itself; it only carries the seed so serialize()
+   *        can persist it next to the cursor it belongs to.
+   */
+  constructor(
+    cards: readonly Card[],
+    priorState?: PersistedSessionState,
+    readonly orderSeed?: number,
+  ) {
     this.deck = buildDeck(cards);
 
     this.entries = this.deck.cards.map((card, i) => {
@@ -198,6 +214,8 @@ export class QuizSession {
       cursorUid: this.uidAtOrNull(this._cursor),
       anchorUid: this._anchor > 0 ? this.uidAtOrNull(this._anchor) : null,
       hintUsedHere: this._hintUsedHere,
+      // Key only present when there is a seed — keeps un-shuffled payloads identical to before.
+      ...(this.orderSeed !== undefined ? {orderSeed: this.orderSeed} : {}),
       cards: this.entries
         // Only cards with something to say. Keeps payloads small on big decks.
         .filter(e => e.attempts > 0 || e.hintUsed || e.solvedAt !== undefined)
@@ -255,3 +273,4 @@ export class QuizSession {
     this._dirty$.next(true);
   }
 }
+

@@ -13,6 +13,8 @@
              #inputRef
              [formControl]="control"
              [placeholder]="'Enter ' + fieldName"
+             [class.wrong-fading]="fading"
+             [style.--clear-ms.ms]="clearMs"
              autocapitalize="off"
              autocorrect="off"
              autocomplete="off"
@@ -20,3 +22,4 @@
     </mat-form-field>
   }
 }
+

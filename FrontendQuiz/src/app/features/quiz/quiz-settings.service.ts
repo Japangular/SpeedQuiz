@@ -1,5 +1,8 @@
 import {Injectable, WritableSignal, effect, signal} from '@angular/core';
 import {RewindRule} from './utils/quiz-session';
+// Straight from the file, not the barrel: these are runtime values, and the
+// barrel also re-exports SessionSyncService, which imports this service.
+import {CardOrderMode, DEFAULT_CARD_ORDER, isCardOrderMode} from './utils/quiz-session/sort-strategy';
 
 /**
  * Quiz settings: global defaults + per-deck overrides.
@@ -26,8 +29,30 @@ export class QuizSettingsService {
   readonly hintAutoCloseSeconds = this.persisted('quiz_hint_autoclose_s', 5);
   readonly hiraganaDebounceMs = this.persisted('quiz_hiragana_debounce_ms', 300);
 
+  /**
+   * How long a WRONG attempt stays in an answer field before the field empties
+   * itself, so the next guess can be typed straight away. 0 switches it off.
+   *
+   * Deliberately separate from hiraganaDebounceMs: that one decides when typing
+   * counts as "finished" and gets checked; this one starts counting only after
+   * that check has come back wrong. Total time from last keystroke to empty
+   * field is therefore debounce + this.
+   */
+  readonly wrongAnswerClearMs = this.persisted('quiz_wrong_clear_ms', 1500);
+
   readonly rewindRule = this.persisted<RewindRule>('quiz_rewind_rule', 'toAnchor');
   readonly historyNewestFirst = this.persisted('quiz_history_newest_first', false);
+
+  /**
+   * Card order of the attached deck. NOT a persisted global like the others:
+   * "last used" is the wrong default here — shuffling deck A should not mean a
+   * brand-new deck B opens shuffled. It lives only in the per-deck record, and
+   * a deck that has never been touched starts in its original order.
+   *
+   * Change it through QuizEngine.setCardOrder(), which also re-lays the deck;
+   * setting the signal alone only records the preference.
+   */
+  readonly cardOrder = signal<CardOrderMode>(DEFAULT_CARD_ORDER);
 
   private deckId: string | null = null;
 
@@ -40,7 +65,9 @@ export class QuizSettingsService {
         rewindRule: this.rewindRule(),
         hintAutoCloseSeconds: this.hintAutoCloseSeconds(),
         hiraganaDebounceMs: this.hiraganaDebounceMs(),
+        wrongAnswerClearMs: this.wrongAnswerClearMs(),
         historyNewestFirst: this.historyNewestFirst(),
+        cardOrder: this.cardOrder(),
       };
       if (this.deckId) {
         this.write(DECK_KEY_PREFIX + this.deckId, snapshot);
@@ -66,7 +93,12 @@ export class QuizSettingsService {
       if (o?.rewindRule) this.rewindRule.set(o.rewindRule);
       if (o?.hintAutoCloseSeconds != null) this.hintAutoCloseSeconds.set(o.hintAutoCloseSeconds);
       if (o?.hiraganaDebounceMs != null) this.hiraganaDebounceMs.set(o.hiraganaDebounceMs);
+      if (o?.wrongAnswerClearMs != null) this.wrongAnswerClearMs.set(o.wrongAnswerClearMs);
       if (o?.historyNewestFirst != null) this.historyNewestFirst.set(o.historyNewestFirst);
+      // No "keep the current value" branch: see the note on cardOrder.
+      this.cardOrder.set(isCardOrderMode(o?.cardOrder) ? o.cardOrder : DEFAULT_CARD_ORDER);
+    } else {
+      this.cardOrder.set(DEFAULT_CARD_ORDER);
     }
     this.deckId = deckId ? deckId : null;
   }
@@ -111,5 +143,8 @@ export interface PerDeckSettings {
   rewindRule?: RewindRule;
   hintAutoCloseSeconds?: number;
   hiraganaDebounceMs?: number;
+  wrongAnswerClearMs?: number;
   historyNewestFirst?: boolean;
+  cardOrder?: CardOrderMode;
 }
+

@@ -1,0 +1,64 @@
+.run-result {
+  text-align: center;
+  padding: 8px 0 16px;
+}
+
+.run-time {
+  font-size: 3rem;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.run-result.is-best .run-time {
+  color: var(--mat-sys-primary);
+}
+
+.run-verdict {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: .95rem;
+}
+
+.run-verdict.best {
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.run-verdict.dim,
+.run-meta {
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.run-meta {
+  margin-top: 4px;
+  font-size: .85rem;
+}
+
+.run-history {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.run-history caption {
+  text-align: left;
+  padding-bottom: 4px;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.run-history td {
+  padding: 4px 0;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.run-history .what { padding: 4px 12px; color: var(--mat-sys-on-surface-variant, #666); }
+.run-history .ms { text-align: right; font-weight: 500; }
+.run-history tr.current td { font-weight: 600; color: var(--mat-sys-primary); }

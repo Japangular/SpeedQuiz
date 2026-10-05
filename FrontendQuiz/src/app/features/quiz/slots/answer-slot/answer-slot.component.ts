@@ -1,13 +1,10 @@
-import {
-  Component, ElementRef, EventEmitter, inject, Input, OnChanges, OnDestroy,
-  OnInit, Output, ViewChild
-} from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import {debounceTime, distinctUntilChanged, skip, Subscription} from 'rxjs';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { ValidatorFn, validatorForField } from '../../model/validation';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, inject} from '@angular/core';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatInput} from '@angular/material/input';
+import {Subscription, debounceTime, distinctUntilChanged, skip, tap} from 'rxjs';
+import { ValidatorFn, isAnswerPrefix, validatorForField } from '../../model/validation';
 import { RenderHint } from '../../model/slot.model';
 import {
   StrokeOrderKanjiComponent
@@ -47,6 +44,10 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
   control = new FormControl('');
 
   private resolved = false;
+
+  /** True while a wrong attempt is on its way out; drives the fade in the template. */
+  fading = false;
+  private clearTimer?: ReturnType<typeof setTimeout>;
 
   // Declaration order matters: `settings` must be initialised before
   // `debounceMs$` reads it. Field initialisers run in an injection context,
@@ -94,12 +95,19 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(): void {
     this.resolved = false;
+    this.cancelClear();
     this.control.reset('');
     this.setupSubscription();
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.cancelClear();
+  }
+
+  /** Fade duration = the clear delay, so the text runs out exactly when it is removed. */
+  get clearMs(): number {
+    return this.settings.wrongAnswerClearMs();
   }
 
   /** Idempotent: always replaces any previously active valueChanges subscription. */
@@ -110,6 +118,9 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
     const debounceMs = this.settings.hiraganaDebounceMs();
 
     this.subscription = this.control.valueChanges.pipe(
+      // BEFORE the debounce, so it sees every raw keystroke: typing again is
+      // what rescues an attempt from being cleared.
+      tap(() => this.cancelClear()),
       debounceTime(debounceMs),
       distinctUntilChanged(),
     ).subscribe(input => {
@@ -129,8 +140,44 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
       if (result.correct) {
         this.resolved = true;
         this.result.emit({ fieldName: this.fieldName, correct: true, exact: result.exact });
+        return;
       }
+
+      this.scheduleClear(result.transformedInput ?? input);
     });
+  }
+
+  /**
+   * The attempt was checked and is wrong: empty the field after a second,
+   * separate delay so the next guess can be typed without deleting this one.
+   *
+   * Not armed while the text is still the beginning of a correct answer — a
+   * pause mid-word is not a wrong attempt, and wiping it would punish slow
+   * typing rather than wrong answers.
+   */
+  private scheduleClear(shown: string): void {
+    const ms = this.settings.wrongAnswerClearMs();
+    if (ms <= 0) return;
+    if (isAnswerPrefix(shown, this.correctAnswer)) return;
+
+    this.fading = true;
+    this.clearTimer = setTimeout(() => {
+      this.clearTimer = undefined;
+      this.fading = false;
+      if (this.resolved) return;
+      // emitEvent stays on (unlike the kana write-back above): the '' has to
+      // travel through distinctUntilChanged, otherwise retyping the very same
+      // guess would be swallowed as "unchanged" and never checked again.
+      this.control.setValue('');
+    }, ms);
+  }
+
+  private cancelClear(): void {
+    if (this.clearTimer !== undefined) {
+      clearTimeout(this.clearTimer);
+      this.clearTimer = undefined;
+    }
+    this.fading = false;
   }
 
   onStrokeResult(correct: boolean): void {
@@ -142,6 +189,7 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
 
   /** Called by parent when moving to next card — resets the input. */
   reset(): void {
+    this.cancelClear();
     this.control.reset('');
     this.resolved = false;
   }
@@ -151,3 +199,4 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
     this.inputRef?.nativeElement?.focus();
   }
 }
+

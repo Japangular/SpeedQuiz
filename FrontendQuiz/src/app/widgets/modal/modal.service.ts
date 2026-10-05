@@ -1,10 +1,11 @@
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs';
 import {MatDialog, MatDialogRef} from '@angular/material/dialog';
+import {Observable} from 'rxjs';
 import {CombinedReadings, KanjiModalComponent} from './kanji-modal/kanji-modal.component';
 import {HintModalComponent} from './hint-modal/hint-modal.component';
 import {DeckCompletedModalComponent} from './deck-completed/deck-completed-modal.component';
 import {Card} from '../../features/quiz/model/quiz.model';
+import {DeckRunResult} from '../../features/quiz/deck-timer.service';
 
 @Injectable({providedIn: 'root'})
 export class ModalService {
@@ -49,7 +50,7 @@ export class ModalService {
     this.dialog.open(HintModalComponent, {data: {card}});
   }
 
-  openDeckCompletedModal(cards: Card[]): Observable<'restart' | 'goToAnki' | undefined> {
-    return this.dialog.open(DeckCompletedModalComponent, {data: {cards}}).afterClosed();
+  openDeckCompletedModal(cards: Card[], run?: DeckRunResult): Observable<'restart' | 'goToAnki' | undefined> {
+    return this.dialog.open(DeckCompletedModalComponent, {data: {cards, run}}).afterClosed();
   }
 }

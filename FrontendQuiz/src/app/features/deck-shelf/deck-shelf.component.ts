@@ -1,22 +1,22 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {catchError, forkJoin, Observable, of} from 'rxjs';
-import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
-import { AsyncPipe } from '@angular/common';
+import {AsyncPipe, DatePipe} from '@angular/common';
+import {Component, OnInit, inject} from '@angular/core';
+import {MatBadgeModule} from '@angular/material/badge';
+import {MatButtonModule} from '@angular/material/button';
+import {MatCardModule} from '@angular/material/card';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatIconModule} from '@angular/material/icon';
+import {MatListModule} from '@angular/material/list';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
+import {Observable, catchError, filter, forkJoin, map, of, shareReplay, switchMap, take} from 'rxjs';
 import {DeckShelfService} from './deck-shelf.service';
 import {LocalProfile, LocalProfileService} from '../../user-store-management/local-profile.service';
-import {Router} from '@angular/router';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-import {MatCardModule} from '@angular/material/card';
-import {MatExpansionModule} from '@angular/material/expansion';
-import {MatListModule} from '@angular/material/list';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatBadgeModule} from '@angular/material/badge';
 import {DeckContent, DeckInfo} from '../../../generated/api';
 import {DeckStore} from '../../store/deck.store';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {DeckTransferService} from './deck-transfer.service';
+import {DeckRunSummary, DeckTimerService, formatDuration} from '../quiz/deck-timer.service';
 
 export interface DeckSelection {
   deck: DeckInfo;
@@ -32,6 +32,7 @@ export interface DeckGroup {
   selector: 'app-deck-shelf',
   imports: [
     AsyncPipe,
+    DatePipe,
     MatProgressBarModule,
     MatCardModule,
     MatExpansionModule,
@@ -55,6 +56,13 @@ export class DeckShelfComponent implements OnInit {
   private static readonly INITIAL_BATCH_SIZE = 30;
 
   private deckTransfer = inject(DeckTransferService);
+  private deckTimer = inject(DeckTimerService);
+
+  /**
+   * Best run per deck, read once per shelf load rather than from the template —
+   * each lookup parses localStorage, and the template re-evaluates constantly.
+   */
+  runStats = new Map<string, DeckRunSummary>();
   private snackBar = inject(MatSnackBar);
 
   constructor(
@@ -75,6 +83,12 @@ export class DeckShelfComponent implements OnInit {
       take(1),
       switchMap(() => this.deckShelfService.getDeckOverview()),
       map(decks => {
+        this.runStats = new Map(
+          decks
+            .map(deck => [deck.id, this.deckTimer.summaryFor(deck.id)] as const)
+            .filter((pair): pair is readonly [string, DeckRunSummary] => pair[1] !== null),
+        );
+
         const groups = new Map<string, DeckInfo[]>();
         for (const deck of decks) {
           if (!groups.has(deck.attribution)) groups.set(deck.attribution, []);
@@ -100,6 +114,7 @@ export class DeckShelfComponent implements OnInit {
         if (last && JSON.parse(last).deckId === deck.id) {
           localStorage.removeItem('japangular_last_deck');
         }
+        this.deckTimer.forgetDeck(deck.id);
         this.loadDecks();
       },
       error: err => {
@@ -225,6 +240,10 @@ export class DeckShelfComponent implements OnInit {
     return {properties, cards: allCards};
   }
 
+  bestTime(stats: DeckRunSummary): string {
+    return formatDuration(stats.bestMs, true);
+  }
+
   exportDeck(deck: DeckInfo): void {
     this.deckTransfer.exportToFile(deck).subscribe({
       error: () => this.snackBar.open('Export failed.', 'OK', {duration: 4000}),
@@ -246,3 +265,4 @@ export class DeckShelfComponent implements OnInit {
     });
   }
 }
+

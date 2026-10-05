@@ -81,6 +81,13 @@
                 @if (deck.description) {
                   <span matListItemLine>{{ deck.description }}</span>
                 }
+                @if (runStats.get(deck.id); as stats) {
+                  <span matListItemLine class="deck-best">
+                    <mat-icon inline>emoji_events</mat-icon>
+                    Best {{ bestTime(stats) }} · {{ stats.runs }} {{ stats.runs === 1 ? 'run' : 'runs' }}
+                    · last {{ stats.lastFinishedAt | date:'MMM d' }}
+                  </span>
+                }
                 @if (!multiSelectMode) {
                   <span matListItemMeta class="deck-actions">
                     <button mat-icon-button
@@ -116,3 +123,4 @@
   }
 
 </div>
+

@@ -20,3 +20,8 @@ mat-expansion-panel-header mat-icon {
 mat-panel-description {
   justify-content: flex-end;
 }
+
+.deck-best {
+  color: var(--mat-sys-primary);
+  font-variant-numeric: tabular-nums;
+}
