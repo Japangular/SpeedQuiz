@@ -55,13 +55,12 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @ViewChild('historyPanel') historyPanel!: TemplateRef<any>;
   @ViewChild('popoutHost') popoutHost!: ElementRef<HTMLElement>;
 
+  private router = inject(Router);
+
   // 'input' as well: some mobile keyboards deliver text without a usable keydown.
   @HostListener('document:keydown')
   @HostListener('document:pointerdown')
   @HostListener('document:input')
-
-  private router = inject(Router);
-
   onUserActivity(): void {
     this.emotes.notifyActivity();
     this.timer.notifyActivity();
