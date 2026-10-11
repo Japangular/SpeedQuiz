@@ -96,7 +96,14 @@
                       <mat-icon>download</mat-icon>
                     </button>
                     <button mat-icon-button
+                       (click)="learnDeck(deck); $event.stopPropagation()"
+                       matTooltip="Learn this deck"
+                       [attr.aria-label]="'Learn ' + deck.name">
+                      <mat-icon>school</mat-icon>
+                    </button>
+                    <button mat-icon-button
                       (click)="loadDeck(deck); $event.stopPropagation()"
+                      matTooltip="Quiz this deck"
                       [disabled]="loadingDeckId === deck.id">
                       <mat-icon>play_arrow</mat-icon>
                     </button>

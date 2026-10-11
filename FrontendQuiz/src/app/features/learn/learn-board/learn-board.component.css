@@ -1,0 +1,83 @@
+:host { display: block; }
+
+.learn-board {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 2rem;
+}
+
+.learn-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1rem;
+  margin-bottom: .5rem;
+}
+
+.deck-name {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.position {
+  color: rgba(0, 0, 0, .6);
+  font-variant-numeric: tabular-nums;
+}
+
+.level { margin-left: .75rem; }
+
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1rem;
+  margin-top: 1rem;
+}
+
+/* Reserves its line so the card doesn't jump when a message appears. */
+.announcement {
+  min-height: 1.5em;
+  margin: .75rem 0 0;
+  text-align: center;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  padding: 1rem 0;
+}
+
+.answers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  column-gap: 16px;
+}
+
+.end-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.end-icon {
+  width: 48px;
+  height: 48px;
+  font-size: 48px;
+  color: #2e7d32;
+}
+
+.end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: .75rem;
+}

@@ -38,6 +38,7 @@ export class AnswerSlotComponent implements OnInit, OnChanges, OnDestroy {
   @Input() propertyType?: string;
 
   @Output() result = new EventEmitter<AnswerResult>();
+  @Output() typed = new EventEmitter<void>();
 
   @ViewChild('inputRef') inputRef?: ElementRef<HTMLInputElement>;
 

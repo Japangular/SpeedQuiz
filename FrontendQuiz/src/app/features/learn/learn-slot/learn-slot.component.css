@@ -1,0 +1,49 @@
+:host { display: block; }
+
+mat-form-field { width: 300px; max-width: 100%; }
+
+/* The ghost sits in the same box as the input and inherits the same font, so
+   the typed text (invisible here) pushes the rest to exactly where the next
+   character will land. */
+.ghost-host { position: relative; }
+
+.ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  white-space: pre;
+  pointer-events: none;
+  /* Grey, but still text to read: #6b6b6b is 5.3:1 on white (WCAG AA 1.4.3). */
+  color: var(--learn-ghost-color, #6b6b6b);
+}
+
+.ghost-typed { visibility: hidden; }
+
+/* Positioned after the ghost in DOM order, so it paints on top. MDC already
+   gives the input a transparent background. */
+.ghost-host input { position: relative; }
+
+.done-icon { color: var(--learn-done-color, #2e7d32); }
+
+/* A typo fades out over exactly the clear delay, then the field empties.
+   Same as the quiz's answer slot: the transition sits on the class only, so
+   typing again snaps the text back at once. */
+input.wrong-fading {
+  opacity: .2;
+  transition: opacity var(--clear-ms, 1500ms) ease-in;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  input.wrong-fading { transition: none; opacity: .5; }
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

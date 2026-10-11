@@ -1,0 +1,27 @@
+<mat-form-field appearance="outline" floatLabel="always">
+  <mat-label>{{ fieldName() }}</mat-label>
+
+  <div class="ghost-host">
+    @if (!done()) {
+      <span class="ghost" aria-hidden="true"><span class="ghost-typed">{{ shown() }}</span>{{ ghost().rest }}</span>
+    }
+    <input matInput
+           #inputRef
+           [formControl]="control"
+           [readonly]="done()"
+           [class.wrong-fading]="fading()"
+           [style.--clear-ms.ms]="settings.wrongAnswerClearMs()"
+           [aria-describedby]="answerId"
+           (input)="onInput($event)"
+           autocapitalize="off"
+           autocorrect="off"
+           autocomplete="off"
+           spellcheck="false" />
+  </div>
+
+  @if (done()) {
+    <mat-icon matSuffix class="done-icon" aria-hidden="true">check</mat-icon>
+  }
+</mat-form-field>
+
+<span class="visually-hidden" [id]="answerId">Answer: {{ answer() }}</span>

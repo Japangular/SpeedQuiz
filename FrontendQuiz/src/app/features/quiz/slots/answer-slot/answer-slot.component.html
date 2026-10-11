@@ -12,6 +12,7 @@
       <input matInput
              #inputRef
              [formControl]="control"
+             (input)="typed.emit()"
              [placeholder]="'Enter ' + fieldName"
              [class.wrong-fading]="fading"
              [style.--clear-ms.ms]="clearMs"

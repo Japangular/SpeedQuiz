@@ -1,0 +1,72 @@
+<section class="learn-board">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Loading deck" />
+  } @else if (error(); as message) {
+    <div class="end-state" role="alert">
+      <p>{{ message }}</p>
+      <a mat-stroked-button routerLink="/deckShelf">Back to deck shelf</a>
+    </div>
+  } @else if (deck().length === 0) {
+    <div class="end-state">
+      <p>This deck has no cards yet.</p>
+      <a mat-stroked-button routerLink="/deckShelf">Back to deck shelf</a>
+    </div>
+  } @else {
+    <header class="learn-header">
+      <h1 class="deck-name">{{ deckName() }}</h1>
+      @if (card(); as c) {
+        <span class="position">
+          Card {{ index() + 1 }} of {{ deck().length }}
+          @if (deck().hasLevels) { <span class="level">Level {{ c.level }}</span> }
+        </span>
+      }
+      <button mat-button (click)="startOver()">Start over</button>
+    </header>
+    <mat-progress-bar mode="determinate" [value]="progress()" aria-hidden="true" />
+
+    @if (deck().hasLevels) {
+      <div class="flow">
+        <span id="learn-flow-label">After the last card of a level</span>
+        <mat-button-toggle-group
+          [value]="flow()"
+          (change)="setFlow($event.value)"
+          hideSingleSelectionIndicator
+          aria-labelledby="learn-flow-label">
+          @for (f of flows; track f) {
+            <mat-button-toggle [value]="f">{{ flowLabel(f) }}</mat-button-toggle>
+          }
+        </mat-button-toggle-group>
+      </div>
+    }
+
+    <p class="announcement" aria-live="polite">{{ announcement() }}</p>
+
+    @if (card()) {
+      <div class="card">
+        @for (slot of questionSlots(); track $index) {
+          <app-display-slot [value]="slot.value" [renderHint]="slot.renderHint" [fieldName]="slot.fieldName" />
+        }
+
+        <div class="answers">
+          @for (a of answerSlots(); track a.key; let first = $first) {
+            <app-learn-slot
+              [answer]="a.slot.value"
+              [fieldName]="a.field"
+              [propertyType]="a.slot.propertyType"
+              [autofocus]="first"
+              (solved)="onSolved(a.field)" />
+          }
+        </div>
+      </div>
+    } @else if (finished()) {
+      <div class="end-state">
+        <mat-icon class="end-icon" aria-hidden="true">task_alt</mat-icon>
+        <p>You've reached the end of the deck.</p>
+        <div class="end-actions">
+          <button mat-flat-button (click)="startOver()">Start over</button>
+          <a mat-stroked-button routerLink="/deckShelf">Back to deck shelf</a>
+        </div>
+      </div>
+    }
+  }
+</section>

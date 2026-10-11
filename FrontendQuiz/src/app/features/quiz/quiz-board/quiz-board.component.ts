@@ -257,5 +257,9 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   /** Spread-out, deterministic hue per level (stable across reloads). */
   get levelHue(): number { return hueForLevel(this.currentLevel); }
 
+  /** A character went into an answer field, main window or popout. Starts the clock. */
+  onTyped(): void {
+    this.timer.notifyTyping();
+  }
 }
 

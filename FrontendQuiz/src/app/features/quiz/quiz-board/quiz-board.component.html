@@ -57,7 +57,8 @@
         <app-slot-group
           [slots]="currentSlots"
           [showStrokeOrder]="showStrokeOrder && !popout.active()"
-          (allSolved)="onCardSolved($event)" (labelClicked)="onLabelClicked($event)" />
+          (allSolved)="onCardSolved($event)" (labelClicked)="onLabelClicked($event)"
+          (typed)="onTyped()" />
       </div>
       @if (popout.active()) {
         <p class="popout-hint">Quiz is floating in its own window.</p>

@@ -188,13 +188,36 @@ export class DeckTimerService implements OnDestroy {
 
   // ── events ────────────────────────────────────────────────────────────────
 
-  /** Any keystroke or tap on the quiz board. This is what moves the clock. */
+  /**
+   * A character went into an answer field. The only thing that starts the
+   * clock, on a fresh run and again after an idle pause.
+   */
+  notifyTyping(): void {
+    this.registerActivity(true);
+  }
+
+  /**
+   * Any other keystroke or tap on the board. Keeps a running clock running,
+   * but never starts a stopped one: clicking into the window isn't playing.
+   */
   notifyActivity(): void {
+    this.registerActivity(false);
+  }
+
+  private registerActivity(canStart: boolean): void {
     if (!this.deckId || !this.boardActive || this.lastResult) return;
 
     const now = Date.now();
-    if (this.lastActivity !== null) {
-      this.baseMs += Math.min(now - this.lastActivity, IDLE_CAP_MS);
+    // Went idle without a tick noticing (throttled background tab, sleep):
+    // bank the capped stretch so a click can't carry the clock through it.
+    if (this.lastActivity !== null && now - this.lastActivity >= IDLE_CAP_MS) {
+      this.bank(now);
+    }
+
+    if (this.lastActivity === null) {
+      if (!canStart) return;
+    } else {
+      this.baseMs += now - this.lastActivity;
     }
     this.lastActivity = now;
 

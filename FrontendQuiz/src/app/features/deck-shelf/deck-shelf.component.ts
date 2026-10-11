@@ -17,6 +17,7 @@ import {DeckContent, DeckInfo} from '../../../generated/api';
 import {DeckStore} from '../../store/deck.store';
 import {DeckTransferService} from './deck-transfer.service';
 import {DeckRunSummary, DeckTimerService, formatDuration} from '../quiz/deck-timer.service';
+import {MatTooltip} from '@angular/material/tooltip';
 
 export interface DeckSelection {
   deck: DeckInfo;
@@ -40,8 +41,9 @@ export interface DeckGroup {
     MatIconModule,
     MatButtonModule,
     MatCheckboxModule,
-    MatBadgeModule
-],
+    MatBadgeModule,
+    MatTooltip
+  ],
   templateUrl: './deck-shelf.component.html',
   styleUrl: './deck-shelf.component.css'
 })
@@ -263,6 +265,10 @@ export class DeckShelfComponent implements OnInit {
       },
       error: err => this.snackBar.open(err?.message ?? 'Import failed.', 'OK', {duration: 5000}),
     });
+  }
+
+  learnDeck(deck: DeckInfo): void {
+    this.router.navigate(['/learn', deck.id], {state: {deckName: deck.name}});
   }
 }
 

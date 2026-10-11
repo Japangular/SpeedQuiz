@@ -17,6 +17,7 @@ export class SlotGroupComponent implements AfterViewInit, OnChanges {
 
   @Output() allSolved = new EventEmitter<{ exact: boolean }>();
   @Output() labelClicked = new EventEmitter<{ value: string; event: MouseEvent }>();
+  @Output() typed = new EventEmitter<void>();
 
   @ViewChildren(AnswerSlotComponent) answerSlots!: QueryList<AnswerSlotComponent>;
 

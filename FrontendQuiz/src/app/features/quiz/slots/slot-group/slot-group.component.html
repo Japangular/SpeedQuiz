@@ -11,7 +11,8 @@
       [fieldName]="slot.fieldName ?? 'answer'"
       [renderHint]="slot.renderHint"
       [propertyType]="slot.propertyType"
-      (result)="onAnswerResult($index, $event)"/>
+      (result)="onAnswerResult($index, $event)"
+      (typed)="typed.emit()"/>
   }
 }
 

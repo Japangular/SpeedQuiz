@@ -15,6 +15,7 @@ import {DeckShelfComponent} from './features/deck-shelf/deck-shelf.component';
 import {inject} from '@angular/core';
 import {AnkiImportComponent} from './features/anki-import/anki-import.component';
 import {SettingsComponent} from './features/settings/settings.component';
+import {LearnBoardComponent} from './features/learn/learn-board/learn-board.component';
 
 export const routes: Routes = [
   {
@@ -32,14 +33,41 @@ export const routes: Routes = [
         component: DeckShelfComponent
       },
       {
-        path: 'cardCreator',
-        component: DynamicCardCreatorComponent,
-        data: {label: 'Deck Stepper', icon: 'style'}
-      },
-      {
         path: 'quiz',
         component: QuizBoardComponent,
         data: {label: 'Quiz', icon: 'web'}
+      },
+      {
+        path: 'learn/:deckId',
+        component: LearnBoardComponent,
+        title: 'Learn',   // no data.label: needs a deck, so it stays out of the side nav
+      },
+      {
+        path: 'deckShelf',
+        component: DeckShelfComponent,
+        data: {label: 'DeckShelf', icon: 'view_quilt'}
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent,
+        title: 'Settings',
+        data: {label: 'Settings', bottom: true, icon: 'settings'}
+      },
+      {
+        path: 'extract from url',
+        component: ExtractCardsFromUrlComponent,
+        data: {label: 'Extract Cards', icon: 'stadium'}
+      },
+      {
+        path: 'kanjiWall',
+        component: KanjiWallComponent,
+        title: 'Kanji Wall',
+        data: {label: 'Kanji Wall', icon: 'grid_view'}
+      },
+      {
+        path: 'cardCreator',
+        component: DynamicCardCreatorComponent,
+        data: {label: 'Deck Stepper', icon: 'style'}
       },
       {
         path: 'dict',
@@ -58,38 +86,15 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'kanjiWall',
-        component: KanjiWallComponent,
-        title: 'Kanji Wall',
-        data: {label: 'Kanji Wall', icon: 'grid_view'}
-      },
-      {
         path: 'transcriptTable',
         component: TranscriptionTranslationTableComponent,
         data: {label: 'Transcripts', icon: 'translate'}
-      },
-      {
-        path: 'extract from url',
-        component: ExtractCardsFromUrlComponent,
-        data: {label: 'Extract Cards', icon: 'stadium'}
-      },
-
-      {
-        path: 'deckShelf',
-        component: DeckShelfComponent,
-        data: {label: 'DeckShelf', icon: 'view_quilt'}
       },
       {
         path: 'ankiImport',
         component: AnkiImportComponent,
         title: 'Import Anki',
         data: { label: 'Anki Import', icon: 'cloud_upload' }
-      },
-      {
-        path: 'settings',
-        component: SettingsComponent,
-        title: 'Settings',
-        data: {label: 'Settings', bottom: true, icon: 'settings'}
       },
       {
         path: 'about',

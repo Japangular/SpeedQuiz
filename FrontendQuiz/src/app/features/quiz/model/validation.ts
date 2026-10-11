@@ -64,24 +64,25 @@ export const strokeOrderValidator: ValidatorFn = (_input, _correctAnswer) => {
   return {correct: false};
 };
 
-export function validatorForField(fieldName: string, propertyType?: string): ValidatorFn {
-  // Primary dispatch: use declared property type if available
-  if (propertyType) {
-    switch (propertyType) {
-      case 'hiragana':
-        return exactHiraganaValidator;
-    }
-  }
-
-  // Fallback: infer from field name
+/**
+ * Fields answered in kana: romaji converts as you type and only an exact match
+ * counts. A declared `hiragana` property type wins; otherwise the field name
+ * decides, so older decks without declared types keep working.
+ */
+export function isKanaField(fieldName: string, propertyType?: string): boolean {
+  if (propertyType === 'hiragana') return true;
   switch (fieldName.toLowerCase()) {
     case 'hiragana':
     case 'romanji':
     case 'reading':
-      return exactHiraganaValidator;
+      return true;
     default:
-      return levenshteinValidator;
+      return false;
   }
+}
+
+export function validatorForField(fieldName: string, propertyType?: string): ValidatorFn {
+  return isKanaField(fieldName, propertyType) ? exactHiraganaValidator : levenshteinValidator;
 }
 
 /**
@@ -103,9 +104,10 @@ export function isAnswerPrefix(shown: string, correctAnswer: string): boolean {
   return normalizeAnswers(correctAnswer).some(ans => ans.toLowerCase().startsWith(typed));
 }
 
-// ── Helpers (copied from your existing code) ────────────
+// ── Helpers ─────────────────────────────────────────────
 
-function normalizeAnswers(raw: string): string[] {
+/** The accepted alternatives of an answer field: "book, volume (counter)" → ["book", "volume"]. */
+export function normalizeAnswers(raw: string): string[] {
   return raw
     .replace(/\([^)]*\)/g, '')
     .split(/[,・/]/)

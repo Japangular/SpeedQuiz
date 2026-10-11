@@ -39,7 +39,7 @@ describe('DeckTimerService', () => {
 
   /** Keystroke, then let `ms` pass. */
   const typeThenWait = (ms: number) => {
-    timer.notifyActivity();
+    timer.notifyTyping();
     jasmine.clock().tick(ms);
   };
 
@@ -61,9 +61,9 @@ describe('DeckTimerService', () => {
 
   it('does not start until the first keystroke', () => {
     jasmine.clock().tick(10_000);
-    timer.notifyActivity();
+    timer.notifyTyping();
     jasmine.clock().tick(2_000);
-    timer.notifyActivity();
+    timer.notifyTyping();
 
     expect(timer.complete('original').ms).toBe(2_000);
   });
@@ -88,7 +88,7 @@ describe('DeckTimerService', () => {
     typeThenWait(3_000);
     timer.setBoardActive(false);
     jasmine.clock().tick(20_000);
-    timer.notifyActivity();          // ignored: board not active
+    timer.notifyTyping();          // ignored: board not active
     timer.setBoardActive(true);
     typeThenWait(1_000);
 
@@ -187,5 +187,31 @@ describe('DeckTimerService', () => {
   it('reports an untimed result when no deck is attached', () => {
     timer.detach();
     expect(timer.complete('original').timed).toBeFalse();
+  });
+
+  it('is not started by a click or a stray key', () => {
+    timer.notifyActivity();
+    jasmine.clock().tick(10_000);
+    timer.notifyActivity();
+    expect(timer.paused()).toBeTrue();
+
+    typeThenWait(2_000);
+    expect(timer.complete('original').ms).toBe(2_000);
+  });
+
+  it('lets a click keep a running clock alive', () => {
+    const gap = IDLE_CAP_MS - 1_000;
+    typeThenWait(gap);
+    timer.notifyActivity();
+    jasmine.clock().tick(gap);
+    expect(timer.complete('original').ms).toBe(2 * gap);   // without the click: capped
+  });
+
+  it('does not let a click resume an idle clock', () => {
+    typeThenWait(IDLE_CAP_MS + 5_000);
+    timer.notifyActivity();
+    jasmine.clock().tick(5_000);
+    expect(timer.paused()).toBeTrue();
+    expect(timer.displayMs()).toBe(IDLE_CAP_MS);
   });
 });

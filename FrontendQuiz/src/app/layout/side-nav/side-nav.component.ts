@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
-import {MatAnchor, MatFabButton, MatIconButton} from '@angular/material/button';
+import {MatAnchor, MatButton, MatFabButton, MatIconButton} from '@angular/material/button';
 import {MatListItem, MatNavList} from '@angular/material/list';
 import {MatSidenav, MatSidenavContainer, MatSidenavContent} from '@angular/material/sidenav';
 import {MatToolbar} from '@angular/material/toolbar';
@@ -45,8 +45,9 @@ import {OfflineModeService} from '../../services/offline-mode.service';
     MatBottomSheetModule,
     ProvisionComponent,
     ProfileActionsComponent,
-    AccessGateComponent
-],
+    AccessGateComponent,
+    MatButton
+  ],
   templateUrl: './side-nav.component.html',
   standalone: true,
   styleUrl: './side-nav.component.scss'
