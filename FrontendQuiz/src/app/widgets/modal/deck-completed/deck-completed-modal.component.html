@@ -30,6 +30,9 @@
       <div class="run-meta">
         {{ run.cards }} cards ·
         {{ run.hints === 0 ? 'no hints' : run.hints === 1 ? '1 hint' : run.hints + ' hints' }}
+        @if (run.learnSwitches > 0) {
+          · {{ run.learnSwitches === 1 ? '1 switch to Learn' : run.learnSwitches + ' switches to Learn' }}
+        }
       </div>
     </div>
 
@@ -39,7 +42,7 @@
         @for (record of run.recent; track record.finishedAt) {
           <tr [class.current]="isThisRun(record)">
             <td class="when">{{ record.finishedAt | date:'MMM d, HH:mm' }}</td>
-            <td class="what">{{ record.cards }} cards · {{ orderLabel(record) }}</td>
+            <td class="what">{{ record.cards }} cards · {{ orderLabel(record) }}@if (record.learnSwitches) { · used Learn }</td>
             <td class="ms">{{ time(record.ms) }}</td>
           </tr>
         }

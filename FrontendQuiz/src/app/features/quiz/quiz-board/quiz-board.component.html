@@ -10,6 +10,7 @@
     (popoutToggle)="togglePopout()"
     (hintRequested)="triggerHint()"
     (hintHovered)="onHintHover()"
+    (learnRequested)="learnFromHere()"
   />
 
   @if (quizEngine.lockStatus() === 'follower') {
@@ -58,7 +59,7 @@
           [slots]="currentSlots"
           [showStrokeOrder]="showStrokeOrder && !popout.active()"
           (allSolved)="onCardSolved($event)" (labelClicked)="onLabelClicked($event)"
-          (typed)="onTyped()" />
+          (typed)="onTyped()"/>
       </div>
       @if (popout.active()) {
         <p class="popout-hint">Quiz is floating in its own window.</p>
@@ -81,5 +82,5 @@
 </div>
 
 <ng-template #historyPanel>
-  <app-quiz-history-sidebar />
+  <app-quiz-history-sidebar/>
 </ng-template>

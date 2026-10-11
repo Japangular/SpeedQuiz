@@ -18,6 +18,7 @@ import {
   REWIND_RULES, rewindIcon, rewindLabel, RewindRule,
 } from '../quiz/utils/quiz-session';
 import {DeckTimerService, formatDuration} from '../quiz/deck-timer.service';
+
 @Component({
   selector: 'app-deck-bar',
   imports: [
@@ -41,6 +42,22 @@ import {DeckTimerService, formatDuration} from '../quiz/deck-timer.service';
   styleUrl: './deck-bar.component.css'
 })
 export class DeckBarComponent {
+  @Input() canReorder = false;
+  @Input() reorderActive = false;
+
+  @Input() popoutSupported = false;
+  @Input() popoutActive = false;
+  @Output() popoutToggle = new EventEmitter<void>();
+
+  @Output() reorderToggle = new EventEmitter<void>();
+
+  @Input() showStrokeOrder = true;
+  @Output() showStrokeOrderChange = new EventEmitter<boolean>();
+
+  @Output() hintRequested = new EventEmitter<void>();
+  @Output() hintHovered = new EventEmitter<void>();
+  @Output() learnRequested = new EventEmitter<void>();
+
   private deckStore = inject(DeckStore);
   protected quizEngine = inject(QuizEngine);   // was private — template needs it
   protected settings = inject(QuizSettingsService);
@@ -51,18 +68,32 @@ export class DeckBarComponent {
 
   // ── card order ────────────────────────────────────────────────────────────
 
-  get currentOrder(): CardOrderMode { return this.settings.cardOrder(); }
+  get currentOrder(): CardOrderMode {
+    return this.settings.cardOrder();
+  }
 
-  orderLabel(mode: CardOrderMode): string { return cardOrderLabel(mode); }
-  orderIcon(mode: CardOrderMode): string  { return cardOrderIcon(mode); }
+  orderLabel(mode: CardOrderMode): string {
+    return cardOrderLabel(mode);
+  }
+
+  orderIcon(mode: CardOrderMode): string {
+    return cardOrderIcon(mode);
+  }
 
   /** Through the engine, not the setting: the deck has to be re-laid, not just the preference stored. */
-  selectOrder(mode: CardOrderMode): void { this.quizEngine.setCardOrder(mode); }
-  reshuffle(): void { this.quizEngine.reshuffle(); }
+  selectOrder(mode: CardOrderMode): void {
+    this.quizEngine.setCardOrder(mode);
+  }
+
+  reshuffle(): void {
+    this.quizEngine.reshuffle();
+  }
 
   // ── run clock ─────────────────────────────────────────────────────────────
 
-  get elapsedLabel(): string { return formatDuration(this.timer.displayMs()); }
+  get elapsedLabel(): string {
+    return formatDuration(this.timer.displayMs());
+  }
 
   get bestLabel(): string | null {
     const best = this.timer.best();
@@ -79,9 +110,17 @@ export class DeckBarComponent {
     return 'Active time on this run';
   }
 
-  get currentRule(): RewindRule    { return this.settings.rewindRule(); }
-  get hasSavePoint(): boolean      { return this.quizEngine.hasSavePoint; }
-  get levelRewindAvailable(): boolean { return this.quizEngine.deck.hasLevels; }
+  get currentRule(): RewindRule {
+    return this.settings.rewindRule();
+  }
+
+  get hasSavePoint(): boolean {
+    return this.quizEngine.hasSavePoint;
+  }
+
+  get levelRewindAvailable(): boolean {
+    return this.quizEngine.deck.hasLevels;
+  }
 
   ruleLabel(rule: RewindRule): string {
     return rewindLabel(rule, this.hasSavePoint);
@@ -91,29 +130,22 @@ export class DeckBarComponent {
     return rewindIcon(rule, this.hasSavePoint);
   }
 
-  selectRule(rule: RewindRule): void { this.settings.rewindRule.set(rule); }
-  setSavePoint(): void   { this.quizEngine.saveHere(); }
-  clearSavePoint(): void { this.quizEngine.clearSave(); }
+  selectRule(rule: RewindRule): void {
+    this.settings.rewindRule.set(rule);
+  }
+
+  setSavePoint(): void {
+    this.quizEngine.saveHere();
+  }
+
+  clearSavePoint(): void {
+    this.quizEngine.clearSave();
+  }
 
   deckName = this.deckStore.deckName;
   hasCards = this.deckStore.hasCards;
 
   showDebounceSlider = false;
-
-  @Input() canReorder = false;
-  @Input() reorderActive = false;
-
-  @Input() popoutSupported = false;
-  @Input() popoutActive = false;
-  @Output() popoutToggle = new EventEmitter<void>();
-
-  @Output() reorderToggle = new EventEmitter<void>();
-
-  @Input() showStrokeOrder = true;
-  @Output() showStrokeOrderChange = new EventEmitter<boolean>();
-
-  @Output() hintRequested = new EventEmitter<void>();
-  @Output() hintHovered = new EventEmitter<void>();
 
   resetDeck(): void {
     this.quizEngine.resetSession();
@@ -122,7 +154,7 @@ export class DeckBarComponent {
   get debounceLabel(): string {
     const ms = this.settings.hiraganaDebounceMs();
     return `${ms} ms`;
-}
+  }
 
   onDebounceChange(value: number): void {
     this.settings.hiraganaDebounceMs.set(value);
@@ -137,4 +169,3 @@ export class DeckBarComponent {
     this.settings.wrongAnswerClearMs.set(value);
   }
 }
-

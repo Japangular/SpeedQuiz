@@ -4,7 +4,7 @@ import {FormsModule} from '@angular/forms';
 import {MatAnchor, MatButton, MatIconButton} from '@angular/material/button';
 import {MatIcon} from '@angular/material/icon';
 import {MatTooltip} from '@angular/material/tooltip';
-import {RouterLink} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {DeckBarComponent} from '../../deck-bar/deck-bar.component';
 import {QuizHistorySidebarComponent} from '../../quiz-history-sidebar/quiz-history-sidebar.component';
@@ -25,6 +25,7 @@ import {EmoteOverlayComponent} from '../../../widgets/emote-overlay/emote-overla
 import {DeckTimerService} from '../deck-timer.service';
 
 import {levelHue as hueForLevel} from '../utils/level-theme';
+import {LearnArrival, quizDeckKey} from '../../learn/learn-navigation';
 
 interface HintFlash { items: { label: string; value: string }[]; key: number; }
 
@@ -58,6 +59,9 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   @HostListener('document:keydown')
   @HostListener('document:pointerdown')
   @HostListener('document:input')
+
+  private router = inject(Router);
+
   onUserActivity(): void {
     this.emotes.notifyActivity();
     this.timer.notifyActivity();
@@ -260,6 +264,26 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   /** A character went into an answer field, main window or popout. Starts the clock. */
   onTyped(): void {
     this.timer.notifyTyping();
+  }
+
+  /**
+   * Switch to Learn at the current card. Nothing here is reset: QuizEngine and
+   * DeckStore are app-wide, so Learn's "Back to quiz" lands on this card again.
+   */
+  learnFromHere(): void {
+    const deckKey = quizDeckKey(this.deckStore.deckId(), this.deckStore.deckName());
+    if (!deckKey) return;
+
+    // The board may be in the floating window. Close it, or that window would
+    // keep showing a board that is no longer on screen anywhere.
+    if (this.popout.active()) this.popout.close();
+
+    this.timer.recordLearnSwitch();
+    const state: LearnArrival = {
+      deckName: this.deckStore.deckName(),
+      startUid: this.quizEngine.currentEntry?.uid,
+    };
+    void this.router.navigate(['/learn', deckKey], {state});
   }
 }
 

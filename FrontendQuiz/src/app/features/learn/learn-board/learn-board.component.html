@@ -13,6 +13,8 @@
     </div>
   } @else {
     <header class="learn-header">
+      <!-- Says which mode this is in words, not only through the background. -->
+      <span class="mode-label"><mat-icon aria-hidden="true">school</mat-icon>Learn</span>
       <h1 class="deck-name">{{ deckName() }}</h1>
       @if (card(); as c) {
         <span class="position">
@@ -21,6 +23,7 @@
         </span>
       }
       <button mat-button (click)="startOver()">Start over</button>
+      <ng-container *ngTemplateOutlet="quizSwitch" />
     </header>
     <mat-progress-bar mode="determinate" [value]="progress()" aria-hidden="true" />
 
@@ -64,9 +67,19 @@
         <p>You've reached the end of the deck.</p>
         <div class="end-actions">
           <button mat-flat-button (click)="startOver()">Start over</button>
+          <ng-container *ngTemplateOutlet="quizSwitch" />
           <a mat-stroked-button routerLink="/deckShelf">Back to deck shelf</a>
         </div>
       </div>
     }
   }
 </section>
+
+<ng-template #quizSwitch>
+  <button mat-stroked-button
+          (click)="toQuiz()"
+          [matTooltip]="replacesQuizDeck() ? 'Replaces the deck currently in the quiz' : ''">
+    <mat-icon>web</mat-icon>
+    {{ quizHoldsDeck() ? 'Back to quiz' : 'Quiz this deck' }}
+  </button>
+</ng-template>

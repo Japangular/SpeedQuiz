@@ -46,6 +46,8 @@ export interface DeckRunRecord {
   cards: number;
   /** Hints taken during this run. */
   hints: number;
+  /** Times the user switched to Learn mid-run. Absent on records from before Learn existed. */
+  learnSwitches?: number;
   order: CardOrderMode;
 }
 
@@ -56,6 +58,7 @@ export interface DeckRunResult {
   cards: number;
   solved: number;
   hints: number;
+  learnSwitches: number;
   /** False when not every card was answered in this run — shown, but not recorded. */
   counted: boolean;
   isBest: boolean;
@@ -75,6 +78,7 @@ interface StoredRun {
   baseMs: number;
   solved: string[];
   hints: number;
+  learnSwitches?: number;
 }
 
 @Injectable({providedIn: 'root'})
@@ -108,6 +112,7 @@ export class DeckTimerService implements OnDestroy {
   private lastActivity: number | null = null;
   private solved = new Set<string>();
   private hints = 0;
+  private learnSwitches = 0;
   private lastResult: DeckRunResult | null = null;
 
   private ticker?: ReturnType<typeof setInterval>;
@@ -141,6 +146,7 @@ export class DeckTimerService implements OnDestroy {
     this.baseMs = Math.max(0, stored?.baseMs ?? 0);
     this.solved = new Set(stored?.solved ?? []);
     this.hints = stored?.hints ?? 0;
+    this.learnSwitches = stored?.learnSwitches ?? 0;
 
     this.runCards.set(runCards);
     this.records.set(read<DeckRunRecord[]>(RECORDS_KEY_PREFIX + deckId) ?? []);
@@ -165,6 +171,7 @@ export class DeckTimerService implements OnDestroy {
     this.baseMs = 0;
     this.solved.clear();
     this.hints = 0;
+    this.learnSwitches = 0;
     this.lastResult = null;
     this.finished.set(false);
     this.paused.set(true);
@@ -238,13 +245,24 @@ export class DeckTimerService implements OnDestroy {
   }
 
   /**
+   * The user switched to Learn. The clock already pauses while the quiz board
+   * is off screen; this marks the run, so a time set with the answers on
+   * screen in between can be told apart from one without.
+   */
+  recordLearnSwitch(): void {
+    if (!this.deckId || this.lastResult) return;
+    this.learnSwitches++;
+    this.persist();
+  }
+
+  /**
    * The deck was finished. Idempotent: re-answering the last card after
    * closing the dialog returns the same result instead of logging a second run.
    */
   complete(order: CardOrderMode): DeckRunResult {
     if (this.lastResult) return this.lastResult;
     if (!this.deckId) {
-      return {timed: false, ms: 0, cards: 0, solved: 0, hints: 0, counted: false, isBest: false, recent: []};
+      return {timed: false, ms: 0, cards: 0, solved: 0, hints: 0, learnSwitches: 0, counted: false, isBest: false, recent: []};
     }
 
     const cards = this.runCards();
@@ -258,7 +276,9 @@ export class DeckTimerService implements OnDestroy {
 
     let all = previous;
     if (counted) {
-      const record: DeckRunRecord = {ms, finishedAt: Date.now(), cards, hints: this.hints, order};
+      const record: DeckRunRecord = {
+        ms, finishedAt: Date.now(), cards, hints: this.hints, learnSwitches: this.learnSwitches, order,
+      };
       all = trim([...previous, record]);
       write(RECORDS_KEY_PREFIX + this.deckId, all);
       this.records.set(all);
@@ -271,6 +291,7 @@ export class DeckTimerService implements OnDestroy {
       cards,
       solved: this.solved.size,
       hints: this.hints,
+      learnSwitches: this.learnSwitches,
       counted,
       isBest: counted && (previousBestMs === undefined || ms < previousBestMs),
       previousBestMs,
@@ -369,7 +390,9 @@ export class DeckTimerService implements OnDestroy {
     if (!this.deckId || this.lastResult) return;
     const baseMs = Math.round(this.currentMs(Date.now()));
     if (baseMs === 0 && this.solved.size === 0) return;   // untouched run: nothing worth keeping
-    write(RUN_KEY_PREFIX + this.deckId, {baseMs, solved: [...this.solved], hints: this.hints} satisfies StoredRun);
+    write(RUN_KEY_PREFIX + this.deckId, {
+      baseMs, solved: [...this.solved], hints: this.hints, learnSwitches: this.learnSwitches,
+    } satisfies StoredRun);
   }
 }
 

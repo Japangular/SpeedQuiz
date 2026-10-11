@@ -4,20 +4,28 @@ import {MatButton} from '@angular/material/button';
 import {MatButtonToggle, MatButtonToggleGroup} from '@angular/material/button-toggle';
 import {MatIcon} from '@angular/material/icon';
 import {MatProgressBar} from '@angular/material/progress-bar';
-import {ActivatedRoute, RouterLink} from '@angular/router';
-import {catchError, filter, map, of, switchMap, tap} from 'rxjs';
+import {MatTooltip} from '@angular/material/tooltip';
+import {NgTemplateOutlet} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {Observable, catchError, filter, map, of, switchMap, tap} from 'rxjs';
 
+import {DeckContent} from '../../../models/deck.model';
+import {DeckStore} from '../../../store/deck.store';
 import {DeckShelfService} from '../../deck-shelf/deck-shelf.service';
 import {cardToSlots} from '../../quiz/model/card-to-slot.adapter';
 import {FieldOrderService} from '../../quiz/model/field-order.service';
 import {Card, mapDeck} from '../../quiz/model/quiz.model';
 import {QuizMode, Slot} from '../../quiz/model/slot.model';
 import {DisplaySlotComponent} from '../../quiz/slots/display-slot/display-slot.component';
-import {buildDeck, Deck, EMPTY_DECK} from '../../quiz/utils/quiz-session/deck';
+import {buildDeck, Deck, EMPTY_DECK} from '../../quiz/utils/quiz-session';
 import {DEFAULT_LEARN_FLOW, isLearnFlow, LEARN_FLOWS, LearnFlow, learnFlowLabel, nextLearnIndex} from '../learn-flow';
+import {LearnArrival, quizDeckKey} from '../learn-navigation';
 import {LearnSlotComponent} from '../learn-slot/learn-slot.component';
 
 const FLOW_KEY = 'learn_level_flow';
+
+/** Same key and shape DeckShelfComponent.loadDeck writes; DeckStore restores the quiz's deck from it on reload. */
+const LAST_DECK_KEY = 'japangular_last_deck';
 
 interface AnswerSlotView {
   slot: Slot;
@@ -31,24 +39,29 @@ interface AnswerSlotView {
  * After the last card of a level it either carries on or repeats the level,
  * as the user chooses (see LearnFlow).
  *
+ * Switching with the quiz: the quiz sends the card it is on (LearnArrival),
+ * and Learn starts there. The quiz is never touched while learning, because
+ * QuizEngine and DeckStore are app-wide, so "Back to quiz" is a plain
+ * navigation and lands on the card the switch was pressed on.
+ *
  * Shares the deck model, level blocks, slot adapter, field order and display
- * slot with the quiz; has its own state. It loads the deck itself rather than
- * reading DeckStore, so opening a deck here leaves the quiz untouched and gets
- * the whole deck, not the shelf's first-30 slice.
+ * slot with the quiz; has its own state.
  */
 @Component({
   selector: 'app-learn-board',
   standalone: true,
   imports: [
     DisplaySlotComponent, LearnSlotComponent,
-    MatButton, MatButtonToggleGroup, MatButtonToggle, MatIcon, MatProgressBar, RouterLink,
+    MatButton, MatButtonToggleGroup, MatButtonToggle, MatIcon, MatProgressBar, MatTooltip, NgTemplateOutlet, RouterLink,
   ],
   templateUrl: './learn-board.component.html',
   styleUrl: './learn-board.component.css',
 })
 export class LearnBoardComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly shelf = inject(DeckShelfService);
+  private readonly deckStore = inject(DeckStore);
   private readonly fieldOrderService = inject(FieldOrderService);
 
   readonly flows = LEARN_FLOWS;
@@ -56,6 +69,7 @@ export class LearnBoardComponent {
 
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
+  readonly deckId = signal('');
   readonly deckName = signal('');
   readonly deck = signal<Deck>(EMPTY_DECK);
   readonly index = signal(0);
@@ -63,8 +77,14 @@ export class LearnBoardComponent {
   /** Said out loud when the board jumps back, so the jump is not a surprise. */
   readonly announcement = signal('');
 
+  /** The quiz holds this deck, so switching back returns to where it was left. */
+  readonly quizHoldsDeck = computed(() => !!this.deckId() && this.quizDeck() === this.deckId());
+  /** Switching would put this deck into the quiz in place of another one. */
+  readonly replacesQuizDeck = computed(() => !this.quizHoldsDeck() && this.deckStore.hasCards());
+
   /** Increments with every card shown. */
   private readonly shown = signal(0);
+  private content: DeckContent | null = null;
   private properties: Record<string, string> = {};
   private mode: QuizMode = {name: 'learn', questionFields: ['question'], answerFields: []};
 
@@ -104,7 +124,7 @@ export class LearnBoardComponent {
         this.loading.set(true);
         this.error.set(null);
       }),
-      switchMap(id => this.shelf.loadDeck(id).pipe(
+      switchMap(id => this.loadContent(id).pipe(
         map(deck => ({id, deck})),
         catchError(() => of(null)),
       )),
@@ -115,14 +135,23 @@ export class LearnBoardComponent {
         this.error.set('This deck could not be loaded. Check your connection, or pick it again from the deck shelf.');
         return;
       }
-      this.deckName.set(history.state?.deckName ?? result.id);
+
+      const arrival = (history.state ?? {}) as LearnArrival;
+      const fromQuiz = this.quizDeck() === result.id;
+
+      this.deckId.set(result.id);
+      this.deckName.set(arrival.deckName ?? (fromQuiz ? this.deckStore.deckName() : result.id));
+      this.content = result.deck;
       this.properties = result.deck.properties;
       this.mode = {
         ...this.mode,
         answerFields: this.fieldOrderService.orderedAnswerFields(result.id, result.deck.properties),
       };
-      this.deck.set(buildDeck(mapDeck(result.deck)));
-      this.goTo(0);
+
+      const deck = buildDeck(mapDeck(result.deck));
+      this.deck.set(deck);
+      const start = arrival.startUid ? deck.indexOfUid(arrival.startUid) : -1;
+      this.goTo(Math.max(start, 0));
     });
   }
 
@@ -136,6 +165,22 @@ export class LearnBoardComponent {
 
   startOver(): void {
     this.goTo(0);
+  }
+
+  /**
+   * Back to the quiz. When the quiz holds this deck, nothing is loaded: it is
+   * exactly as it was left. Otherwise the deck goes into the quiz the same
+   * way the shelf's play button puts it there, and the quiz resumes the
+   * deck's saved position.
+   */
+  toQuiz(): void {
+    if (!this.quizHoldsDeck() && this.content) {
+      try {
+        localStorage.setItem(LAST_DECK_KEY, JSON.stringify({deckId: this.deckId(), deckName: this.deckName()}));
+      } catch { /* storage disabled: a reload just won't restore it */ }
+      this.deckStore.loadDeck(this.content, this.deckName(), this.deckId());
+    }
+    void this.router.navigate(['/quiz']);
   }
 
   onSolved(field: string): void {
@@ -152,6 +197,20 @@ export class LearnBoardComponent {
     if (next <= from && next < deck.length) {
       this.announcement.set(`Level ${deck.levelAt(next)} again, from its first card.`);
     }
+  }
+
+  /**
+   * The quiz's own deck when the quiz holds this one, so Learn has exactly
+   * the cards the quiz has (and a mixed deck, which exists nowhere else);
+   * otherwise the deck from the server.
+   */
+  private loadContent(id: string): Observable<DeckContent> {
+    const held = this.quizDeck() === id ? this.deckStore.deck() : null;
+    return held ? of(held) : this.shelf.loadDeck(id);
+  }
+
+  private quizDeck(): string | undefined {
+    return quizDeckKey(this.deckStore.deckId(), this.deckStore.deckName());
   }
 
   private goTo(index: number): void {

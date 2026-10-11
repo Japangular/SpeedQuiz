@@ -214,4 +214,38 @@ describe('DeckTimerService', () => {
     expect(timer.paused()).toBeTrue();
     expect(timer.displayMs()).toBe(IDLE_CAP_MS);
   });
+
+  describe('switches to Learn', () => {
+    const solveAll = () => ['a', 'b', 'c'].forEach(uid => timer.recordSolved(uid));
+
+    it('are counted on the run and on its record', () => {
+      typeThenWait(1_000);
+      timer.recordLearnSwitch();
+      solveAll();
+
+      const result = timer.complete('original');
+      expect(result.learnSwitches).toBe(1);
+      expect(result.recent[0].learnSwitches).toBe(1);
+    });
+
+    it('survive a reload mid-run', () => {
+      typeThenWait(1_000);
+      timer.recordLearnSwitch();
+      timer.detach();
+      timer.attach(DECK, 3);
+      solveAll();
+
+      expect(timer.complete('original').learnSwitches).toBe(1);
+    });
+
+    it('start from zero on a new run', () => {
+      typeThenWait(1_000);
+      timer.recordLearnSwitch();
+      timer.beginRun();
+      typeThenWait(1_000);
+      solveAll();
+
+      expect(timer.complete('original').learnSwitches).toBe(0);
+    });
+  });
 });

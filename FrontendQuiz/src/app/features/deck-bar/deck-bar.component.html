@@ -33,6 +33,14 @@
         <mat-icon>lightbulb</mat-icon>
       </button>
 
+      <!-- Switch to Learn at this card; Learn's "Back to quiz" returns here. -->
+      <button mat-icon-button
+              (click)="learnRequested.emit()"
+              matTooltip="Learn from this card"
+              aria-label="Learn from this card">
+        <mat-icon>school</mat-icon>
+      </button>
+
       <button mat-icon-button (click)="resetDeck()" matTooltip="Reset progress">
         <mat-icon>restart_alt</mat-icon>
       </button>
@@ -190,4 +198,3 @@
     <span>No deck loaded</span>
   </mat-toolbar>
 }
-
