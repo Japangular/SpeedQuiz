@@ -90,11 +90,21 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
 
   private deckStore = inject(DeckStore);
   private emotes = inject(EmoteService);
-  private timer = inject(DeckTimerService);
+  protected readonly timer = inject(DeckTimerService);
 
   readonly hintFlash = signal<HintFlash | null>(null);
   /** @for + track key restarts the CSS animation on repeat hints — same trick as EmoteOverlay. */
   readonly hintFlashList = computed(() => { const f = this.hintFlash(); return f ? [f] : []; });
+
+  /**
+   * What the pause chip shows. Nothing before the first keystroke (the clock
+   * is waiting, not paused) and nothing once the run is over.
+   */
+  readonly clockChip = computed<'running' | 'paused' | null>(() => {
+    if (!this.timer.attached() || this.timer.finished()) return null;
+    if (!this.timer.paused()) return 'running';
+    return this.timer.displayMs() > 0 ? 'paused' : null;
+  });
 
   private flashKey = 0;
   private flashTimer?: ReturnType<typeof setTimeout>;
@@ -211,6 +221,11 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
       event.preventDefault();
       this.triggerHint();
     }
+    // Esc pauses, unless something else used it first: a dialog or menu
+    // closing (they cancel the event), or the IME dropping a composition.
+    if (event.key === 'Escape' && !event.defaultPrevented && !event.isComposing) {
+      this.pauseRun();
+    }
   }
 
   triggerHint(): void {
@@ -225,6 +240,15 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
     } else {
       this.modal.openHintModal(this.currentCard, 0).subscribe();
     }
+  }
+
+  /**
+   * Stops the run clock now, for a break taken on purpose (a video in the
+   * other window). Typing in an answer field resumes it, as after an idle
+   * pause. The emote only shows when the clock was actually running.
+   */
+  pauseRun(): void {
+    if (this.timer.pause()) this.emotes.showPaused();
   }
 
   private buildMode(): QuizMode {
@@ -263,6 +287,7 @@ export class QuizBoardComponent implements AfterViewInit, OnDestroy {
   /** A character went into an answer field, main window or popout. Starts the clock. */
   onTyped(): void {
     this.timer.notifyTyping();
+    this.emotes.notifyResumed();
   }
 
   /**

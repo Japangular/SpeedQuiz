@@ -1,4 +1,5 @@
 import {TestBed} from '@angular/core/testing';
+
 import {DeckTimerService, IDLE_CAP_MS, bestOf, formatDuration} from './deck-timer.service';
 
 describe('formatDuration', () => {
@@ -246,6 +247,86 @@ describe('DeckTimerService', () => {
       solveAll();
 
       expect(timer.complete('original').learnSwitches).toBe(0);
+    });
+  });
+
+  describe('pause', () => {
+    const solveAll = () => ['a', 'b', 'c'].forEach(uid => timer.recordSolved(uid));
+
+    it('stops the clock at once instead of after the idle cap', () => {
+      typeThenWait(4_000);
+      expect(timer.pause()).toBeTrue();
+      jasmine.clock().tick(20_000);
+
+      expect(timer.paused()).toBeTrue();
+      expect(timer.displayMs()).toBe(4_000);
+
+      typeThenWait(1_000);
+      expect(timer.complete('original').ms).toBe(5_000);
+    });
+
+    it('is ended by typing, not by a click', () => {
+      typeThenWait(4_000);
+      timer.pause();
+      timer.notifyActivity();
+      jasmine.clock().tick(5_000);
+
+      expect(timer.paused()).toBeTrue();
+      expect(timer.displayMs()).toBe(4_000);
+
+      timer.notifyTyping();
+      expect(timer.paused()).toBeFalse();
+    });
+
+    it('does nothing before the first keystroke or after an idle pause', () => {
+      expect(timer.pause()).toBeFalse();
+
+      typeThenWait(IDLE_CAP_MS + 5_000);
+      expect(timer.pause()).toBeFalse();
+
+      expect(timer.complete('original').pauses).toBe(0);
+    });
+
+    it('treats a clock that went idle unnoticed as an idle pause', () => {
+      typeThenWait(2_000);
+      timer.notifyTyping();            // last keystroke: 2 s banked
+      // A throttled background tab: time passes, but no tick runs.
+      jasmine.clock().mockDate(new Date(Date.now() + IDLE_CAP_MS + 10_000));
+
+      expect(timer.pause()).toBeFalse();
+      expect(timer.displayMs()).toBe(2_000 + IDLE_CAP_MS);
+    });
+
+    it('does nothing once the run is over', () => {
+      typeThenWait(1_000);
+      solveAll();
+      timer.complete('original');
+
+      expect(timer.pause()).toBeFalse();
+    });
+
+    it('is counted on the run and on its record, across a reload', () => {
+      typeThenWait(1_000);
+      timer.pause();
+      timer.detach();
+      timer.attach(DECK, 3);
+      typeThenWait(1_000);
+      solveAll();
+
+      const result = timer.complete('original');
+      expect(result.ms).toBe(2_000);
+      expect(result.pauses).toBe(1);
+      expect(result.recent[0].pauses).toBe(1);
+    });
+
+    it('starts from zero on a new run', () => {
+      typeThenWait(1_000);
+      timer.pause();
+      timer.beginRun();
+      typeThenWait(1_000);
+      solveAll();
+
+      expect(timer.complete('original').pauses).toBe(0);
     });
   });
 });

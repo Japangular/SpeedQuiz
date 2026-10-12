@@ -1,7 +1,8 @@
 import {inject, Injectable, OnDestroy, signal} from '@angular/core';
 import {SiteModeService} from '../../site-mode/site-mode.service';
 
-export type EmoteEvent = 'cardSwitch' | 'correct' | 'hint' | 'reset' | 'takingLong' | 'greeting' | 'hintPeek';
+export type EmoteEvent = 'cardSwitch' | 'correct' | 'hint' | 'reset' | 'takingLong' | 'greeting' | 'hintPeek' | 'paused';
+
 
 export interface EmoteDisplay {
   src: string;
@@ -23,6 +24,7 @@ const EMOTE_MAP: Record<EmoteEvent, string> = {
   reset:      'emotes/shocked.png',
   takingLong: 'emotes/waiting.png',
   hintPeek:   'emotes/mad.png',
+  paused:     'emotes/waiting.png',   // same image as idle for now; swap in a "break" emote later
 };
 
 /** Which events also play the ping. */
@@ -34,6 +36,7 @@ const PLAY_SOUND: Record<EmoteEvent, boolean> = {
   hint:       false,
   reset:      false,
   takingLong: false,   // it creeps in silently — that's the joke
+  paused:     false,
 };
 
 /** Keep in sync with the `emote-pop` animation duration in emote-overlay.component.css */
@@ -113,9 +116,20 @@ export class EmoteService implements OnDestroy {
     this.trigger('hintPeek');
   }
 
+  /**
+   * The clock was paused by hand: show it at once instead of after
+   * TAKING_LONG_MS, and keep it up until typing resumes the clock.
+   */
+  showPaused(): void {
+    if (!this.siteMode.isVtuberFan) return;
+    clearTimeout(this.longTimer);
+    this.show(EMOTE_MAP.paused, 'linger', 'paused');
+  }
+
   /** Any sign of life: keystroke, stroke on the kanji canvas, etc. */
   notifyActivity(): void {
     if (!this.siteMode.isVtuberFan) return;
+    if (this.current()?.event === 'paused') return;   // clicks and stray keys don't end a pause
 
     if (this.current()?.event === 'takingLong') this.current.set(null);   // #3
 
@@ -154,5 +168,12 @@ export class EmoteService implements OnDestroy {
       osc.start();
       osc.stop(ctx.currentTime + 0.4);
     } catch { /* audio blocked or unsupported — no big deal */ }
+  }
+
+  /** Typing resumed the clock. */
+  notifyResumed(): void {
+    if (this.current()?.event !== 'paused') return;
+    this.current.set(null);
+    this.armTakingLongTimer();
   }
 }

@@ -1,4 +1,5 @@
-import {Injectable, NgZone, OnDestroy, computed, inject, signal} from '@angular/core';
+import {computed, inject, Injectable, NgZone, OnDestroy, signal} from '@angular/core';
+
 import {CardOrderMode} from './utils/quiz-session/sort-strategy';
 
 /**
@@ -13,6 +14,8 @@ import {CardOrderMode} from './utils/quiz-session/sort-strategy';
  * by activity: every keystroke/tap adds the time since the previous one, capped
  * at IDLE_CAP_MS. Thinking for ten seconds counts in full; a coffee break
  * counts as thirty seconds and the clock shows as paused until the next key.
+ * The pause button (pause()) stops it at once instead, so a break announced
+ * in advance costs nothing.
  *
  * Because the accounting happens on events, not on ticks, it is immune to the
  * browser throttling timers in a background tab (exactly the situation the
@@ -27,6 +30,7 @@ import {CardOrderMode} from './utils/quiz-session/sort-strategy';
  * answered. Paging to the end with the arrow buttons finishes the deck but
  * does not produce a time. Hints are allowed — the rewind they cause is the
  * penalty — and are counted on the record so clean runs can be told apart.
+ * Pauses are counted the same way.
  *
  * Storage is localStorage, per deck. Records do not sync between devices yet;
  * see the note at the bottom of this file for where that would plug in.
@@ -48,6 +52,8 @@ export interface DeckRunRecord {
   hints: number;
   /** Times the user switched to Learn mid-run. Absent on records from before Learn existed. */
   learnSwitches?: number;
+  /** Times the clock was paused by hand. Absent on records from before the pause button. */
+  pauses?: number;
   order: CardOrderMode;
 }
 
@@ -59,6 +65,7 @@ export interface DeckRunResult {
   solved: number;
   hints: number;
   learnSwitches: number;
+  pauses: number;
   /** False when not every card was answered in this run — shown, but not recorded. */
   counted: boolean;
   isBest: boolean;
@@ -79,6 +86,7 @@ interface StoredRun {
   solved: string[];
   hints: number;
   learnSwitches?: number;
+  pauses?: number;
 }
 
 @Injectable({providedIn: 'root'})
@@ -91,7 +99,7 @@ export class DeckTimerService implements OnDestroy {
   readonly attached = signal(false);
   /** Elapsed active time, refreshed once a second while the clock runs. */
   readonly displayMs = signal(0);
-  /** Clock is stopped waiting for activity: fresh run, idle, or the run is over. */
+  /** Clock is stopped waiting for activity: fresh run, idle, paused by hand, or the run is over. */
   readonly paused = signal(true);
   readonly finished = signal(false);
   readonly records = signal<DeckRunRecord[]>([]);
@@ -113,6 +121,7 @@ export class DeckTimerService implements OnDestroy {
   private solved = new Set<string>();
   private hints = 0;
   private learnSwitches = 0;
+  private pauses = 0;
   private lastResult: DeckRunResult | null = null;
 
   private ticker?: ReturnType<typeof setInterval>;
@@ -147,6 +156,7 @@ export class DeckTimerService implements OnDestroy {
     this.solved = new Set(stored?.solved ?? []);
     this.hints = stored?.hints ?? 0;
     this.learnSwitches = stored?.learnSwitches ?? 0;
+    this.pauses = stored?.pauses ?? 0;
 
     this.runCards.set(runCards);
     this.records.set(read<DeckRunRecord[]>(RECORDS_KEY_PREFIX + deckId) ?? []);
@@ -172,6 +182,7 @@ export class DeckTimerService implements OnDestroy {
     this.solved.clear();
     this.hints = 0;
     this.learnSwitches = 0;
+    this.pauses = 0;
     this.lastResult = null;
     this.finished.set(false);
     this.paused.set(true);
@@ -197,7 +208,7 @@ export class DeckTimerService implements OnDestroy {
 
   /**
    * A character went into an answer field. The only thing that starts the
-   * clock, on a fresh run and again after an idle pause.
+   * clock, on a fresh run and again after an idle or manual pause.
    */
   notifyTyping(): void {
     this.registerActivity(true);
@@ -209,6 +220,29 @@ export class DeckTimerService implements OnDestroy {
    */
   notifyActivity(): void {
     this.registerActivity(false);
+  }
+
+  /**
+   * Stop the clock now instead of after IDLE_CAP_MS of silence. Time up to
+   * this moment counts, nothing after it does. The next keystroke in an answer
+   * field resumes it, exactly as after an idle pause; a click does not.
+   *
+   * Returns false when there was no running clock to stop: before the first
+   * keystroke, after an idle pause, off the board, or after the run. Only a
+   * pause that actually stopped the clock is counted on the run.
+   */
+  pause(): boolean {
+    if (!this.deckId || this.lastResult || this.lastActivity === null) return false;
+
+    const now = Date.now();
+    // Idle already, without a tick noticing (throttled background tab, sleep):
+    // that is an idle pause, banked with the cap, not a manual one.
+    const wasIdle = now - this.lastActivity >= IDLE_CAP_MS;
+
+    this.bank(now);
+    if (!wasIdle) this.pauses++;
+    this.persist();
+    return !wasIdle;
   }
 
   private registerActivity(canStart: boolean): void {
@@ -262,7 +296,10 @@ export class DeckTimerService implements OnDestroy {
   complete(order: CardOrderMode): DeckRunResult {
     if (this.lastResult) return this.lastResult;
     if (!this.deckId) {
-      return {timed: false, ms: 0, cards: 0, solved: 0, hints: 0, learnSwitches: 0, counted: false, isBest: false, recent: []};
+      return {
+        timed: false, ms: 0, cards: 0, solved: 0, hints: 0, learnSwitches: 0, pauses: 0,
+        counted: false, isBest: false, recent: [],
+      };
     }
 
     const cards = this.runCards();
@@ -277,7 +314,8 @@ export class DeckTimerService implements OnDestroy {
     let all = previous;
     if (counted) {
       const record: DeckRunRecord = {
-        ms, finishedAt: Date.now(), cards, hints: this.hints, learnSwitches: this.learnSwitches, order,
+        ms, finishedAt: Date.now(), cards, hints: this.hints,
+        learnSwitches: this.learnSwitches, pauses: this.pauses, order,
       };
       all = trim([...previous, record]);
       write(RECORDS_KEY_PREFIX + this.deckId, all);
@@ -292,6 +330,7 @@ export class DeckTimerService implements OnDestroy {
       solved: this.solved.size,
       hints: this.hints,
       learnSwitches: this.learnSwitches,
+      pauses: this.pauses,
       counted,
       isBest: counted && (previousBestMs === undefined || ms < previousBestMs),
       previousBestMs,
@@ -391,7 +430,8 @@ export class DeckTimerService implements OnDestroy {
     const baseMs = Math.round(this.currentMs(Date.now()));
     if (baseMs === 0 && this.solved.size === 0) return;   // untouched run: nothing worth keeping
     write(RUN_KEY_PREFIX + this.deckId, {
-      baseMs, solved: [...this.solved], hints: this.hints, learnSwitches: this.learnSwitches,
+      baseMs, solved: [...this.solved], hints: this.hints,
+      learnSwitches: this.learnSwitches, pauses: this.pauses,
     } satisfies StoredRun);
   }
 }

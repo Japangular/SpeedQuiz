@@ -14,6 +14,14 @@ import type {StampedSessionState} from './session-sync.service';
  * The cursor and anchor come from whichever blob was saved later, since those
  * describe where you were sitting rather than what you know.
  *
+ * Resets: a merge alone would undo them, because the device that did not
+ * reset still holds the old records and would merge them straight back in.
+ * So a reset stamps its moment (`resetAt`) on the state, and a side that has
+ * not seen the latest reset keeps only answers given after it. The side that
+ * carries the reset keeps everything it has: its records were written after
+ * the reset, or (for an import that replaced the deck's progress) are exactly
+ * what the reset installed.
+ *
  * This makes the merge commutative in the cards and direction-independent
  * overall, which is the property that matters: pasting a stale export cannot
  * roll back progress made since, and pasting a fresh one cannot lose progress
@@ -45,13 +53,20 @@ export function mergeSessionStates(
   const baseSavedAt = base.savedAt ?? 0;
   const incomingSavedAt = incoming.savedAt ?? 0;
 
+  // The latest reset either side knows of; 0 when neither was ever reset.
+  // Only answers count as "after the reset": a record without solvedAt cannot
+  // say when it was made, so on the side that missed the reset it goes.
+  const resetAt = Math.max(base.resetAt ?? 0, incoming.resetAt ?? 0);
+  const survivesReset = (side: StampedSessionState) => (entry: PersistedCardState) =>
+    (side.resetAt ?? 0) >= resetAt || (entry.solvedAt ?? 0) > resetAt;
+
   const merged = new Map<string, PersistedCardState>();
 
-  for (const entry of base.cards ?? []) {
+  for (const entry of (base.cards ?? []).filter(survivesReset(base))) {
     merged.set(entry.uid, entry);
   }
 
-  for (const entry of incoming.cards ?? []) {
+  for (const entry of (incoming.cards ?? []).filter(survivesReset(incoming))) {
     const existing = merged.get(entry.uid);
     if (!existing) {
       merged.set(entry.uid, entry);
@@ -80,6 +95,7 @@ export function mergeSessionStates(
     ...(orderSeed !== undefined ? {orderSeed} : {}),
     cards: [...merged.values()],
     savedAt: Math.max(baseSavedAt, incomingSavedAt),
+    ...(resetAt > 0 ? {resetAt} : {}),
   };
 }
 
@@ -129,4 +145,3 @@ export function previewMerge(
     incomingIsOlder: baseSavedAt > 0 && incomingSavedAt > 0 && incomingSavedAt < baseSavedAt,
   };
 }
-

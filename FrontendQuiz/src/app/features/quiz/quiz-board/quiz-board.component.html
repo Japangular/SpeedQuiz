@@ -48,11 +48,25 @@
             <div class="hint-flash">
               @for (item of flash.items; track item.label) {
                 <span class="hint-chip">
-            <span class="hint-chip-label">{{ item.label }}</span>
-            <span class="hint-chip-value">{{ item.value }}</span>
-          </span>
+                  <span class="hint-chip-label">{{ item.label }}</span>
+                  <span class="hint-chip-value">{{ item.value }}</span>
+                </span>
               }
             </div>
+          }
+          @if (clockChip(); as state) {
+            <!-- A plain button with a title, not matTooltip: this row travels into
+                 the popout, where overlay widgets render in the main window.
+                 Cancelling mousedown keeps focus in the answer field, so the next
+                 keystroke resumes the clock without clicking back into it. -->
+            <button type="button" class="clock-chip"
+                    [disabled]="state === 'paused'"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="pauseRun()"
+                    [title]="state === 'paused' ? 'Continues when you type' : 'Pause the clock (Esc)'">
+              <mat-icon aria-hidden="true">{{ state === 'paused' ? 'pause_circle' : 'pause' }}</mat-icon>
+              {{ state === 'paused' ? 'Paused · type to continue' : 'Pause' }}
+            </button>
           }
         </div>
         <app-slot-group

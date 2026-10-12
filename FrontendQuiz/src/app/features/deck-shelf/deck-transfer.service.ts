@@ -189,7 +189,7 @@ export class DeckTransferService {
         }
 
         const write$ = mode === 'replace'
-          ? this.sessionSync.writeState(updated.id, state)
+          ? this.sessionSync.writeState(updated.id, state, {replace: true})
           : from(this.sessionSync.snapshotFor(updated.id)).pipe(
             switchMap(here => this.sessionSync.writeState(
               updated.id, mergeSessionStates(here, state))),
@@ -276,7 +276,12 @@ export class DeckTransferService {
     if (!state) return null;
     if (state.version !== SESSION_STATE_VERSION) return null;
     if (file.cardUidVersion != null && file.cardUidVersion !== CARD_UID_VERSION) return null;
-    return state;
+
+    // A reset belongs to the deployment it happened on. Carried into a merge
+    // here, it would drop this deployment's older answers.
+    const portable: StampedSessionState = {...state};
+    delete portable.resetAt;
+    return portable;
   }
 
   private wrap(

@@ -100,6 +100,60 @@ describe('mergeSessionStates', () => {
   });
 });
 
+describe('mergeSessionStates after a reset', () => {
+  const resetAt = (s: StampedSessionState, at: number): StampedSessionState => ({...s, resetAt: at});
+  const uids = (s: StampedSessionState) => s.cards.map(c => c.uid).sort();
+
+  it('drops what the side that missed the reset learned before it', () => {
+    const afterReset = resetAt(state(5_000, [card('a', 4_500)]), 4_000);
+    const missedIt = state(3_000, [card('b', 2_000), card('c', 2_500)]);
+
+    expect(uids(mergeSessionStates(missedIt, afterReset))).toEqual(['a']);
+    expect(uids(mergeSessionStates(afterReset, missedIt))).toEqual(['a']);
+  });
+
+  it('keeps answers given after the reset, even from the side that missed it', () => {
+    // Desktop reset at 4000; the phone was offline and kept studying.
+    const afterReset = resetAt(state(4_000, []), 4_000);
+    const offlinePhone = state(6_000, [card('b', 3_000), card('c', 4_500)]);
+
+    expect(uids(mergeSessionStates(afterReset, offlinePhone))).toEqual(['c']);
+  });
+
+  it('drops an unanswered record from the side that missed the reset', () => {
+    // No solvedAt, so nothing says it came after the reset, even though its
+    // blob was saved after it.
+    const afterReset = resetAt(state(4_000, []), 4_000);
+    const missedIt = state(6_000, [{uid: 'h', hintUsed: true, attempts: 0, solvedWithoutHint: false}]);
+
+    expect(uids(mergeSessionStates(afterReset, missedIt))).toEqual([]);
+  });
+
+  it('keeps every record of the side that carries the reset, however old', () => {
+    // An import that replaced progress: old answers, installed at 9000.
+    const imported = resetAt(state(9_000, [card('a', 1_000, 4), card('b', 1_500)]), 9_000);
+    const elsewhere = state(8_000, [card('a', 7_000, 1), card('c', 7_500)]);
+
+    for (const merged of [mergeSessionStates(imported, elsewhere), mergeSessionStates(elsewhere, imported)]) {
+      expect(uids(merged)).toEqual(['a', 'b']);
+      expect(merged.cards.find(c => c.uid === 'a')!.attempts).toBe(4);
+    }
+  });
+
+  it('merges as usual between two sides that both saw the reset', () => {
+    const left = resetAt(state(5_000, [card('a', 4_500)]), 4_000);
+    const right = resetAt(state(6_000, [card('b', 5_500)]), 4_000);
+
+    expect(uids(mergeSessionStates(left, right))).toEqual(['a', 'b']);
+  });
+
+  it('carries the latest reset forward, and adds none where there was none', () => {
+    expect(mergeSessionStates(resetAt(state(1_000, []), 900), resetAt(state(2_000, []), 1_900)).resetAt)
+      .toBe(1_900);
+    expect(mergeSessionStates(state(1_000, []), state(2_000, [])).resetAt).toBeUndefined();
+  });
+});
+
 describe('previewMerge', () => {
 
   it('counts what would be gained and what would be updated', () => {

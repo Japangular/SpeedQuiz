@@ -33,6 +33,9 @@
         @if (run.learnSwitches > 0) {
           · {{ run.learnSwitches === 1 ? '1 switch to Learn' : run.learnSwitches + ' switches to Learn' }}
         }
+        @if (run.pauses > 0) {
+          · {{ run.pauses === 1 ? '1 pause' : run.pauses + ' pauses' }}
+        }
       </div>
     </div>
 
